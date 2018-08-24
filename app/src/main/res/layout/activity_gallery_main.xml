@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".GridView.MainActivity">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/iDCard"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="50dp"
+        android:layout_marginRight="20dp"
+        android:visibility="invisible"
+        app:cardCornerRadius="25dp"
+        app:cardElevation="5dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white">
+
+            <Button
+                android:id="@+id/idFloatButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentBottom="false"
+                android:layout_alignParentRight="false"
+                android:layout_centerHorizontal="false"
+                android:layout_centerInParent="true"
+                android:background="@drawable/ic_cloud_upload" />
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <RelativeLayout
+        android:id="@+id/ContainerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/white">
+
+        <TextView
+            android:id="@+id/SelectText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="3dp"
+            android:autoText="false"
+            android:text="Tap item to select , long Tap to attach"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/ContainerLayout"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+
+</RelativeLayout>

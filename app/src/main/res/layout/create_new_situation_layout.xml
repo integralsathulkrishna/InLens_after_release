@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:padding="10dp"
+    app:cardBackgroundColor="@color/colorPrimary">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="1.5dp"
+        android:background="#FFFF">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="New Situation"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:text="Enter the name for the new situation."
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/situation_name"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_below="@id/message"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:background="#ffffff"
+            android:hint="New situation name ?"
+            android:textColor="@color/colorPrimaryDark"
+
+            />
+
+        <Button
+            android:id="@+id/done_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/situation_name"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:background="#ffffff"
+            android:padding="2dp"
+            android:text="Done"
+            android:textColor="@color/colorPrimaryDark" />
+
+        <Button
+            android:id="@+id/cancel_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/situation_name"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:background="#ffffff"
+            android:padding="2dp"
+            android:text="Cancel"
+            android:textColor="@color/colorPrimaryDark" />
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
