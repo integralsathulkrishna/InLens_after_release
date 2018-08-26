@@ -48,4 +48,6 @@ public class DisplayPhotographer extends AppCompatActivity {
                 .into(PhotographerProfilePic);
 
     }
+
+
 }

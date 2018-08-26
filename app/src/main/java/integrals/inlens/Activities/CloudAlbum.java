@@ -351,4 +351,6 @@ public class CloudAlbum extends AppCompatActivity {
             }
         });
         }
+
+
 }

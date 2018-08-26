@@ -165,5 +165,7 @@ public class RegisterUser extends AppCompatActivity {
         private void checkEmailVerification(){
         startActivity(new Intent(RegisterUser.this,SettingActivity.class));
         }
+
+
     }
 

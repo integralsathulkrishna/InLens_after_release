@@ -287,21 +287,21 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-
                     if(task.isSuccessful()) {
-                         OngoingTask = false;
-                         InProgressDialog.dismiss();
-                        if (CloudAlbumDone == false) {
-                            setIntent(null);
-                            UploadProgressTextView.setText("Cloud Album Created.");
-                            UploadProgress.setVisibility(View.INVISIBLE);
-                            SubmitButton.setVisibility(View.VISIBLE);
-                                                finish();
-                                                startActivity(new Intent(CreateCloudAlbum.this, MainActivity.class));
+                          if (CloudAlbumDone == false) {
+                              InProgressDialog.dismiss();
+                              UploadProgressTextView.setText("Cloud Album Created.");
+                              UploadProgress.setVisibility(View.INVISIBLE);
+                              SubmitButton.setVisibility(View.VISIBLE);
+                              StartServices();
+                              CloudAlbumDone = true;
+                              finish();
+                              startActivity(
+                                      new Intent(CreateCloudAlbum.this,
+                                      MainActivity.class)
+                              );
 
-                            StartServices();
-                            CloudAlbumDone = true;
-                        }
+                            }
                     }
                     else
                         {
