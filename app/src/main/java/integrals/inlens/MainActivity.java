@@ -439,14 +439,15 @@ public class MainActivity extends AppCompatActivity {
     if ((intent != null) && (intent.getData() != null)) {
         String Data = intent.getDataString().toString();
         String str = Data.substring(18,23);
-
+/*
         if(str.contentEquals("watch")) {
             Toast.makeText(getApplicationContext(),"View "+Data.substring(24),Toast.LENGTH_SHORT).show();
             ViewAlbum(Data.substring(24));
-        }else if(str.contentEquals("joins")){
-
-            Toast.makeText(getApplicationContext(),"Join "+Data.substring(24),Toast.LENGTH_SHORT).show();
-            SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+        }else
+         */
+             if(str.contentEquals("joins")){
+                 Toast.makeText(getApplicationContext(),"Join "+Data.substring(24),Toast.LENGTH_SHORT).show();
+                  SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
             if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
                 Toast.makeText(getApplicationContext(),"Sorry.You can't join to a new Cloud-Album, " +
                         "before you quit the current one.",Toast.LENGTH_SHORT)

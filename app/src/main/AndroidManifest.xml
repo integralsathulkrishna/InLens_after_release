@@ -87,9 +87,6 @@
             android:autoRemoveFromRecents="true"
             android:excludeFromRecents="true"
             android:label="Upload Activity" />
-        <activity
-            android:name=".Activities.PhotoView_Recycler"
-            android:configChanges="orientation|screenSize" />
 
         <meta-data
             android:name="com.google.android.gms.vision"

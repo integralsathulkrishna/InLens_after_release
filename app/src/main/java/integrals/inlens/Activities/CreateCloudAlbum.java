@@ -24,6 +24,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +33,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
@@ -40,6 +42,9 @@ import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.MainActivity;
@@ -64,7 +69,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private DatabaseReference                   InUserReference;
     private String                              PostKey;
     private String                              DatabaseTimeTaken;
-    private DatabaseReference                   photographerReference;
+    private DatabaseReference                   photographerReference,databaseReference,ComNotyRef;
     private String                              UserID;
     private Boolean                             PhotographerCreated = false;
     private ProgressBar                         UploadProgress;
@@ -79,7 +84,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private String                              date;
     private String                              AlbumTime;
     private DatePickerDialog.OnDateSetListener  dateSetListener;
-
+    private Calendar calendar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +95,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
         InUser = InAuthentication.getCurrentUser();
         CommunityDatabaseReference = FirebaseDatabase.getInstance().getReference()
                 .child("Communities");
+
         InUserReference = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
                 .child(InUser.getUid());
@@ -255,7 +261,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                         databaseReference.child("Profile_picture").setValue(dataSnapshot.child("Profile_picture").getValue());
                                         databaseReference.child("Email_ID").setValue(dataSnapshot.child("Email").getValue());
                                         PhotographerCreated = true;
-
+                                        CreateSituation();
 
                                     } else {
                                            }
@@ -369,4 +375,90 @@ public class CreateCloudAlbum extends AppCompatActivity {
             finish();
             }
     }
+
+
+
+    private void CreateSituation(){
+        {
+            CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+            final String CommunityID=currentDatabase.GetLiveCommunityID();
+            databaseReference = FirebaseDatabase.getInstance().getReference().child("Communities")
+                    .child(CommunityID).child("Situations");
+            ComNotyRef = FirebaseDatabase.getInstance().getReference().child("Communities")
+                    .child(CommunityID).child("CommunityPhotographer");
+            calendar=Calendar.getInstance();
+            String SituationTimeIntervel=calendar.get(Calendar.YEAR)+ "-"
+                    +calendar.get(Calendar.MONTH)+"-"
+                    +calendar.get(Calendar.DAY_OF_MONTH)+"T"
+                    +calendar.get(Calendar.HOUR_OF_DAY)+"-"
+                    +calendar.get(Calendar.MINUTE)+"-"
+                    +calendar.get(Calendar.SECOND);
+
+            Map situationmap = new HashMap();
+            situationmap.put("name","Event Started");
+            situationmap.put("time", ServerValue.TIMESTAMP);
+            situationmap.put("owner", FirebaseAuth.getInstance().getCurrentUser().getUid());
+            final String push_id =databaseReference.push().getKey();
+            // Added by Athul Krishna For Implementation of Situation Upload
+            situationmap.put("SituationKey",push_id);
+            situationmap.put("SituationTime",SituationTimeIntervel);
+            final Map member = new HashMap();
+            member.put("memid",FirebaseAuth.getInstance().getCurrentUser().getUid());
+            final DatabaseReference dref = FirebaseDatabase.getInstance().getReference().child("ComNoty");
+            ComNotyRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                    {
+                        String id = snapshot.child("Photographer_UID").getValue().toString();
+                        dref.child(id).push().child("comid").setValue(CommunityID);
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            databaseReference.child(push_id).setValue(situationmap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+
+                    if(task.isSuccessful())
+                    {
+                        databaseReference.child(push_id).child("members").push().setValue(member);
+                        Toast.makeText(CreateCloudAlbum.this,"New Situation Created : "+"Event Started",Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                    if(e.toString().contains("FirebaseNetworkException"))
+                        Toast.makeText(CreateCloudAlbum.this,"Not Connected to Internet.",Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(CreateCloudAlbum.this,"Unable to create new Situation.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

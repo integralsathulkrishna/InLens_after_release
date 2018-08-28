@@ -58,7 +58,6 @@ public class CloudAlbum extends AppCompatActivity {
 
         setContentView(R.layout.activity_cloud_album);
         String AlbumName = getIntent().getStringExtra("AlbumName");
-
         CommunityID = getIntent().getStringExtra("GlobalID::");
         recyclerView = (RecyclerView)findViewById(R.id.SituationRecyclerView);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),1,LinearLayoutManager.VERTICAL,false);
@@ -121,7 +120,10 @@ public class CloudAlbum extends AppCompatActivity {
                     situationmap.put("time", ServerValue.TIMESTAMP);
                     situationmap.put("owner", FirebaseAuth.getInstance().getCurrentUser().getUid());
                     final String push_id =databaseReference.push().getKey();
-                    // Added by Athul Krishna For Implementation of Situation Upload
+
+
+
+                    // Added by  For Implementation of Situation Upload
                     situationmap.put("SituationKey",push_id);
                     situationmap.put("SituationTime",SituationTimeIntervel);
                     final Map member = new HashMap();

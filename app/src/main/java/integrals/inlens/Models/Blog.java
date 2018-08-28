@@ -1,10 +1,13 @@
 package integrals.inlens.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Athul Krishna on 7/14/2017.
  */
 
-public class Blog {
+public class Blog implements Parcelable {
     private String AudioCaption;
     private String Image;
     private String ImageThumb;
@@ -40,6 +43,37 @@ public class Blog {
         PostedByProfilePic = postedByProfilePic;
         OriginalImageName = originalImageName;
     }
+
+    protected Blog(Parcel in) {
+        AudioCaption = in.readString();
+        Image = in.readString();
+        ImageThumb = in.readString();
+        BlogDescription = in.readString();
+        BlogTitle = in.readString();
+        Location = in.readString();
+        TimeTaken = in.readString();
+        UserName = in.readString();
+        User_ID = in.readString();
+        WeatherDetails = in.readString();
+        PostedByProfilePic = in.readString();
+        OriginalImageName = in.readString();
+    }
+
+    public static final Parcelable.Creator<Blog> CREATOR = new Parcelable.Creator<Blog>() {
+
+        @Override
+        public Blog createFromParcel(Parcel parcel) {
+            return new Blog(parcel);
+        }
+
+        @Override
+        public Blog[] newArray(int i) {
+            return new Blog[i];
+        }
+    };
+
+
+
 
     public String getAudioCaption() {
         return AudioCaption;
@@ -136,4 +170,26 @@ public class Blog {
     public void setOriginalImageName(String originalImageName) {
         OriginalImageName = originalImageName;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+               parcel.writeString( AudioCaption);
+               parcel.writeString(Image);
+               parcel.writeString(ImageThumb);
+               parcel.writeString( BlogDescription);
+               parcel.writeString(BlogTitle);
+               parcel.writeString(Location);
+               parcel.writeString(TimeTaken);
+               parcel.writeString(UserName);
+               parcel.writeString(User_ID);
+               parcel.writeString(WeatherDetails);
+               parcel.writeString(PostedByProfilePic);
+               parcel.writeString(OriginalImageName);
+      }
+
 }

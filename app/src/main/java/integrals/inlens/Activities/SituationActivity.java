@@ -1,6 +1,7 @@
 package integrals.inlens.Activities;
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -139,7 +140,7 @@ public class SituationActivity extends AppCompatActivity {
                                 }
                     }
 
-                    gridImageAdapter=new GridImageAdapter(
+                     gridImageAdapter=new GridImageAdapter(
                             getApplicationContext(),
                             BlogList,
                             BlogListID
@@ -167,14 +168,9 @@ public class SituationActivity extends AppCompatActivity {
                     public void onItemClick(View view, int position) {
                         String PostKey1 = BlogListID.get(position).toString().trim();
 
-                        Intent i = new Intent(getApplicationContext(), PhotoView_Recycler.class);
-                        i.putExtra("PHOTO_URI", BlogList.get(position).getImageThumb());
-
-                        i.putExtra("PHOTO_TITLE", BlogList.get(position).getBlogTitle());
-                        i.putExtra("PHOTO_DESCRIPTION", BlogList.get(position).getBlogDescription());
-                        i.putExtra("POST_KEY", PostKey1);
-                        i.putExtra("POSITION", position);
-                        i.putExtra("GlobalID::", CommunityID);
+                        Intent i = new Intent(getApplicationContext(), PhotoView.class);
+                        i.putParcelableArrayListExtra("data", (ArrayList<? extends Parcelable>) BlogList);
+                        i.putExtra("position",position);
                         startActivity(i);
 
 
@@ -201,7 +197,7 @@ public class SituationActivity extends AppCompatActivity {
             if(dt_1.after(dt_2)&&(dt_1.before(dt_3))){
                 Result=true;
             }
-            else if(dt_1.after(dt_2)&&(dt_1).equals(dt_3)){
+            else if(dt_1.after(dt_2)&& dt_1.equals(dt_3)){
                 Result=true;
             }
         }
@@ -223,83 +219,3 @@ public class SituationActivity extends AppCompatActivity {
 
 
 
-
-                //Done for Implementation of Recycler View OnClick
-                /*
-                recyclerView.addOnItemTouchListener(
-                        new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(View view, int position) {
-                                Intent intent= new Intent(CloudAlbum.this,SituationActivity.class);
-                                intent.putExtra("TimeIntervel::",SituationList.get(position).getSituationTime());
-                                intent.putExtra("GlobalID::",CommunityID);
-                                startActivity(intent);
-                            }
-
-                            @Override
-                            public void onLongItemClick(View view, int position) {
-                            }
-                        })
-                );
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-
-
-
-
-
-
-    }
-}
-
-
-/*        final FirebaseRecyclerAdapter<Blog, BlogViewHolder> firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<Blog, BlogViewHolder>(
-                        Blog.class,
-                        R.layout.photo_grid_card,
-                        BlogViewHolder.class,
-                        databaseReference
-
-                ) {
-                    @Override
-                    protected void populateViewHolder(final BlogViewHolder viewHolder, final Blog model, final int position) {
-
-                        String PostKey = getRef(position).getKey().toString().trim();
-                        viewHolder.SetPhoto(
-                                getApplicationContext(), model.getImage(),
-                                model.getImage(),
-                                model.getBlogTitle(),
-                                model.getBlogDescription(),
-                                model.getUserName(),
-                                model.getTimeTaken(),
-                                PostKey);
-                        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String PostKey1 = getRef(position).getKey().toString().trim();
-
-                                Intent i = new Intent(getApplicationContext(), PhotoView_Recycler.class);
-                                i.putExtra("PHOTO_URI", model.getOriginalImageName());
-                                i.putExtra("PHOTO_TITLE", model.getBlogTitle());
-                                i.putExtra("PHOTO_DESCRIPTION", model.getBlogDescription());
-                                i.putExtra("POST_KEY", PostKey1);
-                                i.putExtra("POSITION", position);
-                                i.putExtra("GlobalID::", CommunityID);
-                                startActivity(i);
-
-                            }
-                        });
-                    }
-
-
-                 };
-                recyclerView.setAdapter(firebaseRecyclerAdapter);
-                */
