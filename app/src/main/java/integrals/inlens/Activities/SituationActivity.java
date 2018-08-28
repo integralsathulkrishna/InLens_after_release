@@ -197,7 +197,7 @@ public class SituationActivity extends AppCompatActivity {
             if(dt_1.after(dt_2)&&(dt_1.before(dt_3))){
                 Result=true;
             }
-            else if(dt_1.after(dt_2)&& dt_1.equals(dt_3)){
+            else if(dt_1.after(dt_2)&&dt_1.equals(dt_3)){
                 Result=true;
             }
         }
