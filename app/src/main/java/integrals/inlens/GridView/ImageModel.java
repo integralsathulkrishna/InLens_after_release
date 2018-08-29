@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 public class ImageModel implements Parcelable {
 
-    String name, url;
+    String name, url,timeTaken;
 
     public ImageModel() {
 
@@ -14,6 +14,7 @@ public class ImageModel implements Parcelable {
     protected ImageModel(Parcel in) {
         name = in.readString();
         url = in.readString();
+        timeTaken=in.readString();
     }
 
     public static final Creator<ImageModel> CREATOR = new Creator<ImageModel>() {
@@ -28,9 +29,7 @@ public class ImageModel implements Parcelable {
         }
     };
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     public void setName(String name) {
         this.name = name;
@@ -43,6 +42,11 @@ public class ImageModel implements Parcelable {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    public String getTimeTaken() { return timeTaken; }
+
+    public void setTimeTaken(String timeTaken) { this.timeTaken = timeTaken; }
+
 
     @Override
     public int describeContents() {

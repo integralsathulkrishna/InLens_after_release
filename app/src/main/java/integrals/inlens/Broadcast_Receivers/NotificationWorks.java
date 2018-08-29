@@ -35,7 +35,7 @@ public  class NotificationWorks extends BroadcastReceiver {
     private  String  DatabaseUploaderProfilePic="NULLX";
     private  String  DatabaseCurrentTimeMillis="NULLX";
     private  Context context;
-
+    private  String  TIME_TAKEN;
     public NotificationWorks() {
     }
 
@@ -48,6 +48,7 @@ public  class NotificationWorks extends BroadcastReceiver {
         UploadActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         RecentImageDatabase recentImageDatabase= new RecentImageDatabase(context,"",null,1);
         UPLOAD_IMAGE_URL=recentImageDatabase.GetPhotoUri(recentImageDatabase.GetNumberOfRows());
+        TIME_TAKEN=recentImageDatabase.GetTimeTaken(recentImageDatabase.GetNumberOfRows());
         if(intent.getAction().equals(UPLOAD_TASK_INTENT)) {
             cancelNotification();
             context.startActivity(UploadTaskIntent);
@@ -97,12 +98,7 @@ public  class NotificationWorks extends BroadcastReceiver {
         DatabaseUploaderProfilePic="";
         DatabaseUploadStatus="NOT_UPLOADED";
         Calendar calendar=Calendar.getInstance();
-        DatabaseTimeTaken =calendar.get(Calendar.YEAR)+ "-"
-                +calendar.get(Calendar.MONTH)+"-"
-                +calendar.get(Calendar.DAY_OF_MONTH)+"T"
-                +calendar.get(Calendar.HOUR_OF_DAY)+"-"
-                +calendar.get(Calendar.MINUTE)+"-"
-                +calendar.get(Calendar.SECOND);
+        DatabaseTimeTaken =TIME_TAKEN;
         CurrentDatabase currentDatabase= new CurrentDatabase(context,"",null,1);
         int Value=currentDatabase.GetUploadingTotal();
         currentDatabase.ResetUploadTotal((Value+1));

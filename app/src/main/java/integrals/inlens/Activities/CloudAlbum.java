@@ -327,6 +327,7 @@ public class CloudAlbum extends AppCompatActivity {
                                   intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
                                   intent.putExtra("TimeEnd::",SituationList.get(position+1).getSituationTime());
                                   intent.putExtra("GlobalID::",CommunityID);
+                                  intent.putExtra("LastPost::",false);
                                   startActivity(intent);
 
                               }catch (IndexOutOfBoundsException e){
@@ -334,6 +335,7 @@ public class CloudAlbum extends AppCompatActivity {
                                   intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
                                   intent.putExtra("TimeEnd::",SituationList.get(position).getSituationTime());
                                   intent.putExtra("GlobalID::",CommunityID);
+                                  intent.putExtra("LastPost::",true);
                                   startActivity(intent);
 
                                 }

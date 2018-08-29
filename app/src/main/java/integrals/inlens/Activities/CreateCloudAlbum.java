@@ -220,7 +220,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                     .putFile(ImageUri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        public void onSuccess(final UploadTask.TaskSnapshot taskSnapshot) {
                             final Uri DownloadUri = taskSnapshot.getDownloadUrl();
                             final DatabaseReference CommunityPost = CommunityDatabaseReference.push();
                             final DatabaseReference NewPost = PostDatabaseReference.push();
@@ -260,8 +260,8 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                         databaseReference.child("Name").setValue(dataSnapshot.child("Name").getValue());
                                         databaseReference.child("Profile_picture").setValue(dataSnapshot.child("Profile_picture").getValue());
                                         databaseReference.child("Email_ID").setValue(dataSnapshot.child("Email").getValue());
-                                        PhotographerCreated = true;
                                         CreateSituation();
+                                        PhotographerCreated = true;
 
                                     } else {
                                            }
@@ -287,36 +287,28 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                                                      .getTotalByteCount());
                                                      String UploadIndex = "Creating new Cloud-Album, "+ (int) progress + "%" + " completed.";
                                                      UploadProgressTextView.setText(UploadIndex);
+
                                                  }
                                              }
             ).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    if(task.isSuccessful()) {
-                          if (CloudAlbumDone == false) {
-                              InProgressDialog.dismiss();
-                              UploadProgressTextView.setText("Cloud Album Created.");
-                              UploadProgress.setVisibility(View.INVISIBLE);
-                              SubmitButton.setVisibility(View.VISIBLE);
-                              StartServices();
-                              CloudAlbumDone = true;
-                              finish();
-                              startActivity(
-                                      new Intent(CreateCloudAlbum.this,
-                                      MainActivity.class)
-                              );
+                    if(task.isSuccessful()){
+                        if(task.isComplete()==true){
+                            if(CloudAlbumDone==false) {
+                                InProgressDialog.dismiss();
+                                UploadProgressTextView.setText("Cloud Album Created.");
+                                UploadProgress.setVisibility(View.INVISIBLE);
+                                SubmitButton.setVisibility(View.VISIBLE);
+                                CloudAlbumDone=true;
+                                StartServices();
+                                finish();
+                                }else {
 
                             }
-                    }
-                    else
-                        {
-                        Toast.makeText(getApplicationContext(),"Sorry Cloud-Album Creation failed,Please try again ",Toast.LENGTH_SHORT).show();
+
                         }
-
-
-
-
+                    }
                 }
             });
         } else {
@@ -431,7 +423,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                     {
                         databaseReference.child(push_id).child("members").push().setValue(member);
                         Toast.makeText(CreateCloudAlbum.this,"New Situation Created : "+"Event Started",Toast.LENGTH_SHORT).show();
-
+                        CloudAlbumDone=false;
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -445,6 +437,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
                 }
             });
         }
+
+
+
     }
 
 

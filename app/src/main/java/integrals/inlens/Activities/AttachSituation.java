@@ -935,7 +935,7 @@ public  class AttachSituation
 
     }
 
-//DatabaseToUpload
+    //DatabaseToUpload
     public void CreateDatabaseValues()
     {
         String Default="SS";
@@ -954,11 +954,13 @@ public  class AttachSituation
         DatabaseUploaderProfilePic=sharedPreferencesUser.getString("PROFILEPIC",Default);
         DatabaseUploadStatus="NOT_UPLOADED";
         Calendar calender=Calendar.getInstance();
-        DatabaseTimeTaken=""+calender.get(Calendar.HOUR_OF_DAY)+ ":"
-                +calender.get(Calendar.MINUTE)+""
-                +"        "+calender.get(Calendar.DAY_OF_MONTH)+"/"
-                +calender.get(Calendar.MONTH)+1+"/"
-                +calender.get(Calendar.YEAR)+"";
+        DatabaseTimeTaken=calender.get(Calendar.YEAR)+ "-"
+                +calender.get(Calendar.MONTH)+"-"
+                +calender.get(Calendar.DAY_OF_MONTH)+"T"
+                +calender.get(Calendar.HOUR_OF_DAY)+"-"
+                +calender.get(Calendar.MINUTE)+"-"
+                +calender.get(Calendar.SECOND);
+
         String TextCaption=null;
         TextCaption=CaptionEditText.getText().toString().trim();
         if(TextCaption==null){

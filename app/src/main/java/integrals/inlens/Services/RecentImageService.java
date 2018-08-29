@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -74,6 +75,7 @@ import integrals.inlens.R;
      private File         ImageFile,ThumbnailFile;
      private String       OriginalImageName;
      private Uri          DownloadUri,ThumbImageUri,DownloadThumbUri;
+     private Calendar     calendar;
      /*
      private String       sowner,stime,stitle,sKey,sTime;
      private DatabaseReference databaseReference;
@@ -140,13 +142,21 @@ import integrals.inlens.R;
                             if (ImageLocation[0].contentEquals(CurrentImage[0])) {
                                 //Do not do anything,if the current image matches the image in SharedPreference
                             } else if ((!ImageLocation[0].contains("/WhatsApp/")) && !ImageLocation[0].contains("/Screenshots/") && !ImageLocation[0].contains(CurrentImage[0])) {
+                                calendar=Calendar.getInstance();
+                                String TimeTaken=  calendar.get(Calendar.YEAR)+ "-"
+                                        +calendar.get(Calendar.MONTH)+"-"
+                                        +calendar.get(Calendar.DAY_OF_MONTH)+"T"
+                                        +calendar.get(Calendar.HOUR_OF_DAY)+"-"
+                                        +calendar.get(Calendar.MINUTE)+"-"
+                                        +calendar.get(Calendar.SECOND);
+
                                 RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
                                 recentImageDatabase.InsertUploadValues(
                                         ImageLocation[0].toString(),
                                         "NULL",
                                         "NULL",
                                         "NULL",
-                                        "NULL",
+                                        TimeTaken,
                                         "NULL",
                                         "NULL",
                                         "NULL",

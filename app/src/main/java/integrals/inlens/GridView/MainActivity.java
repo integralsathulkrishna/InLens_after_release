@@ -44,7 +44,10 @@ public class MainActivity extends AppCompatActivity
     ArrayList<ImageModel> data = new ArrayList<>();
     private TextView SelectedText;
     public static String IMGS[];
+    public static String TIME[];
     ArrayList<String> ImageList = new ArrayList<>();
+    ArrayList<String> TimeList =  new ArrayList<>();
+
     String TextValue;
     private Boolean FirstImageClicked=false;
      @Override
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity
 
         IMGS=         new String[10000];
         PositionArray=new int[10000];
+        TIME=         new String[10000];
         SelectedText=(TextView)findViewById(R.id.SelectText);
         mRecyclerView = (RecyclerView) findViewById(R.id.list);
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), this));
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity
                         ImageModel imageModel = new ImageModel();
                         imageModel.setName("Image " + i);
                         imageModel.setUrl(IMGS[i]);
+                        imageModel.setTimeTaken(TIME[i]);
                         data.add(imageModel);
                         Total += 1;
 
@@ -143,9 +148,11 @@ public class MainActivity extends AppCompatActivity
         int Record=recentImageDatabase.GetNumberOfRows();
         for (int i = 1; i <=Record; i++) {
             ImageList.add(recentImageDatabase.GetPhotoUri(i));
+            TimeList .add(recentImageDatabase.GetTimeTaken(i));
         }
         for (int j=0;j<Record;j++){
             IMGS[j]=ImageList.get(j);
+            TIME[j]=TimeList.get(j);
         }
 
     }
@@ -177,13 +184,7 @@ public class MainActivity extends AppCompatActivity
         DatabaseCurrentTimeMilliSecond= String.valueOf(System.currentTimeMillis());
         DatabaseUploadStatus="NOT_UPLOADED";
         Calendar calendar=Calendar.getInstance();
-        DatabaseTimeTaken =calendar.get(Calendar.YEAR)+ "-"
-                +calendar.get(Calendar.MONTH)+"-"
-                +calendar.get(Calendar.DAY_OF_MONTH)+"T"
-                +calendar.get(Calendar.HOUR_OF_DAY)+"-"
-                +calendar.get(Calendar.MINUTE)+"-"
-                +calendar.get(Calendar.SECOND);
-
+        DatabaseTimeTaken =TIME[Index];
         CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
         int Value=currentDatabase.GetUploadingTotal();
         currentDatabase.ResetUploadTotal((Value+1));
