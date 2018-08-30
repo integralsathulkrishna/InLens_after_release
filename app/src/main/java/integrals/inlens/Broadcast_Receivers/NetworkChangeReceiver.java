@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import integrals.inlens.Services.RecentImageService;
+import integrals.inlens.Services.SituationNotyService;
+
 import static android.content.Context.MODE_PRIVATE;
 
 /**
@@ -35,6 +37,8 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
                 recentImageService = new RecentImageService(MyContext);
                 if (!isMyServiceRunning(recentImageService.getClass())) {
                     context.startService(new Intent(context, RecentImageService.class));
+                    context.startService(new Intent(context, SituationNotyService.class));
+
                 }
 
 

@@ -51,6 +51,7 @@ public class CloudAlbum extends AppCompatActivity {
     private DatabaseReference db,ComNotyRef;
     private String Album;
     private FloatingActionButton NewSituation;
+    private String ReturnName="Oops";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,11 +134,20 @@ public class CloudAlbum extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
+                            // Situation Notification function by elson jose
+
+                            Map notymap = new HashMap();
+                            notymap.put("name",SituationName.getText().toString().trim());
+                            notymap.put("ownername",GetUserName(FirebaseAuth.getInstance().getCurrentUser().getUid()));
+
+
                             for(DataSnapshot snapshot : dataSnapshot.getChildren())
                             {
                                 String id = snapshot.child("Photographer_UID").getValue().toString();
-                                dref.child(id).push().child("comid").setValue(CommunityID);
+                                if(!id.equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))
+                                    dref.child(id).push().setValue(notymap);
                             }
+
 
                         }
 
@@ -200,16 +210,36 @@ public class CloudAlbum extends AppCompatActivity {
             NewSituation.setVisibility(View.GONE);
         }
 
-            NewSituation.setOnClickListener(new View.OnClickListener() {
-              @Override
-             public void onClick(View view) {
-                  createNewSituation.show();
+        NewSituation.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                createNewSituation.show();
 
-                      }
-                 }
-                );
-                }
+                                            }
+                                        }
+        );
+    }
 
+    private String GetUserName(String uid) {
+
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                String name = dataSnapshot.child("Name").getValue().toString();
+                ReturnName = name;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return ReturnName;
+    }
 
 
     @Override
@@ -222,7 +252,7 @@ public class CloudAlbum extends AppCompatActivity {
                 menu.add(0, 0, 0, "Add Participant")
                         .setIcon(R.drawable.ic_add_participant)
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                }
+            }
 
 
         }
@@ -322,28 +352,29 @@ public class CloudAlbum extends AppCompatActivity {
                             @Override
                             public void onItemClick(View view, int position) {
 
-                              try {
-                                  Intent intent= new Intent(CloudAlbum.this,SituationActivity.class);
-                                  intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
-                                  intent.putExtra("TimeEnd::",SituationList.get(position+1).getSituationTime());
-                                  intent.putExtra("GlobalID::",CommunityID);
-                                  intent.putExtra("LastPost::",false);
-                                  startActivity(intent);
+                                try {
+                                    Intent intent= new Intent(CloudAlbum.this,SituationActivity.class);
+                                    intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
+                                    intent.putExtra("TimeEnd::",SituationList.get(position+1).getSituationTime());
+                                    intent.putExtra("GlobalID::",CommunityID);
+                                    intent.putExtra("LastPost::",false);
 
-                              }catch (IndexOutOfBoundsException e){
-                                  Intent intent= new Intent(CloudAlbum.this,SituationActivity.class);
-                                  intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
-                                  intent.putExtra("TimeEnd::",SituationList.get(position).getSituationTime());
-                                  intent.putExtra("GlobalID::",CommunityID);
-                                  intent.putExtra("LastPost::",true);
-                                  startActivity(intent);
+                                    startActivity(intent);
+
+                                }catch (IndexOutOfBoundsException e){
+                                    Intent intent= new Intent(CloudAlbum.this,SituationActivity.class);
+                                    intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
+                                    intent.putExtra("TimeEnd::",SituationList.get(position).getSituationTime());
+                                    intent.putExtra("GlobalID::",CommunityID);
+                                    intent.putExtra("LastPost::",true);
+                                    startActivity(intent);
 
                                 }
-                              }
+                            }
 
                             @Override
                             public void onLongItemClick(View view, int position) {
-                              }
+                            }
                         })
                 );
 
@@ -354,7 +385,7 @@ public class CloudAlbum extends AppCompatActivity {
 
             }
         });
-        }
+    }
 
 
 }

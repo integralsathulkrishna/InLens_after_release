@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activities.QRCodeGenerator">
+
     <ImageView
         android:id="@+id/QR_Display"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_centerInParent="true"/>
+        android:layout_gravity="center"/>
 
     <TextView
         android:id="@+id/textViewAlbumQR"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="6dp"
-        android:layout_marginRight="6dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
         android:layout_marginTop="22dp"
         android:text="Scan this QR code to join as a photographer to the community"
         android:textSize="17sp" />
@@ -30,9 +27,8 @@
         android:id="@+id/InviteLinkButton"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="0dp"
         android:background="@color/colorPrimary"
         android:text="SEND INVITE LINK"
-        android:textColor="#FFF" />
-</RelativeLayout>
+        android:textColor="#FFF"
+        android:layout_gravity="bottom"/>
+</android.support.design.widget.CoordinatorLayout>

@@ -42,6 +42,7 @@ import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.Models.AlbumModel;
 import integrals.inlens.Services.RecentImageService;
+import integrals.inlens.Services.SituationNotyService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 
 
@@ -54,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton floatingActionButton;
     private FirebaseAuth InAuthentication;
     private FirebaseUser firebaseUser;
-    private DatabaseReference participantDatabaseReference,getParticipantDatabaseReference;
+    private DatabaseReference participantDatabaseReference,
+            getParticipantDatabaseReference;
     private String CommunityID;
     private Intent intent;
     private static final int JOB_ID=7907;
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         recentImageService = new RecentImageService(getApplicationContext());
         if (!isMyServiceRunning(recentImageService.getClass()) && firebaseUser!=null) {
             startService(new Intent(getApplicationContext(), RecentImageService.class));
+            startService(new Intent(getApplicationContext(), SituationNotyService.class));
         }
 
 
@@ -135,9 +138,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Participant Database Reference
         participantDatabaseReference=FirebaseDatabase.getInstance().getReference();
-
-
-
         //Setting Recycler View
         MemoryRecyclerView=(RecyclerView)findViewById(R.id.CloudAlbumRecyclerView);
         MemoryRecyclerView.setHasFixedSize(true);
@@ -246,9 +246,10 @@ public class MainActivity extends AppCompatActivity {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
                                     startActivity(new Intent(MainActivity.this,CloudAlbum.class)
-                                            .putExtra("AlbumName",model.getAlbumTitle()).putExtra("GlobalID::",CommunityPostKey));
+                                            .putExtra("AlbumName",model.getAlbumTitle())
+                                            .putExtra("GlobalID::",CommunityPostKey));
 
-                                }
+                                    }
 
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {

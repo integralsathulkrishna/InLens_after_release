@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.widget.Toast;
 
 import integrals.inlens.Services.RecentImageService;
+import integrals.inlens.Services.SituationNotyService;
 
 public class InLensJobScheduler extends JobService {
     private JobExcecute  inLensJobExecuter;
@@ -46,6 +47,12 @@ public class InLensJobScheduler extends JobService {
                 recentImageService = new RecentImageService(getApplicationContext());
                 if (!isMyServiceRunning(recentImageService.getClass())) {
                     getApplicationContext().startService(new Intent(getApplicationContext(), RecentImageService.class));
+                    getApplicationContext().startService(new Intent(getApplicationContext(), SituationNotyService.class));
+
+
+
+
+
                 }
 
             }

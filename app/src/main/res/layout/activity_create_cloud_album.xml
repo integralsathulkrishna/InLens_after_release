@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,33 +14,27 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="43dp"
         android:layout_height="43dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_marginBottom="30dp"
-        android:layout_marginRight="30dp"
-        android:visibility="invisible" />
+        android:layout_marginEnd="30dp"
+        android:visibility="invisible"
+        android:layout_gravity="end|bottom"/>
 
     <ImageView
         android:id="@+id/CoverPhoto"
         android:layout_width="match_parent"
         android:layout_height="230dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:background="@android:color/white" />
+        android:background="@android:color/white"
+        android:layout_gravity="center_horizontal"/>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/AlbumTitleLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/CoverPhoto"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="238dp"
         android:background="@android:color/white"
-        android:hint="Album Title">
+        android:hint="Album Title"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/AlbumTitleEditText"
@@ -50,14 +46,11 @@
         android:id="@+id/AlbumDescriptionLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/AlbumTitleLayout"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="288dp"
         android:background="@android:color/white"
-        android:hint="Album Description">
+        android:hint="Album Description"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/AlbumDescriptionEditText"
@@ -71,21 +64,19 @@
         android:id="@+id/TimeEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/AlbumDescriptionLayout"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="350dp"
         android:hint="Click to pick completion date."
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"/>
+
     <Button
         android:id="@+id/DoneButton"
         android:layout_width="63dp"
         android:layout_height="63dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_marginBottom="20dp"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="20dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="1dp"
         android:background="@drawable/ic_tick" />
 
@@ -93,8 +84,7 @@
         android:id="@+id/DisplayImage"
         android:layout_width="70dp"
         android:layout_height="60dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="100dp"
         android:background="@drawable/ic_camera" />
 
@@ -102,9 +92,9 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/CoverPhoto"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="5dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="230dp"
         android:text="Tap to add album cover"
         android:textSize="10sp" />
 
@@ -112,12 +102,11 @@
         android:id="@+id/UploadProgressTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
         android:layout_marginBottom="30dp"
-        android:layout_marginLeft="25dp"
+        android:layout_marginStart="25dp"
         android:text="Upload Progress"
         android:textColor="#3E3D63"
         android:textSize="10sp"
+        android:layout_gravity="bottom"
         android:visibility="invisible" />
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

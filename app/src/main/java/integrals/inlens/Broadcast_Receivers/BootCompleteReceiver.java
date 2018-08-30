@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import integrals.inlens.Services.RecentImageService;
+import integrals.inlens.Services.SituationNotyService;
+
 import static android.content.Context.MODE_PRIVATE;
 
 /**
@@ -24,6 +26,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
             recentImageService = new RecentImageService(MyContext);
             if (!isMyServiceRunning(recentImageService.getClass())) {
                 context.startService(new Intent(context, RecentImageService.class));
+                context.startService(new Intent(context, SituationNotyService.class));
               }
 
 

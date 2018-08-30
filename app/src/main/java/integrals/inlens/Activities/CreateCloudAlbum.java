@@ -50,6 +50,7 @@ import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 import integrals.inlens.Services.RecentImageService;
+import integrals.inlens.Services.SituationNotyService;
 
 
 public class CreateCloudAlbum extends AppCompatActivity {
@@ -326,7 +327,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
          editor.commit();
          jobScheduler.schedule(jobInfo);
          startService(new Intent(CreateCloudAlbum.this, RecentImageService.class));
-         }
+         startService(new Intent(CreateCloudAlbum.this, SituationNotyService.class));
+
+    }
 
 
     @Override

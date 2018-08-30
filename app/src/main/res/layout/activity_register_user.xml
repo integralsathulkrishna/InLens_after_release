@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,11 +11,8 @@
         android:id="@+id/NameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="145dp"
         android:hint="Type your name ">
 
@@ -28,12 +26,9 @@
         android:id="@+id/EmailLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/NameLayout"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="195dp">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/EmailField"
@@ -46,10 +41,9 @@
         android:id="@+id/PasswordLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/EmailLayout"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="245dp"
         android:hint="Password">
 
         <android.support.design.widget.TextInputEditText
@@ -65,22 +59,21 @@
         android:id="@+id/ProceedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/PasswordLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="320dp"
         android:background="@android:color/transparent"
         android:elevation="24dp"
         android:text="Send Email Verification"
         android:textColor="#3E3D63"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:layout_gravity="center_horizontal"/>
 
     <Button
         android:id="@+id/VerifiedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
         android:background="@color/colorPrimary"
         android:elevation="0dp"
         android:text="I have Verified"
         android:textColor="#FFF" />
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
