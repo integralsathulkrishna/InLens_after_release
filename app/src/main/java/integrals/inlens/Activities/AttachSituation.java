@@ -710,7 +710,7 @@ public  class AttachSituation
                             SharedPreferences sharedPreferences = getSharedPreferences("txtCelsius.pref",Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor=sharedPreferences.edit();
                             editor.putString("txtCelsius:","");
-                            editor.commit();
+                             editor.commit();
                         }
                     }
                 });
