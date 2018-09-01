@@ -189,7 +189,6 @@ public class QRCodeReader extends AppCompatActivity
                 editor.putBoolean("UsingCommunity::",true);
                 editor.commit();
                 startService(new Intent(QRCodeReader.this, RecentImageService.class));
-
                 JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
                 builder.setPeriodic(15*60*1000);
                 builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);

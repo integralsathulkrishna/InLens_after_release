@@ -15,12 +15,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,7 +39,6 @@ import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.Models.AlbumModel;
 import integrals.inlens.Services.RecentImageService;
-import integrals.inlens.Services.SituationNotyService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 
 
@@ -100,8 +96,7 @@ public class MainActivity extends AppCompatActivity {
         recentImageService = new RecentImageService(getApplicationContext());
         if (!isMyServiceRunning(recentImageService.getClass()) && firebaseUser!=null) {
             startService(new Intent(getApplicationContext(), RecentImageService.class));
-            startService(new Intent(getApplicationContext(), SituationNotyService.class));
-        }
+           }
 
 
 
@@ -345,90 +340,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
     }
-/*
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Intent intent= getIntent();
-        if((intent!=null)&&(intent.getData()!=null)){
-            String Data=intent.getDataString().toString();
-            String str=Data.substring(18);
-            AddCloudAlbum(str);
-        }
-    }
-
-    private void AddCloudAlbum(String str)
-        {
-             final FirebaseAuth CommunityPhotographerAuthentication;
-             final String UserID;
-             final DatabaseReference UserData;
-             final String[] CommunityID = {str};
-             final DatabaseReference[] databaseReference = new DatabaseReference[1];
-             final DatabaseReference databaseReference2;
-
-            CommunityPhotographerAuthentication = FirebaseAuth.getInstance();
-            UserData = FirebaseDatabase.getInstance()
-                     .getReference()
-                     .child("Users")
-                    .child(CommunityPhotographerAuthentication.getCurrentUser()
-                            .getUid());
-            UserID = CommunityPhotographerAuthentication.getCurrentUser().getUid();
-            databaseReference[0] = FirebaseDatabase.getInstance().getReference();
-            databaseReference2=FirebaseDatabase
-                    .getInstance()
-                    .getReference()
-                    .child("Communities")
-                    .child(CommunityID[0]);
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setCancelable(true);
-            builder.setTitle("Join");
-            builder.setMessage("Add this Cloud-Album to your account ?");
-            builder.setPositiveButton(" YES ", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    {
-
-
-                        databaseReference[0] = databaseReference[0].child("Users").child(UserID).child("Communities");
-                        final DatabaseReference AddingAlbumToReference= databaseReference[0].push();
-                        databaseReference2.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                AddingAlbumToReference.child("AlbumTitle").setValue(dataSnapshot.child("AlbumTitle").getValue().toString());
-                                AddingAlbumToReference.child("AlbumDescription").setValue(dataSnapshot.child("AlbumDescription").getValue().toString());
-                                AddingAlbumToReference.child("AlbumCoverImage").setValue(dataSnapshot.child("AlbumCoverImage").getValue().toString());
-                                AddingAlbumToReference.child("User_ID").setValue(dataSnapshot.child("User_ID").getValue().toString());
-                                AddingAlbumToReference.child("PostedByProfilePic").setValue(dataSnapshot.child("PostedByProfilePic").getValue().toString());
-                                AddingAlbumToReference.child("UserName").setValue(dataSnapshot.child("UserName").getValue().toString());
-                                AddingAlbumToReference.child("Time").setValue(dataSnapshot.child("Time").getValue().toString());
-                                AddingAlbumToReference.child("CommunityID").setValue(CommunityID[0]);
-                                }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Toast.makeText(getApplicationContext(),"Sorry network error...please try again",Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-
-
-
-                    }
-                    builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-                }
-
-                  });
-            builder.create().show();
-
-        }
-
-*/
-
 
 
 
@@ -440,12 +351,6 @@ public class MainActivity extends AppCompatActivity {
     if ((intent != null) && (intent.getData() != null)) {
         String Data = intent.getDataString().toString();
         String str = Data.substring(18,23);
-/*
-        if(str.contentEquals("watch")) {
-            Toast.makeText(getApplicationContext(),"View "+Data.substring(24),Toast.LENGTH_SHORT).show();
-            ViewAlbum(Data.substring(24));
-        }else
-         */
              if(str.contentEquals("joins")){
                  Toast.makeText(getApplicationContext(),"Join "+Data.substring(24),Toast.LENGTH_SHORT).show();
                   SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
@@ -560,7 +465,6 @@ public class MainActivity extends AppCompatActivity {
                     editor.putBoolean("UsingCommunity::",true);
                     editor.commit();
                     startService(new Intent(MainActivity.this,RecentImageService.class));
-
                     JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
                     builder.setPeriodic(15*60*1000);
                     builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
@@ -569,36 +473,6 @@ public class MainActivity extends AppCompatActivity {
                     jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
                     jobScheduler.schedule(jobInfo);
 
-
-                    /*
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                        JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
-                        // Android N
-                        builder.setPeriodic(1000);
-                        // Android N
-                        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-                        builder.setPersisted(true);
-                        jobInfo = builder.build();
-                        jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                        jobScheduler.schedule(jobInfo);
-                        Toast.makeText(getApplicationContext(),"Job Scheduled on Noughat OS..",Toast.LENGTH_SHORT).show();
-
-                    }else{
-                        JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
-                        builder.setPeriodic(2000);
-                        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-                        builder.setPersisted(true);
-                        jobInfo = builder.build();
-                        jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                        jobScheduler.schedule(jobInfo);
-                        Toast.makeText(getApplicationContext(),"Job Scheduled on Mashmello OS..",Toast.LENGTH_SHORT).show();
-
-                    }
-                    Toast.makeText(getApplicationContext(),"Job Scheduled..",Toast.LENGTH_SHORT).show();
-
-                    //Error Fix 4
-                    */
 
 
                 }
@@ -613,38 +487,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
-    private void ViewAlbum(String str) {
-        final String CommunityPostKey=str;
-        DatabaseReference db;
-        db=FirebaseDatabase.getInstance().getReference().child("Communities").child(str);
-        try {
-            db.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String AlbumName=dataSnapshot.child("AlbumTitle").getValue().toString();
-                    startActivity(new Intent(MainActivity.this,CloudAlbum.class).
-                            putExtra("AlbumName",AlbumName)
-                            .putExtra("GlobalID::",CommunityPostKey));
-                    setIntent(null);
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-
-        }catch (NullPointerException e){
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),"Failed to view Cloud-Album",Toast.LENGTH_SHORT).show();
-        }
-
-
-    }
-
 
 }
 

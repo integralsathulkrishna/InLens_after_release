@@ -118,10 +118,6 @@
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.SituationActivity" />
         <activity android:name=".Activities.PhotoView"></activity>
-        <service
-            android:name=".Services.SituationNotyService"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>

@@ -50,6 +50,7 @@ import id.zelory.compressor.Compressor;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
+import integrals.inlens.MainActivity;
 import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
 
@@ -76,6 +77,12 @@ import integrals.inlens.R;
      private String       OriginalImageName;
      private Uri          DownloadUri,ThumbImageUri,DownloadThumbUri;
      private Calendar     calendar;
+     private DatabaseReference ComNotyRef;
+     private String MyUserID;
+     private NotificationCompat.Builder noty  ;
+     private static int notyid =808679;
+
+
      /*
      private String       sowner,stime,stitle,sKey,sTime;
      private DatabaseReference databaseReference;
@@ -100,6 +107,26 @@ import integrals.inlens.R;
          super.onCreate();
          handler=new Handler();
          remoteViews=new RemoteViews(getPackageName(),R.layout.notification_layout);
+
+
+         if(FirebaseAuth.getInstance().getCurrentUser()!=null)
+         {
+             MyUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+             ComNotyRef = FirebaseDatabase.getInstance().getReference().child("ComNoty").child(MyUserID);
+         }
+
+         noty = new NotificationCompat.Builder(this);
+         noty.setAutoCancel(true);
+         noty.setSmallIcon(R.mipmap.ic_launcher);
+         noty.setContentTitle("New Situation Detected");
+         Intent intent = new Intent(this, MainActivity.class);
+         intent.putExtra("code",1);
+         PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+         noty.setContentIntent(pendingIntent);
+         noty.setSound(Uri.parse("android.resource://" + getPackageName() + "/raw/impulse"));
+
+
+
          Toast.makeText(getApplicationContext(),"InLens  Service created.",Toast.LENGTH_SHORT).show();
     }
 
@@ -198,6 +225,8 @@ import integrals.inlens.R;
                     e.printStackTrace();
                 }
 
+                //Situation Operation
+                SituationOperation();
 
                 //Upload Operation
                 UploadOperation();
@@ -213,6 +242,35 @@ import integrals.inlens.R;
         return START_STICKY;
 
     }
+
+     private void SituationOperation() {
+
+         ComNotyRef.addValueEventListener(new ValueEventListener() {
+             @Override
+             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                 {   try {
+                     String notificationid = snapshot.getKey();
+                     String sitname = snapshot.child("name").getValue().toString();
+                     String ownername = snapshot.child("ownername").getValue().toString();
+                     noty.setContentText(ownername+" has created a new situation, "+sitname+". Check it out now.");
+                     NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                     manager.notify(notyid,noty.build());
+                     ComNotyRef.child(notificationid).removeValue();
+                 }catch (NullPointerException e){
+                     e.printStackTrace();
+                 }
+
+                 }
+             }
+
+             @Override
+             public void onCancelled(DatabaseError databaseError) {
+
+             }
+         });
+     }
 
      private void UploadOperation() {
          CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
