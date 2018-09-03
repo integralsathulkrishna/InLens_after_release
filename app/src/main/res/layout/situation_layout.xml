@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.design.widget.CoordinatorLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,7 +12,10 @@
     android:paddingEnd="5dp"
     android:paddingStart="5dp"
     android:paddingTop="5dp">
-
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="@color/colorPrimary"></RelativeLayout>
     <RelativeLayout
         android:id="@+id/parent"
         android:layout_width="120dp"
@@ -26,8 +29,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:layout_marginStart="130dp"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/parent"
         android:background="#FFFF">
 
         <TextView
@@ -76,16 +79,6 @@
             android:textSize="13sp" />
     </RelativeLayout>
 
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="120dp"
-        android:background="@color/colorPrimary">
-
-    </RelativeLayout>
-
-
     <Button
         android:id="@+id/situaview"
         android:layout_width="wrap_content"
@@ -111,4 +104,4 @@
         android:textColor="#FFFF"
         android:visibility="gone" />
 
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

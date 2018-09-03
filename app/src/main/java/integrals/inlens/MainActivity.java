@@ -39,6 +39,7 @@ import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.Models.AlbumModel;
 import integrals.inlens.Services.RecentImageService;
+import integrals.inlens.Services.SituationNotyService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 
 
@@ -98,6 +99,12 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(getApplicationContext(), RecentImageService.class));
            }
 
+           
+        SituationNotyService situationNotyService;
+        situationNotyService = new SituationNotyService(getApplicationContext());
+        if (!isMyServiceRunning(situationNotyService.getClass()) && firebaseUser!=null) {
+            startService(new Intent(getApplicationContext(), SituationNotyService.class));
+        }
 
 
         //User Authentication
