@@ -2,7 +2,9 @@ package integrals.inlens.Activities;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,15 +29,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.ramotion.cardslider.CardSliderLayoutManager;
+import com.ramotion.cardslider.CardSnapHelper;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecyclerItemClickListener;
+import integrals.inlens.Models.Blog;
 import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
+import integrals.inlens.ViewHolder.GridImageAdapter;
 import integrals.inlens.ViewHolder.SituationAdapter;
 
 public class CloudAlbum extends AppCompatActivity {
@@ -50,21 +60,32 @@ public class CloudAlbum extends AppCompatActivity {
     private List<String> SituationIDList;
     private DatabaseReference db,ComNotyRef;
     private String Album;
-    private FloatingActionButton NewSituation;
+    private Button NewSituation;
     private String ReturnName="Oops";
-
+    private String TimeEnd,TimeStart,GlobalID;
+    private Boolean LastPost;
+    private DatabaseReference   databaseReferencePhotoList=null;
+    private List<Blog>          BlogList;
+    private List<String>        BlogListID;
+    private GridImageAdapter gridImageAdapter;
+    private RecyclerView        recyclerViewPhotoList;
+    private String              PhotoThumb;
+    private String BlogTitle,ImageThumb,BlogDescription,Location;
+    private String TimeTaken,UserName,User_ID,WeatherDetails,PostedByProfilePic;
+    private String OriginalImageName;
+    private Dialog createNewSituation;
+    private TextView SituationName;
+    private String   Name;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_cloud_album);
+        setContentView(R.layout.ac_cloud_album);
         String AlbumName = getIntent().getStringExtra("AlbumName");
         CommunityID = getIntent().getStringExtra("GlobalID::");
         recyclerView = (RecyclerView)findViewById(R.id.SituationRecyclerView);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),1,LinearLayoutManager.VERTICAL,false);
+        SituationName=(TextView)findViewById(R.id.SituationNametxt);
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),1,LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(gridLayoutManager);
-        textViewAlbumName = (TextView) findViewById(R.id.AlbumTitleCloudAlbum);
-        textViewAlbumName.setText(AlbumName);
         Album = AlbumName;
         SituationList = new ArrayList<>();
         SituationIDList = new ArrayList<>();
@@ -94,7 +115,7 @@ public class CloudAlbum extends AppCompatActivity {
         ///////////////////////////////////////////////////////////////////////////////////////////
 
         // new situation layout
-        final Dialog createNewSituation = new Dialog(CloudAlbum.this);
+         createNewSituation = new Dialog(CloudAlbum.this);
         createNewSituation.setContentView(R.layout.create_new_situation_layout);
         createNewSituation.setCancelable(false);
         final EditText SituationName = createNewSituation.findViewById(R.id.situation_name);
@@ -197,27 +218,35 @@ public class CloudAlbum extends AppCompatActivity {
             }
         });
 
+      View bottomSheet=findViewById(R.id.design_bottom_sheet);
+      final BottomSheetBehavior bottomSheetBehavior=BottomSheetBehavior.from(bottomSheet);
+      bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+          @Override
+          public void onStateChanged(@NonNull View bottomSheet, int newState) {
+              switch (newState){
+                  case BottomSheetBehavior.STATE_EXPANDED:
+                      SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,false);
+                      break;
+                  case BottomSheetBehavior.STATE_DRAGGING:
+                      recyclerViewPhotoList.removeAllViews();
+                      break;
+                  case BottomSheetBehavior.STATE_COLLAPSED:
+                      SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true);
+                      break;
 
-        // new situation
 
-        NewSituation = findViewById(R.id.newsituation_btn);
-        SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-        if (sharedPreferences.getBoolean("UsingCommunity::",false) == true)
-        {
-        }
-        else
-        {
-            NewSituation.setVisibility(View.GONE);
-        }
+              }
+          }
 
-        NewSituation.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                createNewSituation.show();
+          @Override
+          public void onSlide(@NonNull View bottomSheet, float slideOffset) {
 
-                                            }
-                                        }
-        );
+          }
+      });
+
+
+
+
     }
 
     private String GetUserName(String uid) {
@@ -252,6 +281,9 @@ public class CloudAlbum extends AppCompatActivity {
                 menu.add(0, 0, 0, "Add Participant")
                         .setIcon(R.drawable.ic_add_participant)
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                menu.add(0, 1, 0, "Add Situation")
+                        .setIcon(R.drawable.ic_add)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
 
@@ -264,6 +296,9 @@ public class CloudAlbum extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 0) {
             startActivity(new Intent(CloudAlbum.this, QRCodeGenerator.class));
+        }
+        if(item.getItemId()==1){
+            createNewSituation.show();
         }
         return true;
     }
@@ -353,21 +388,23 @@ public class CloudAlbum extends AppCompatActivity {
                             public void onItemClick(View view, int position) {
 
                                 try {
-                                    Intent intent= new Intent(CloudAlbum.this,SituationActivity.class);
-                                    intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
-                                    intent.putExtra("TimeEnd::",SituationList.get(position+1).getSituationTime());
-                                    intent.putExtra("GlobalID::",CommunityID);
-                                    intent.putExtra("LastPost::",false);
 
-                                    startActivity(intent);
+                                     TimeStart=SituationList.get(position).getSituationTime();
+                                     TimeEnd  =SituationList.get(position+1).getSituationTime();
+                                     GlobalID =CommunityID;
+                                     LastPost=false;
+                                     Name=SituationList.get(position).getTitle();
+
+                                     SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true);
 
                                 }catch (IndexOutOfBoundsException e){
-                                    Intent intent= new Intent(CloudAlbum.this,SituationActivity.class);
-                                    intent.putExtra("TimeStart::",SituationList.get(position).getSituationTime());
-                                    intent.putExtra("TimeEnd::",SituationList.get(position).getSituationTime());
-                                    intent.putExtra("GlobalID::",CommunityID);
-                                    intent.putExtra("LastPost::",true);
-                                    startActivity(intent);
+
+                                    TimeStart=SituationList.get(position).getSituationTime();
+                                    TimeEnd  =SituationList.get(position).getSituationTime();
+                                    GlobalID =CommunityID;
+                                    LastPost=true;
+                                    Name=SituationList.get(position).getTitle();
+                                    SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true);
 
                                 }
                             }
@@ -387,5 +424,193 @@ public class CloudAlbum extends AppCompatActivity {
         });
     }
 
+    private void SetRecyclerView(String timeStart, String timeEnd, String globalID, Boolean lastPost,String situationName,Boolean Local) {
+        BlogList=new ArrayList<>();
+        BlogListID=new ArrayList<>();
+        TimeStart=timeStart;
+        TimeEnd=timeEnd;
+        CommunityID=globalID;
+        LastPost=lastPost;
+        databaseReferencePhotoList = FirebaseDatabase.getInstance().getReference().child("Communities")
+                .child(CommunityID).child("BlogPosts");
+        recyclerViewPhotoList=(RecyclerView)findViewById(R.id.SituationPhotos);
+        if(Local==true) {
+            try {
+                recyclerViewPhotoList.setLayoutManager(new CardSliderLayoutManager(this));
+                new CardSnapHelper().attachToRecyclerView(recyclerViewPhotoList);
 
-}
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+        }else if(Local==false){
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),2,LinearLayoutManager.VERTICAL,false);
+            recyclerViewPhotoList.setLayoutManager(gridLayoutManager);
+
+        }
+        SituationName.setText(situationName);
+        try {
+
+                databaseReferencePhotoList.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        recyclerView.removeAllViews();
+                        BlogList.clear();
+                        BlogListID.clear();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+
+                            if (snapshot.hasChildren()) {
+                                try {
+
+
+                                    if (CheckIntervel(snapshot.child("TimeTaken").getValue().toString(), TimeStart, TimeEnd)) {
+                                        String BlogListIDString = snapshot.getKey();
+                                        if (snapshot.hasChild("Image")) {
+                                            String photoThumb = snapshot.child("Image").getValue().toString();
+                                            PhotoThumb = photoThumb;
+                                        }
+
+                                        if (snapshot.hasChild("BlogTitle")) {
+                                            String blogTitle = snapshot.child("BlogTitle").getValue().toString();
+                                            BlogTitle = blogTitle;
+                                        }
+
+                                        if (snapshot.hasChild("Location")) {
+                                            String location = snapshot.child("Location").getValue().toString();
+                                            Location = location;
+                                        }
+
+                                        if (snapshot.hasChild("TimeTaken")) {
+                                            String timeTaken = snapshot.child("TimeTaken").getValue().toString();
+                                            TimeTaken = timeTaken;
+                                        }
+
+                                        if (snapshot.hasChild("OriginalImageName")) {
+                                            String originalImageName = snapshot.child("OriginalImageName").getValue().toString();
+                                            OriginalImageName = originalImageName;
+                                        }
+                                        if (snapshot.hasChild("ImageThumb")) {
+                                            String imageThumb = snapshot.child("ImageThumb").getValue().toString();
+                                            ImageThumb = imageThumb;
+                                        }
+
+
+                                        if (snapshot.hasChild("WeatherDetails")) {
+                                            String weatherDetails = snapshot.child("WeatherDetails").getValue().toString();
+                                            WeatherDetails = weatherDetails;
+                                        }
+
+
+                                        if (snapshot.hasChild("UserName")) {
+                                            String userName = snapshot.child("UserName").getValue().toString();
+                                            UserName = userName;
+                                        }
+
+
+                                        if (snapshot.hasChild("User_ID")) {
+                                            String user_id = snapshot.child("User_ID").getValue().toString();
+                                            User_ID = user_id;
+                                        }
+
+                                        if (snapshot.hasChild("PostedByProfilePic")) {
+                                            String postedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
+                                            PostedByProfilePic = postedByProfilePic;
+                                        }
+
+                                        if (!BlogListID.contains(BlogListIDString)) {
+                                            BlogListID.add(BlogListIDString);
+                                            Blog model = new Blog("", PhotoThumb, ImageThumb,
+                                                    "", BlogTitle, Location, TimeTaken,
+                                                    UserName, User_ID,
+                                                    WeatherDetails,
+                                                    PostedByProfilePic,
+                                                    OriginalImageName);
+                                            BlogList.add(model);
+                                        }
+                                    } else
+                                    {
+                                    }
+                                }catch (NullPointerException e){
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            gridImageAdapter = new GridImageAdapter(
+                                    getApplicationContext(),
+                                    BlogList,
+                                    BlogListID
+                            );
+                            recyclerViewPhotoList.setAdapter(gridImageAdapter);
+
+
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
+
+            recyclerViewPhotoList.addOnItemTouchListener(
+                    new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            String PostKey1 = BlogListID.get(position).toString().trim();
+
+                            Intent i = new Intent(getApplicationContext(), PhotoView.class);
+                            i.putParcelableArrayListExtra("data", (ArrayList<? extends Parcelable>) BlogList);
+                            i.putExtra("position",position);
+                            startActivity(i);
+
+
+                        }
+
+                        @Override
+                        public void onLongItemClick(View view, int position) {
+                        }
+                    })
+            );
+
+
+
+
+        }
+
+
+    private boolean CheckIntervel(String timeTaken, String timeStart, String timeEnd) {
+        Boolean Result=false;
+        try{
+            SimpleDateFormat objSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss");
+            Date dt_1 = objSDF.parse(timeTaken);
+            Date dt_2 = objSDF.parse(timeStart);
+            Date dt_3=  objSDF.parse(timeEnd);
+            if(LastPost==false) {
+                if (dt_1.after(dt_2) && (dt_1.before(dt_3))) {
+                    Result = true;
+                }
+            }
+            else
+            {
+                if(dt_1.after(dt_2)){
+                    Result=true;
+                }
+            }
+
+        }
+        catch (ParseException e){
+            Toast.makeText(getApplicationContext(),"Parse Exception",Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+
+        return Result;
+        }
+
+
+        }
+
+

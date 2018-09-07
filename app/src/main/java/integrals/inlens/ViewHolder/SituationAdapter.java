@@ -1,7 +1,6 @@
 package integrals.inlens.ViewHolder;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -18,13 +17,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import integrals.inlens.GridView.MainActivity;
 import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
 
@@ -106,7 +102,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
         long t = Long.parseLong(Situation.get(position).getTime());
         CharSequence time = DateUtils.getRelativeDateTimeString(context,t,DateUtils.SECOND_IN_MILLIS,DateUtils.WEEK_IN_MILLIS,DateUtils.FORMAT_ABBREV_ALL);
         holder.Time.setText(String.format("@ %s", time.toString()));
-        holder.Title.setText(String.format("Title : %s", Situation.get(position).getTitle()));
+        holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
 
         membersref.child(SIdList.get(position)).child("members").addValueEventListener(new ValueEventListener() {
             @Override

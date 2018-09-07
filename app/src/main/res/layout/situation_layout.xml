@@ -2,6 +2,7 @@
 
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginEnd="5dp"
@@ -12,18 +13,6 @@
     android:paddingEnd="5dp"
     android:paddingStart="5dp"
     android:paddingTop="5dp">
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="1dp"
-    android:background="@color/colorPrimary"></RelativeLayout>
-    <RelativeLayout
-        android:id="@+id/parent"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_centerVertical="true"
-        android:background="@drawable/ic_dashboard_black_24dp">
-
-    </RelativeLayout>
 
 
     <RelativeLayout
@@ -31,17 +20,18 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/parent"
-        android:background="#FFFF">
+        android:background="#FFFF"
+        tools:ignore="UnknownId">
 
         <TextView
             android:id="@+id/situationtitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:maxLength="20"
             android:text="SituationName"
-            android:textColor="@color/colorPrimary"
-            android:textSize="14sp" />
+            android:textColor="@android:color/black"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/createdby"
@@ -53,7 +43,8 @@
             android:maxLength="20"
             android:text="By : "
             android:textColor="@color/colorPrimary"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/createdtime"
@@ -63,8 +54,9 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="4dp"
             android:text=" @ : "
-            android:textColor="@color/colorPrimary"
-            android:textSize="13sp" />
+            android:textColor="@android:color/black"
+            android:textSize="13sp"
+            android:layout_marginBottom="5dp"/>
 
         <TextView
             android:id="@+id/numberofpost"
@@ -76,8 +68,22 @@
             android:maxLength="20"
             android:text="Number of post :"
             android:textColor="@color/colorPrimary"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:visibility="gone" />
     </RelativeLayout>
+
+    <Button
+        android:id="@+id/situajoin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/parent"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/border"
+        android:text="Join"
+        android:textColor="#FFFF"
+        android:visibility="gone"
+        tools:ignore="UnknownId" />
 
     <Button
         android:id="@+id/situaview"
@@ -90,18 +96,12 @@
         android:backgroundTint="@color/colorPrimary"
         android:text="View"
         android:textColor="#ffffff"
-        android:visibility="gone" />
+        android:visibility="gone"
+        tools:ignore="UnknownId" />
 
-    <Button
-        android:id="@+id/situajoin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@id/parent"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/border"
-        android:text="Join"
-        android:textColor="#FFFF"
-        android:visibility="gone" />
-
+    <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="@color/colorPrimary"
+    android:layout_alignParentBottom="true"></RelativeLayout>
 </RelativeLayout>

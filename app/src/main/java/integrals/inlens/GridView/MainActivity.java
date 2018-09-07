@@ -13,13 +13,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 
 import integrals.inlens.Activities.AttachSituation;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.R;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity
         implements RecyclerItemClickListener.OnItemClickListener {
@@ -150,12 +153,15 @@ public class MainActivity extends AppCompatActivity
             ImageList.add(recentImageDatabase.GetPhotoUri(i));
             TimeList .add(recentImageDatabase.GetTimeTaken(i));
         }
-        for (int j=0;j<Record;j++){
-            IMGS[j]=ImageList.get(j);
-            TIME[j]=TimeList.get(j);
-        }
 
-    }
+        for (int j=0;j<Record;j++){
+
+            IMGS[j]=ImageList.get(Record-(j+1));
+            TIME[j]=TimeList.get(Record-(j+1));
+
+
+        }
+     }
 
     public void AddingToDatabase(int Index){
         UploadDatabaseHelper  uploadDatabaseHelper= new UploadDatabaseHelper(getApplicationContext(),"",null,1);
