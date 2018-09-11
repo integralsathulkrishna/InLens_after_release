@@ -116,7 +116,6 @@
         </receiver>
 
         <activity android:name=".Activities.ResetPassword" />
-        <activity android:name=".Activities.SituationActivity" />
         <activity android:name=".Activities.PhotoView" />
 
         <service

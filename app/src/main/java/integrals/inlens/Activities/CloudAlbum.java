@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -49,26 +48,26 @@ import integrals.inlens.ViewHolder.GridImageAdapter;
 import integrals.inlens.ViewHolder.SituationAdapter;
 
 public class CloudAlbum extends AppCompatActivity {
-    private RecyclerView recyclerView;
-    private DatabaseReference databaseReference;
-    private String CommunityID;
-    private TextView textViewAlbumName;
-    private Calendar calendar;
-    private SituationAdapter adapter;
-    private String sowner,stime,stitle,sKey,sTime;
-    private List<SituationModel> SituationList;
-    private List<String> SituationIDList;
-    private DatabaseReference db,ComNotyRef;
-    private String Album;
-    private Button NewSituation;
-    private String ReturnName="Oops";
-    private String TimeEnd,TimeStart,GlobalID;
-    private Boolean LastPost;
+    private RecyclerView            recyclerView;
+    private DatabaseReference       databaseReference;
+    private String                  CommunityID;
+    private TextView                textViewAlbumName;
+    private Calendar                calendar;
+    private SituationAdapter        adapter;
+    private String                  sowner,stime,stitle,sKey,sTime;
+    private List<SituationModel>    SituationList;
+    private List<String>            SituationIDList;
+    private DatabaseReference       db,ComNotyRef;
+    private String                  Album;
+    private Button                  NewSituation;
+    private String                  ReturnName="Oops";
+    private String                  TimeEnd,TimeStart,GlobalID;
+    private Boolean                 LastPost;
     private DatabaseReference   databaseReferencePhotoList=null;
     private List<Blog>          BlogList;
     private List<String>        BlogListID;
     private GridImageAdapter gridImageAdapter;
-    private RecyclerView        recyclerViewPhotoList;
+    private RecyclerView        recyclerViewPhotoList,recyclerViewGrid;
     private String              PhotoThumb;
     private String BlogTitle,ImageThumb,BlogDescription,Location;
     private String TimeTaken,UserName,User_ID,WeatherDetails,PostedByProfilePic;
@@ -76,19 +75,36 @@ public class CloudAlbum extends AppCompatActivity {
     private Dialog createNewSituation;
     private TextView SituationName;
     private String   Name;
+    private Button SwipeControl;
+    private Boolean SwipeUp=false;
+    private String TestCommunityID=null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
+
+        SwipeControl=(Button)findViewById(R.id.SwipeControl);
         String AlbumName = getIntent().getStringExtra("AlbumName");
         CommunityID = getIntent().getStringExtra("GlobalID::");
         recyclerView = (RecyclerView)findViewById(R.id.SituationRecyclerView);
         SituationName=(TextView)findViewById(R.id.SituationNametxt);
+        recyclerViewPhotoList=(RecyclerView)findViewById(R.id.SituationPhotos);
+        recyclerViewGrid=(RecyclerView)findViewById(R.id.SituationPhotosGrid);
+        recyclerViewGrid.setVisibility(View.INVISIBLE);
+        recyclerViewPhotoList.setVisibility(View.INVISIBLE);
+        databaseReferencePhotoList = FirebaseDatabase.getInstance().getReference().child("Communities")
+                .child(CommunityID).child("BlogPosts");
+
         final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),1,LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(gridLayoutManager);
         Album = AlbumName;
         SituationList = new ArrayList<>();
         SituationIDList = new ArrayList<>();
+        TimeEnd="2100-8-6T13-22-45";
+        TimeStart="2000-8-6T13-22-45";
+        Name="Album Photos";
+        LastPost=false;
         db = FirebaseDatabase.getInstance().getReference().child("Users");
         SharedPreferences sPreferences = getSharedPreferences("ComIDPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = sPreferences.edit();
@@ -115,13 +131,13 @@ public class CloudAlbum extends AppCompatActivity {
         ///////////////////////////////////////////////////////////////////////////////////////////
 
         // new situation layout
-         createNewSituation = new Dialog(CloudAlbum.this);
+        createNewSituation = new Dialog(CloudAlbum.this);
         createNewSituation.setContentView(R.layout.create_new_situation_layout);
         createNewSituation.setCancelable(false);
         final EditText SituationName = createNewSituation.findViewById(R.id.situation_name);
         SituationName.requestFocus();
         Button Done ,Cancel;
-        Done = createNewSituation.findViewById(R.id.done_btn);
+        Done =   createNewSituation.findViewById(R.id.done_btn);
         Cancel = createNewSituation.findViewById(R.id.cancel_btn);
         Done.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,13 +241,36 @@ public class CloudAlbum extends AppCompatActivity {
           public void onStateChanged(@NonNull View bottomSheet, int newState) {
               switch (newState){
                   case BottomSheetBehavior.STATE_EXPANDED:
-                      SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,false);
+                      recyclerViewGrid.setVisibility(View.INVISIBLE);
+                      recyclerViewPhotoList.setVisibility(View.INVISIBLE);
+                      SwipeUp=true;
+
+                      SetRecyclerView(TimeStart,TimeEnd
+                              ,GlobalID,
+                              LastPost,Name,
+                              false,
+                              recyclerViewGrid);
+                      SwipeControl.setBackgroundResource(R.drawable.ic_down);
+
                       break;
                   case BottomSheetBehavior.STATE_DRAGGING:
-                      recyclerViewPhotoList.removeAllViews();
+                      try {
+                          recyclerViewPhotoList.setVisibility(View.INVISIBLE);
+                          recyclerViewGrid.setVisibility(View.INVISIBLE);
+                           }catch (NullPointerException e){
+                          e.printStackTrace();
+                      }
                       break;
-                  case BottomSheetBehavior.STATE_COLLAPSED:
-                      SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true);
+                   case BottomSheetBehavior.STATE_COLLAPSED:
+                       recyclerViewGrid.setVisibility(View.INVISIBLE);
+                       recyclerViewPhotoList.setVisibility(View.INVISIBLE);
+                       SwipeUp=false;
+                       SetRecyclerView(TimeStart,
+                              TimeEnd,GlobalID,
+                              LastPost,Name,true,
+                              recyclerViewPhotoList);
+                       SwipeControl.setBackgroundResource(R.drawable.ic_up);
+
                       break;
 
 
@@ -246,8 +285,28 @@ public class CloudAlbum extends AppCompatActivity {
 
 
 
+      SwipeControl.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View view) {
+              if(SwipeUp==false){
+                  bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+              }else {
+                  bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+              }
+          }
+      });
+
+
+
+
+     CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+     TestCommunityID=currentDatabase.GetLiveCommunityID();
+     currentDatabase.close();
+
 
     }
+
 
     private String GetUserName(String uid) {
 
@@ -275,19 +334,23 @@ public class CloudAlbum extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         Boolean Default = false;
         SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+        SharedPreferences sharedPreferences1=getSharedPreferences("Owner.pref",MODE_PRIVATE);
+
         if (sharedPreferences.getBoolean("UsingCommunity::", Default) == true) {
-            CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
-            if((currentDatabase.GetLiveCommunityID()).contentEquals(CommunityID)){
-                menu.add(0, 0, 0, "Add Participant")
-                        .setIcon(R.drawable.ic_add_participant)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                menu.add(0, 1, 0, "Add Situation")
-                        .setIcon(R.drawable.ic_add)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-            }
-
-
+        if((TestCommunityID).contentEquals(getIntent().getExtras().getString("GlobalID::"))){
+            menu.add(0, 0, 0, "Add Participant")
+                    .setIcon(R.drawable.ic_add_participant)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        if(sharedPreferences1.getBoolean("ThisOwner::",false) ==true) {
+            menu.add(0, 1, 0, "Add Situation")
+                    .setIcon(R.drawable.ic_add)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
+        }
+
+
+    }
+
 
         return true;
     }
@@ -312,6 +375,10 @@ public class CloudAlbum extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        SetRecyclerView(TimeStart,
+                TimeEnd,GlobalID,
+                LastPost,Name,true,
+                recyclerViewPhotoList);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -394,8 +461,7 @@ public class CloudAlbum extends AppCompatActivity {
                                      GlobalID =CommunityID;
                                      LastPost=false;
                                      Name=SituationList.get(position).getTitle();
-
-                                     SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true);
+                                     SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true,recyclerViewPhotoList);
 
                                 }catch (IndexOutOfBoundsException e){
 
@@ -404,7 +470,7 @@ public class CloudAlbum extends AppCompatActivity {
                                     GlobalID =CommunityID;
                                     LastPost=true;
                                     Name=SituationList.get(position).getTitle();
-                                    SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true);
+                                    SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true, recyclerViewPhotoList);
 
                                 }
                             }
@@ -424,27 +490,43 @@ public class CloudAlbum extends AppCompatActivity {
         });
     }
 
-    private void SetRecyclerView(String timeStart, String timeEnd, String globalID, Boolean lastPost,String situationName,Boolean Local) {
+    private void SetRecyclerView(String timeStart,
+                                 String timeEnd,
+                                 String globalID,
+                                 Boolean lastPost,
+                                 String situationName,
+                                 Boolean Local,
+                                 final RecyclerView recyclerView) {
         BlogList=new ArrayList<>();
         BlogListID=new ArrayList<>();
         TimeStart=timeStart;
         TimeEnd=timeEnd;
         CommunityID=globalID;
         LastPost=lastPost;
-        databaseReferencePhotoList = FirebaseDatabase.getInstance().getReference().child("Communities")
-                .child(CommunityID).child("BlogPosts");
-        recyclerViewPhotoList=(RecyclerView)findViewById(R.id.SituationPhotos);
+        recyclerView.removeAllViews();
         if(Local==true) {
+        // Card Snap Helper
+            recyclerView.setVisibility(View.VISIBLE);
             try {
-                recyclerViewPhotoList.setLayoutManager(new CardSliderLayoutManager(this));
-                new CardSnapHelper().attachToRecyclerView(recyclerViewPhotoList);
+                recyclerView.setLayoutManager(new CardSliderLayoutManager(this));
+                new CardSnapHelper().attachToRecyclerView(recyclerView);
 
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
+
+
+
         }else if(Local==false){
-            GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),2,LinearLayoutManager.VERTICAL,false);
-            recyclerViewPhotoList.setLayoutManager(gridLayoutManager);
+            recyclerView.setVisibility(View.VISIBLE);
+                try {
+            final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),
+                    2,LinearLayoutManager.VERTICAL,false);
+            recyclerView.setLayoutManager(gridLayoutManager);
+                }catch (IllegalStateException e){
+                e.printStackTrace();
+                }
+
 
         }
         SituationName.setText(situationName);
@@ -540,7 +622,7 @@ public class CloudAlbum extends AppCompatActivity {
                                     BlogList,
                                     BlogListID
                             );
-                            recyclerViewPhotoList.setAdapter(gridImageAdapter);
+                            recyclerView.setAdapter(gridImageAdapter);
 
 
                         }
@@ -556,7 +638,7 @@ public class CloudAlbum extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            recyclerViewPhotoList.addOnItemTouchListener(
+            recyclerView.addOnItemTouchListener(
                     new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {

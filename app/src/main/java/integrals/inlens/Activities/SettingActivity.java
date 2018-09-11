@@ -349,7 +349,6 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
         if(progressBar.isShown())
         {
             Toast.makeText(SettingActivity.this,"Wait till uploading is complete",Toast.LENGTH_LONG).show();

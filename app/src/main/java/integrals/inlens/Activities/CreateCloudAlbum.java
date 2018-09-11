@@ -84,6 +84,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private String                              AlbumTime;
     private DatePickerDialog.OnDateSetListener  dateSetListener;
     private Calendar calendar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -323,7 +324,12 @@ public class CreateCloudAlbum extends AppCompatActivity {
          SharedPreferences.Editor editor = sharedPreferences.edit();
          editor.putBoolean("UsingCommunity::", true);
          editor.commit();
-         jobScheduler.schedule(jobInfo);
+        SharedPreferences sharedPreferences1 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor1 = sharedPreferences1.edit();
+        editor1.putBoolean("ThisOwner::", true);
+        editor1.commit();
+
+        jobScheduler.schedule(jobInfo);
          startService(new Intent(CreateCloudAlbum.this, RecentImageService.class));
 
     }

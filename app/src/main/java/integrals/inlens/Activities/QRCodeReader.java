@@ -188,6 +188,11 @@ public class QRCodeReader extends AppCompatActivity
                 SharedPreferences.Editor editor=sharedPreferences.edit();
                 editor.putBoolean("UsingCommunity::",true);
                 editor.commit();
+                SharedPreferences sharedPreferences1 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
+                SharedPreferences.Editor editor1 = sharedPreferences1.edit();
+                editor1.putBoolean("ThisOwner::", false);
+                editor1.commit();
+
                 startService(new Intent(QRCodeReader.this, RecentImageService.class));
                 JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
                 builder.setPeriodic(15*60*1000);

@@ -11,11 +11,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="200dp"
-        android:paddingBottom="3dp"
-        android:paddingLeft="3dp"
-        android:paddingRight="3dp"
-        android:paddingTop="3dp">
+        android:layout_marginBottom="205dp">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/SituationRecyclerView"
@@ -32,29 +28,50 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="4dp"
-        android:background="@color/colorPrimary"
+        android:background="@android:color/white"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="200dp"
+        app:behavior_peekHeight="205dp"
         app:elevation="4dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
+        <Button
+            android:id="@+id/SwipeControl"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentRight="true"
+            android:layout_margin="5dp"
+            android:background="@drawable/ic_up"
+            android:elevation="0dp" />
+
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/SituationPhotos"
-            android:layout_width="match_parent"
+            android:id="@+id/SituationPhotosGrid"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
+            android:layout_alignParentStart="false"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
-            android:background="@android:color/white"></android.support.v7.widget.RecyclerView>
+            android:layout_marginTop="30dp"
+            android:background="@android:color/white"
+            android:visibility="visible"></android.support.v7.widget.RecyclerView>
 
         <TextView
             android:id="@+id/SituationNametxt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:background="@android:color/white"
             android:text="All Photos"
             android:textAlignment="center"
-            android:textColor="#FFFF" />
+            android:textColor="@color/colorPrimary" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/SituationPhotos"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="false"
+            android:layout_marginTop="30dp"
+            android:background="@android:color/white"
+            android:visibility="visible"></android.support.v7.widget.RecyclerView>
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

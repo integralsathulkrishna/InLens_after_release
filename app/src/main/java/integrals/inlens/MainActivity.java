@@ -149,6 +149,18 @@ public class MainActivity extends AppCompatActivity {
         linearLayoutManager.setReverseLayout(true);
         MemoryRecyclerView.setLayoutManager(linearLayoutManager);
 
+
+
+
+
+
+
+
+
+
+
+
+
     }
     // Added By Elson
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -472,6 +484,11 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences.Editor editor=sharedPreferences.edit();
                     editor.putBoolean("UsingCommunity::",true);
                     editor.commit();
+                    SharedPreferences sharedPreferences1 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
+                    SharedPreferences.Editor editor1 = sharedPreferences1.edit();
+                    editor1.putBoolean("ThisOwner::", false);
+                    editor1.commit();
+
                     startService(new Intent(MainActivity.this,RecentImageService.class));
                     JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
                     builder.setPeriodic(15*60*1000);
