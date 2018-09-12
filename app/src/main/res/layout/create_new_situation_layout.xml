@@ -21,7 +21,7 @@
             android:layout_centerHorizontal="true"
             android:text="New Situation"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
@@ -47,7 +47,7 @@
             android:hint="New situation name ?"
             android:textColor="@color/colorPrimaryDark"
 
-            />
+            android:textSize="15sp" />
 
         <Button
             android:id="@+id/done_btn"
@@ -56,10 +56,9 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@id/situation_name"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:background="#ffffff"
+            android:background="@android:color/transparent"
+            android:elevation="0dp"
             android:padding="2dp"
             android:text="Done"
             android:textColor="@color/colorPrimaryDark" />
@@ -74,7 +73,8 @@
             android:layout_marginEnd="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
-            android:background="#ffffff"
+            android:background="@android:color/transparent"
+            android:elevation="0dp"
             android:padding="2dp"
             android:text="Cancel"
             android:textColor="@color/colorPrimaryDark" />
