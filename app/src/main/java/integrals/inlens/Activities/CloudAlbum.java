@@ -273,6 +273,10 @@ public class CloudAlbum extends AppCompatActivity {
 
                       break;
 
+                  case BottomSheetBehavior.STATE_HIDDEN:
+                      bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                      break;
+
 
               }
           }
