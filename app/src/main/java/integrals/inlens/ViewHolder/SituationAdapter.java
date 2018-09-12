@@ -87,7 +87,6 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
                 String name = dataSnapshot.child("Name").getValue().toString();
                 holder.Name.setText(String.format("By : %s",name));
-
             }
 
             @Override
@@ -103,7 +102,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
         CharSequence time = DateUtils.getRelativeDateTimeString(context,t,DateUtils.SECOND_IN_MILLIS,DateUtils.WEEK_IN_MILLIS,DateUtils.FORMAT_ABBREV_ALL);
         holder.Time.setText(String.format("@ %s", time.toString()));
         holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
-
+        holder.SituationLogo.setText(String.format("%s", Situation.get(position).getTitle().charAt(0)));
         membersref.child(SIdList.get(position)).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -185,7 +184,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
     public class SituationViewHolder extends RecyclerView.ViewHolder {
 
-        TextView Name , Count , Time , Title;
+        TextView Name , Count , Time , Title,SituationLogo;
         Button Join,View;
 
         public SituationViewHolder(View itemView) {
@@ -196,7 +195,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
             Title = itemView.findViewById( R.id.situationtitle);
             Join = itemView.findViewById(R.id.situajoin);
             View = itemView.findViewById(R.id.situaview);
-
+            SituationLogo=itemView.findViewById(R.id.SituationLogo);
         }
     }
 }
