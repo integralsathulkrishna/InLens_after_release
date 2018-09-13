@@ -81,7 +81,8 @@ public class RegisterUser extends AppCompatActivity {
             VerifiedButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //If email verified Proceed.
+
+                    FirebaseAuth.getInstance().getCurrentUser().reload();
                     checkEmailVerification();
                 }
             });
@@ -109,12 +110,6 @@ public class RegisterUser extends AppCompatActivity {
 
                         HashMap<String,String> usermap = new HashMap<>();
                         usermap.put("Name",display_name);
-                        usermap.put("Email",email);
-                        usermap.put("bio","New to inLense");
-                        usermap.put("Profile_picture","https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/user_icon.jpg?alt=media&token=a8eeecc6-535b-4652-b42f-a9ff90b11d5b");
-                        usermap.put("thumb_image","default");
-                        usermap.put("device_token", device_token);
-
 
                         mDatabase.setValue(usermap).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -161,11 +156,26 @@ public class RegisterUser extends AppCompatActivity {
                 }
             });
         }
-      }
-        private void checkEmailVerification(){
-        startActivity(new Intent(RegisterUser.this,SettingActivity.class));
-        }
-
 
     }
+
+        private void checkEmailVerification(){
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user.isEmailVerified())
+        {
+            startActivity(new Intent(RegisterUser.this,SettingActivity.class));
+            finish();
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(),"E-mail verification send. Please check your mail and click the link to verify.",Toast.LENGTH_LONG).show();
+
+        }
+
+    }
+
+
+
+}
 

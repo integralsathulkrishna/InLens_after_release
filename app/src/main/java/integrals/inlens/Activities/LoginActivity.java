@@ -56,20 +56,6 @@ public class LoginActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_login);
 
-        InAuthentication=FirebaseAuth.getInstance();
-        firebaseUser=InAuthentication.getCurrentUser();
-
-        try {
-            if(firebaseUser!=null){
-                this.finish();
-            }
-
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        }
-
-        setContentView(R.layout.activity_login);
-
         Ask.on(this)
                 .id(INTID) // in case you are invoking multiple time Ask from same activity or fragment
                 .forPermissions(
@@ -83,6 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                         ,Manifest.permission.SYSTEM_ALERT_WINDOW
                          )
                 .go();
+
         EmailField=(EditText)findViewById(R.id.EmailEditText);
         PassWordField=(EditText)findViewById(R.id.PasswordField);
         LoginButton=(Button)findViewById(R.id.LogInButton);
@@ -91,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         InAuth=FirebaseAuth.getInstance();
         InDatabaseUser= FirebaseDatabase.getInstance().getReference().child("Users");
         InDatabaseUser.keepSynced(true);
+
         InProgressDialogue=new ProgressDialog(this);
         getSupportActionBar().setElevation(0);
 
@@ -145,42 +133,31 @@ public class LoginActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if(task.isSuccessful()){
                         InProgressDialogue.dismiss();
-                        CheckUserExist();
-                    }else{
+                        startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                        finish();
+                    }
+                    else{
                         InProgressDialogue.dismiss();
                         Toast.makeText(LoginActivity.this,"Email or password authentication failed",Toast.LENGTH_LONG).show();
                     }
                 }
             });
         }
+        else
+        {
+            if(TextUtils.isEmpty(Email))
+            {
+                Toast.makeText(LoginActivity.this,"Please enter your email.",Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(LoginActivity.this,"Please enter your password.",Toast.LENGTH_LONG).show();
+
+            }
+        }
 
     }
 
-    private void CheckUserExist() {
-        final String UserId=InAuth.getCurrentUser().getUid();
-        InDatabaseUser.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild(UserId)){
-                    SharedPreferences sharedPreferencesUser=getSharedPreferences("Current_User.pref", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editorUser=sharedPreferencesUser.edit();
-                    editorUser.putString("UID",UserId);
-                    editorUser.commit();
-                    finish();
-                    startActivity(new Intent(LoginActivity.this,MainActivity.class));
-                }
-                else
-                {
-                    Toast.makeText(LoginActivity.this,"Please create new account",Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
 
 
 }
