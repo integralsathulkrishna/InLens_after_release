@@ -101,11 +101,6 @@ public class MainActivity extends AppCompatActivity {
            }
 
            
-        SituationNotyService situationNotyService;
-        situationNotyService = new SituationNotyService(getApplicationContext());
-        if (!isMyServiceRunning(situationNotyService.getClass()) && firebaseUser!=null) {
-            startService(new Intent(getApplicationContext(), SituationNotyService.class));
-        }
 
 
         //User Authentication
