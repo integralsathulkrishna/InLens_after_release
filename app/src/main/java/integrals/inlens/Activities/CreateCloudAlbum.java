@@ -163,11 +163,11 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
 
 
-        DatabaseTimeTaken = calender.get(Calendar.HOUR_OF_DAY) + " : "
-                + calender.get(Calendar.MINUTE) + " : "
-                + "        " + calender.get(Calendar.DAY_OF_MONTH) + "/"
-                + calender.get(Calendar.MONTH) + 1 + "/"
-                + calender.get(Calendar.YEAR);
+        DatabaseTimeTaken = calender.get(Calendar.HOUR_OF_DAY)+":"
+                + calender.get(Calendar.MINUTE)+"."
+                +"         "+calender.get(Calendar.DAY_OF_MONTH) + "/"
+                + calender.get(Calendar.MONTH) + "/"+calender.get(Calendar.YEAR)
+                ;
         DisplayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -191,7 +191,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                     CropImage.activity()
                             .setGuidelines(CropImageView.Guidelines.ON)
                             .setCropShape(CropImageView.CropShape.RECTANGLE)
-                            .setAspectRatio((int) 36,25)
+                            .setAspectRatio((int) 37,27)
                             .setFixAspectRatio(true)
                             .start(CreateCloudAlbum.this);
                                        }

@@ -53,7 +53,12 @@ import integrals.inlens.R;
         TextView textView=(TextView)view.findViewById(R.id.AlbumTitle);
         textView.setText(Text);
     }
-     public void SetProfilePic(Context context,String ImageUri){
+    public void SetAlbumTime(String Text){
+        TextView textView=(TextView)view.findViewById(R.id.EventOccurTime);
+        textView.setText(Text);
+    }
+
+    public void SetProfilePic(Context context,String ImageUri){
         ImageView imageView=(ImageView)view.findViewById(R.id.CreatedByProfilePic);
          RequestOptions requestOptions=new RequestOptions()
                  .centerCrop()

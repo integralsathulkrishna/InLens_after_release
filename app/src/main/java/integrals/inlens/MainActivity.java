@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
                 protected void populateViewHolder(final AlbumViewHolder viewHolder, final AlbumModel model, final int position) {
                     viewHolder.SetAlbumCover(getApplicationContext(),model.getAlbumCoverImage());
                     viewHolder.SetTitle(model.getAlbumTitle());
+                    viewHolder.SetAlbumTime("Event occured on  "+ model.getTime());
                     viewHolder.SetProfilePic(getApplicationContext(),model.getPostedByProfilePic());
                     viewHolder.SetAlbumDescription(model.getAlbumDescription());
                             try {
