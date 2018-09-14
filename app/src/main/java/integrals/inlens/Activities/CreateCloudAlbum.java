@@ -191,7 +191,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                     CropImage.activity()
                             .setGuidelines(CropImageView.Guidelines.ON)
                             .setCropShape(CropImageView.CropShape.RECTANGLE)
-                            .setAspectRatio((int) 36,24)
+                            .setAspectRatio((int) 36,25)
                             .setFixAspectRatio(true)
                             .start(CreateCloudAlbum.this);
                                        }
