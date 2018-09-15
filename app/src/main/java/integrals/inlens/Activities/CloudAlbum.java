@@ -14,6 +14,8 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -78,12 +80,11 @@ public class CloudAlbum extends AppCompatActivity {
     private Button SwipeControl;
     private Boolean SwipeUp=false;
     private String TestCommunityID=null;
-
+    private BottomSheetBehavior bottomSheetBehavior;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
-
         SwipeControl=(Button)findViewById(R.id.SwipeControl);
         String AlbumName = getIntent().getStringExtra("AlbumName");
         CommunityID = getIntent().getStringExtra("GlobalID::");
@@ -235,7 +236,7 @@ public class CloudAlbum extends AppCompatActivity {
         });
 
       View bottomSheet=findViewById(R.id.design_bottom_sheet);
-      final BottomSheetBehavior bottomSheetBehavior=BottomSheetBehavior.from(bottomSheet);
+      bottomSheetBehavior=BottomSheetBehavior.from(bottomSheet);
       bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
           @Override
           public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -244,7 +245,6 @@ public class CloudAlbum extends AppCompatActivity {
                       recyclerViewGrid.setVisibility(View.INVISIBLE);
                       recyclerViewPhotoList.setVisibility(View.INVISIBLE);
                       SwipeUp=true;
-
                       SetRecyclerView(TimeStart,TimeEnd
                               ,GlobalID,
                               LastPost,Name,
@@ -255,6 +255,8 @@ public class CloudAlbum extends AppCompatActivity {
                       break;
                   case BottomSheetBehavior.STATE_DRAGGING:
                       try {
+                          recyclerViewPhotoList.removeAllViews();
+                          recyclerViewGrid.removeAllViews();
                           recyclerViewPhotoList.setVisibility(View.INVISIBLE);
                           recyclerViewGrid.setVisibility(View.INVISIBLE);
                            }catch (NullPointerException e){
@@ -307,6 +309,12 @@ public class CloudAlbum extends AppCompatActivity {
      CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
      TestCommunityID=currentDatabase.GetLiveCommunityID();
      currentDatabase.close();
+
+
+        SetRecyclerView(TimeStart,
+                TimeEnd,GlobalID,
+                LastPost,Name,true,
+                recyclerViewPhotoList);
 
 
     }
@@ -379,16 +387,11 @@ public class CloudAlbum extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        SetRecyclerView(TimeStart,
-                TimeEnd,GlobalID,
-                LastPost,Name,true,
-                recyclerViewPhotoList);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                recyclerView.removeAllViews();
                 SituationIDList.clear();
                 SituationList.clear();
                 for(DataSnapshot snapshot : dataSnapshot.getChildren())
@@ -465,7 +468,9 @@ public class CloudAlbum extends AppCompatActivity {
                                      GlobalID =CommunityID;
                                      LastPost=false;
                                      Name=SituationList.get(position).getTitle();
+                                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                                      SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true,recyclerViewPhotoList);
+
 
                                 }catch (IndexOutOfBoundsException e){
 
@@ -474,6 +479,7 @@ public class CloudAlbum extends AppCompatActivity {
                                     GlobalID =CommunityID;
                                     LastPost=true;
                                     Name=SituationList.get(position).getTitle();
+                                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                                     SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true, recyclerViewPhotoList);
 
                                 }
@@ -492,6 +498,9 @@ public class CloudAlbum extends AppCompatActivity {
 
             }
         });
+
+
+
     }
 
     private void SetRecyclerView(String timeStart,
@@ -509,7 +518,6 @@ public class CloudAlbum extends AppCompatActivity {
         LastPost=lastPost;
         recyclerView.removeAllViews();
         if(Local==true) {
-        // Card Snap Helper
             recyclerView.setVisibility(View.VISIBLE);
             try {
                 recyclerView.setLayoutManager(new CardSliderLayoutManager(this));
@@ -665,7 +673,8 @@ public class CloudAlbum extends AppCompatActivity {
 
 
 
-        }
+
+    }
 
 
     private boolean CheckIntervel(String timeTaken, String timeStart, String timeEnd) {

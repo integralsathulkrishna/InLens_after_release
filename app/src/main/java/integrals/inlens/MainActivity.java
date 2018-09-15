@@ -18,6 +18,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.Toast;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,7 +42,6 @@ import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.Models.AlbumModel;
 import integrals.inlens.Services.RecentImageService;
-import integrals.inlens.Services.SituationNotyService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 
 
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int JOB_ID=7907;
     private JobScheduler jobScheduler;
     private JobInfo jobInfo;
-
+    private LayoutAnimationController animation;
     //
     //
     // Import from Elson.............................................................................
@@ -84,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButton=(FloatingActionButton)findViewById(R.id.CreateCloudAlbumFloat);
 
 
-
         ComponentName componentName= new ComponentName(this, InLensJobScheduler.class);
         JobInfo.Builder builder= new JobInfo.Builder(JOB_ID,componentName);
         builder.setPeriodic(15*60*1000);
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(getApplicationContext(), RecentImageService.class));
            }
 
-           
+
 
 
         //User Authentication
@@ -143,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
         linearLayoutManager.setStackFromEnd(true);
         linearLayoutManager.setReverseLayout(true);
         MemoryRecyclerView.setLayoutManager(linearLayoutManager);
-
 
 
 
@@ -278,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
 
             MemoryRecyclerView.setAdapter(firebaseRecyclerAdapter);
 
+
         }catch (NullPointerException e){
             e.printStackTrace();
         }catch (DatabaseException e){
@@ -289,6 +289,9 @@ public class MainActivity extends AppCompatActivity {
         }catch (NullPointerException e){
             e.printStackTrace();
         }
+
+
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

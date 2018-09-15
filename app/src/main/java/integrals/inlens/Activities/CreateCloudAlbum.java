@@ -324,10 +324,10 @@ public class CreateCloudAlbum extends AppCompatActivity {
          SharedPreferences.Editor editor = sharedPreferences.edit();
          editor.putBoolean("UsingCommunity::", true);
          editor.commit();
-        SharedPreferences sharedPreferences1 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
-        SharedPreferences.Editor editor1 = sharedPreferences1.edit();
-        editor1.putBoolean("ThisOwner::", true);
-        editor1.commit();
+         SharedPreferences sharedPreferences1 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
+         SharedPreferences.Editor editor1 = sharedPreferences1.edit();
+         editor1.putBoolean("ThisOwner::", true);
+         editor1.commit();
 
         jobScheduler.schedule(jobInfo);
          startService(new Intent(CreateCloudAlbum.this, RecentImageService.class));
