@@ -164,7 +164,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
 
         DatabaseTimeTaken = calender.get(Calendar.HOUR_OF_DAY)+":"
-                + calender.get(Calendar.MINUTE)+"."
+                + calender.get(Calendar.MINUTE)+""
                 +"         "+calender.get(Calendar.DAY_OF_MONTH) + "/"
                 + calender.get(Calendar.MONTH) + "/"+calender.get(Calendar.YEAR)
                 ;

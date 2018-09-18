@@ -462,26 +462,26 @@ public class CloudAlbum extends AppCompatActivity {
                             public void onItemClick(View view, int position) {
 
                                 try {
-
-                                     TimeStart=SituationList.get(position).getSituationTime();
-                                     TimeEnd  =SituationList.get(position+1).getSituationTime();
-                                     GlobalID =CommunityID;
-                                     LastPost=false;
-                                     Name=SituationList.get(position).getTitle();
-                                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                     SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true,recyclerViewPhotoList);
-
+                                     if(bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED) {
+                                         TimeStart = SituationList.get(position).getSituationTime();
+                                         TimeEnd = SituationList.get(position + 1).getSituationTime();
+                                         GlobalID = CommunityID;
+                                         LastPost = false;
+                                         Name = SituationList.get(position).getTitle();
+                                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                                         SetRecyclerView(TimeStart, TimeEnd, GlobalID, LastPost, Name, true, recyclerViewPhotoList);
+                                     }
 
                                 }catch (IndexOutOfBoundsException e){
-
-                                    TimeStart=SituationList.get(position).getSituationTime();
-                                    TimeEnd  =SituationList.get(position).getSituationTime();
-                                    GlobalID =CommunityID;
-                                    LastPost=true;
-                                    Name=SituationList.get(position).getTitle();
-                                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                    SetRecyclerView(TimeStart,TimeEnd,GlobalID,LastPost,Name,true, recyclerViewPhotoList);
-
+                                    if(bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED) {
+                                        TimeStart = SituationList.get(position).getSituationTime();
+                                        TimeEnd = SituationList.get(position).getSituationTime();
+                                        GlobalID = CommunityID;
+                                        LastPost = true;
+                                        Name = SituationList.get(position).getTitle();
+                                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                                        SetRecyclerView(TimeStart, TimeEnd, GlobalID, LastPost, Name, true, recyclerViewPhotoList);
+                                    }
                                 }
                             }
 
@@ -516,38 +516,14 @@ public class CloudAlbum extends AppCompatActivity {
         TimeEnd=timeEnd;
         CommunityID=globalID;
         LastPost=lastPost;
-        recyclerView.removeAllViews();
-        if(Local==true) {
-            recyclerView.setVisibility(View.VISIBLE);
-            try {
-                recyclerView.setLayoutManager(new CardSliderLayoutManager(this));
-                new CardSnapHelper().attachToRecyclerView(recyclerView);
 
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            }
-
-
-
-        }else if(Local==false){
-            recyclerView.setVisibility(View.VISIBLE);
-                try {
-            final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),
-                    2,LinearLayoutManager.VERTICAL,false);
-            recyclerView.setLayoutManager(gridLayoutManager);
-                }catch (IllegalStateException e){
-                e.printStackTrace();
-                }
-
-
-        }
         SituationName.setText(situationName);
+
         try {
 
                 databaseReferencePhotoList.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        recyclerView.removeAllViews();
                         BlogList.clear();
                         BlogListID.clear();
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -672,7 +648,30 @@ public class CloudAlbum extends AppCompatActivity {
 
 
 
+        if(Local==true) {
+            recyclerView.setVisibility(View.VISIBLE);
+            try {
+                recyclerView.setLayoutManager(new CardSliderLayoutManager(this));
+                new CardSnapHelper().attachToRecyclerView(recyclerView);
 
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+
+
+
+        }else if(Local==false){
+            recyclerView.setVisibility(View.VISIBLE);
+            try {
+                final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),
+                        2,LinearLayoutManager.VERTICAL,false);
+                recyclerView.setLayoutManager(gridLayoutManager);
+            }catch (IllegalStateException e){
+                e.printStackTrace();
+            }
+
+
+        }
 
     }
 

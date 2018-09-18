@@ -47,7 +47,7 @@
         <RelativeLayout
             android:id="@+id/ParticipantLayout"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:layout_alignParentBottom="false"
             android:layout_below="@+id/CloudAlbumCover"
             android:layout_gravity="bottom"

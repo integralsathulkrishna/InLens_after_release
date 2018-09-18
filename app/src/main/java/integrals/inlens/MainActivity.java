@@ -303,6 +303,7 @@ public class MainActivity extends AppCompatActivity {
         .setIcon(R.drawable.ic_recent_images_option)
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         menu.add(0,3,0,"Profile picture");
+        menu.add(0,4,0,"Uploading task");
         return true;
     }
 
