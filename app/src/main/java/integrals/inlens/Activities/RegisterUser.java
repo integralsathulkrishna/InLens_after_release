@@ -107,10 +107,14 @@ public class RegisterUser extends AppCompatActivity {
                         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
 
                         String device_token = FirebaseInstanceId.getInstance().getToken();
-
                         HashMap<String,String> usermap = new HashMap<>();
                         usermap.put("Name",display_name);
-
+                        usermap.put("Name",display_name);
+                        usermap.put("Email",email);
+                        usermap.put("bio","New to inLense");
+                        usermap.put("Profile_picture","default");
+                        usermap.put("thumb_image","default");
+                        usermap.put("device_token", "");
                         mDatabase.setValue(usermap).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
