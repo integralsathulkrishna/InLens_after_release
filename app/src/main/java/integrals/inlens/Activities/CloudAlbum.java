@@ -92,7 +92,9 @@ public class CloudAlbum extends AppCompatActivity {
         SituationName=(TextView)findViewById(R.id.SituationNametxt);
         recyclerViewPhotoList=(RecyclerView)findViewById(R.id.SituationPhotos);
         recyclerViewGrid=(RecyclerView)findViewById(R.id.SituationPhotosGrid);
+        recyclerViewGrid.setEnabled(false);
         recyclerViewGrid.setVisibility(View.INVISIBLE);
+        recyclerViewPhotoList.setEnabled(false);
         recyclerViewPhotoList.setVisibility(View.INVISIBLE);
         databaseReferencePhotoList = FirebaseDatabase.getInstance().getReference().child("Communities")
                 .child(CommunityID).child("BlogPosts");
@@ -242,7 +244,9 @@ public class CloudAlbum extends AppCompatActivity {
           public void onStateChanged(@NonNull View bottomSheet, int newState) {
               switch (newState){
                   case BottomSheetBehavior.STATE_EXPANDED:
+                      recyclerViewGrid.setEnabled(false);
                       recyclerViewGrid.setVisibility(View.INVISIBLE);
+                      recyclerViewPhotoList.setEnabled(false);
                       recyclerViewPhotoList.setVisibility(View.INVISIBLE);
                       SwipeUp=true;
                       SetRecyclerView(TimeStart,TimeEnd
@@ -255,16 +259,15 @@ public class CloudAlbum extends AppCompatActivity {
                       break;
                   case BottomSheetBehavior.STATE_DRAGGING:
                       try {
-                          recyclerViewPhotoList.removeAllViews();
-                          recyclerViewGrid.removeAllViews();
-                          recyclerViewPhotoList.setVisibility(View.INVISIBLE);
-                          recyclerViewGrid.setVisibility(View.INVISIBLE);
-                           }catch (NullPointerException e){
+
+                      }catch (NullPointerException e){
                           e.printStackTrace();
                       }
                       break;
                    case BottomSheetBehavior.STATE_COLLAPSED:
+                       recyclerViewGrid.setEnabled(false);
                        recyclerViewGrid.setVisibility(View.INVISIBLE);
+                       recyclerViewPhotoList.setEnabled(false);
                        recyclerViewPhotoList.setVisibility(View.INVISIBLE);
                        SwipeUp=false;
                        SetRecyclerView(TimeStart,
@@ -614,6 +617,8 @@ public class CloudAlbum extends AppCompatActivity {
 
 
                         }
+
+
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
@@ -649,7 +654,9 @@ public class CloudAlbum extends AppCompatActivity {
 
 
         if(Local==true) {
+            recyclerView.setEnabled(true);
             recyclerView.setVisibility(View.VISIBLE);
+
             try {
                 recyclerView.setLayoutManager(new CardSliderLayoutManager(this));
                 new CardSnapHelper().attachToRecyclerView(recyclerView);
@@ -661,6 +668,7 @@ public class CloudAlbum extends AppCompatActivity {
 
 
         }else if(Local==false){
+            recyclerView.setEnabled(true);
             recyclerView.setVisibility(View.VISIBLE);
             try {
                 final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),
