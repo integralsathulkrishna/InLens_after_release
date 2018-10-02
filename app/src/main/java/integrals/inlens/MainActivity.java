@@ -377,21 +377,27 @@ public class MainActivity extends AppCompatActivity {
                                 Done.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        String Data=Link.getText().toString();
-                                        String str = Data.substring(18, 23);
-                                        if (str.contentEquals("joins")) {
-                                            Toast.makeText(getApplicationContext(), "Join " + Data.substring(24), Toast.LENGTH_SHORT).show();
-                                            SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                                            if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
-                                                Toast.makeText(getApplicationContext(), "Sorry.You can't join to a new Cloud-Album, " +
-                                                        "before you quit the current one.", Toast.LENGTH_SHORT)
-                                                        .show();
-                                            } else {
-                                                AddToCloud(Data.substring(24),progressBar,PasteCloudAlbumLink);
-                                            }
-                                        }else{
+                                        try {
+                                                String Data=Link.getText().toString();
+                                                String str = Data.substring(18, 23);
+                                                if (str.contentEquals("joins")) {
+                                                    Toast.makeText(getApplicationContext(), "Join " + Data.substring(24), Toast.LENGTH_SHORT).show();
+                                                    SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                                    if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
+                                                        Toast.makeText(getApplicationContext(), "Sorry.You can't join to a new Cloud-Album, " +
+                                                                "before you quit the current one.", Toast.LENGTH_SHORT)
+                                                                .show();
+                                                    } else {
+                                                        AddToCloud(Data.substring(24),progressBar,PasteCloudAlbumLink);
+                                                    }
+                                                }
+                                                else{
+                                                    Toast.makeText(getApplicationContext(),"Invalid Link",Toast.LENGTH_LONG).show();
+                                                }
 
-                                             Toast.makeText(getApplicationContext(),"Invalid Link",Toast.LENGTH_LONG).show();
+                                        }catch (StringIndexOutOfBoundsException e){
+                                            Toast.makeText(getApplicationContext(),"Invalid Link",Toast.LENGTH_LONG).show();
+                                            e.printStackTrace();
                                         }
                                     }
                                 });
