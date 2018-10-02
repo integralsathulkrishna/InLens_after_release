@@ -363,7 +363,8 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(),"Sorry,You can't participate in a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
                              }else
 
-                            {   PasteCloudAlbumLink = new Dialog(MainActivity.this);
+                            {   // To paste invite link
+                                PasteCloudAlbumLink = new Dialog(MainActivity.this);
                                 PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
                                 PasteCloudAlbumLink.setCancelable(true);
                                 final EditText Link = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_edittext);
