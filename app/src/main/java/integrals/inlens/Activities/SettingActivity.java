@@ -183,7 +183,7 @@ public class SettingActivity extends AppCompatActivity {
 
             imageButton.setEnabled(false);
             mText.setVisibility(View.GONE);
-             getSupportActionBar().setTitle("Send Invite to");
+            getSupportActionBar().setTitle("Send Invite to");
 
             db.child("sent").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                     .addValueEventListener(new ValueEventListener() {

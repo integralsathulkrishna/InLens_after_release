@@ -2,6 +2,7 @@ package integrals.inlens;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
@@ -10,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,7 +22,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -51,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private String CommunityPostKey;
     private ComponentName componentName;
     private String CurrentUser;
-    private FloatingActionButton floatingActionButton;
     private FirebaseAuth InAuthentication;
     private FirebaseUser firebaseUser;
     private DatabaseReference participantDatabaseReference,
@@ -62,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private JobScheduler jobScheduler;
     private JobInfo jobInfo;
     private LayoutAnimationController animation;
+    private Dialog PasteCloudAlbumLink;
     //
     //
     // Import from Elson.............................................................................
@@ -82,9 +89,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().setElevation(25);
-        floatingActionButton=(FloatingActionButton)findViewById(R.id.CreateCloudAlbumFloat);
-
-
         ComponentName componentName= new ComponentName(this, InLensJobScheduler.class);
         JobInfo.Builder builder= new JobInfo.Builder(JOB_ID,componentName);
         builder.setPeriodic(15*60*1000);
@@ -119,20 +123,6 @@ public class MainActivity extends AppCompatActivity {
         catch (NullPointerException e){
             e.printStackTrace();
         }
-
-        // Float Button
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                if (sharedPreferences.getBoolean("UsingCommunity::",false) == true) {
-                    Toast.makeText(getApplicationContext(),"Sorry.You can't create a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
-                }
-                else{
-                    startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
-                    }
-            }
-        });
 
         //Participant Database Reference
         participantDatabaseReference=FirebaseDatabase.getInstance().getReference();
@@ -296,73 +286,145 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 0, 0, "Add Participant")
-                .setIcon(R.drawable.ic_read_qr)
+                .setIcon(R.drawable.menu_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(0,1,0,"Quit Cloud-Album");
-        menu.add(0,2,0,"Upload Activity")
-        .setIcon(R.drawable.ic_recent_images_option)
-        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(0,3,0,"Profile picture");
-        menu.add(0,4,0,"Uploading task");
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId()==0){
-            SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-            if (sharedPreferences.getBoolean("UsingCommunity::",false) == true) {
-                Toast.makeText(getApplicationContext(),"Sorry,You can't scan a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
-            }else
+            new BottomSheet.Builder(this).title(" Options").sheet(R.menu.main_menu).listener(new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case R.id.new_album:
+                            SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                            if (sharedPreferences.getBoolean("UsingCommunity::",false) == true) {
+                                Toast.makeText(getApplicationContext(),"Sorry.You can't create a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
+                            }
+                            else{
+                                startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
+                            }
 
-            {
-                startActivity(new Intent(MainActivity.this, QRCodeReader.class));
 
-            }
-        }
-        if(item.getItemId()==1){
+                            break;
+                        case R.id.scan_qr:
+                            SharedPreferences sharedPreferences1 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                            if (sharedPreferences1.getBoolean("UsingCommunity::",false) == true) {
+                                Toast.makeText(getApplicationContext(),"Sorry,You can't scan a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
+                            }else
 
-                AlertDialog.Builder builder =new AlertDialog.Builder(MainActivity.this);
-                builder.setCancelable(true);
-                builder.setTitle("Quit Cloud-Album");
-                builder.setMessage("Are you sure you want to quit the current community");
+                            {
+                                startActivity(new Intent(MainActivity.this, QRCodeReader.class));
 
-                builder.setPositiveButton(" OK ", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
-                        currentDatabase.DeleteDatabase();
-                        RecentImageDatabase recentImageDatabase=new RecentImageDatabase(getApplicationContext(),"",null,1);
-                        recentImageDatabase.DeleteDatabase();
-                        UploadDatabaseHelper uploadDatabaseHelper= new UploadDatabaseHelper(getApplicationContext(),"",null,1);
-                        uploadDatabaseHelper.DeleteDatabase();
-                        SharedPreferences sharedPreferencesC=getSharedPreferences("InCommunity.pref",MODE_PRIVATE);
-                        SharedPreferences.Editor editorC=sharedPreferencesC.edit();
-                        editorC.putBoolean("UsingCommunity::",false);
-                        editorC.commit();
-                        stopService(new Intent(MainActivity.this, RecentImageService.class));
-                        JobScheduler jobScheduler=(JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                        jobScheduler.cancel(7907);
-                        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-                        notificationManager.cancelAll();
-                        Toast.makeText(getApplicationContext(),"Successfully left from the current community",Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+                        case R.id.upload_activity:
+                            startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
+                        break;
+                        case R.id.profile_pic:
+                            startActivity(new Intent(MainActivity.this, SettingActivity.class));
+                            break;
+                        case R.id.quit_cloud_album:
+                            AlertDialog.Builder builder =new AlertDialog.Builder(MainActivity.this);
+                            builder.setCancelable(true);
+                            builder.setTitle("Quit Cloud-Album");
+                            builder.setMessage("Are you sure you want to quit the current community");
+
+                            builder.setPositiveButton(" OK ", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
+                                    currentDatabase.DeleteDatabase();
+                                    RecentImageDatabase recentImageDatabase=new RecentImageDatabase(getApplicationContext(),"",null,1);
+                                    recentImageDatabase.DeleteDatabase();
+                                    UploadDatabaseHelper uploadDatabaseHelper= new UploadDatabaseHelper(getApplicationContext(),"",null,1);
+                                    uploadDatabaseHelper.DeleteDatabase();
+                                    SharedPreferences sharedPreferencesC=getSharedPreferences("InCommunity.pref",MODE_PRIVATE);
+                                    SharedPreferences.Editor editorC=sharedPreferencesC.edit();
+                                    editorC.putBoolean("UsingCommunity::",false);
+                                    editorC.commit();
+                                    stopService(new Intent(MainActivity.this, RecentImageService.class));
+                                    JobScheduler jobScheduler=(JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+                                    jobScheduler.cancel(7907);
+                                    NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+                                    notificationManager.cancelAll();
+                                    Toast.makeText(getApplicationContext(),"Successfully left from the current community",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            builder.create().show();
+                            break;
+
+
+                        case R.id.paste_album_link:
+                            SharedPreferences sharedPreferences2 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                            if (sharedPreferences2.getBoolean("UsingCommunity::",false) == true) {
+                                Toast.makeText(getApplicationContext(),"Sorry,You can't participate in a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
+                             }else
+
+                            {   PasteCloudAlbumLink = new Dialog(MainActivity.this);
+                                PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
+                                PasteCloudAlbumLink.setCancelable(true);
+                                final EditText Link = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_edittext);
+                                Link.requestFocus();
+                                Button Done ,Cancel;
+                                final ProgressBar progressBar;
+                                Done =   PasteCloudAlbumLink.findViewById(R.id.done_btn_paste_link_layout);
+                                Cancel = PasteCloudAlbumLink.findViewById(R.id.cancel_btn_paste_link_layout);
+                                progressBar=PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_progress_bar);
+                                Done.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        String Data=Link.getText().toString();
+                                        String str = Data.substring(18, 23);
+                                        if (str.contentEquals("joins")) {
+                                            Toast.makeText(getApplicationContext(), "Join " + Data.substring(24), Toast.LENGTH_SHORT).show();
+                                            SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                            if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
+                                                Toast.makeText(getApplicationContext(), "Sorry.You can't join to a new Cloud-Album, " +
+                                                        "before you quit the current one.", Toast.LENGTH_SHORT)
+                                                        .show();
+                                            } else {
+                                                AddToCloud(Data.substring(24),progressBar,PasteCloudAlbumLink);
+                                            }
+                                        }else{
+
+                                             Toast.makeText(getApplicationContext(),"Invalid Link",Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
+                                Cancel.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        PasteCloudAlbumLink.hide();
+                                    }
+                                });
+                                PasteCloudAlbumLink.show();
+                                break;
+                            }
+
+
+
+
+
+
+
                     }
-                });
-                builder.create().show();
-                return true;
-
-           }
-        else if(item.getItemId()==2){
-            startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
+                }
+            }).show();
         }
-        else if(item.getItemId()==3){
-            startActivity(new Intent(MainActivity.this, SettingActivity.class));
-            }
+
+
             return true;
     }
 
 
 
+
+
+
+    /*
     @Override
     protected void onResume() {
      super.onResume();
@@ -385,9 +447,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
-
-    private void AddToCloud(String substring) {
-
+*/
+    private void AddToCloud(String substring,ProgressBar progressBar,Dialog dialog) {
+             progressBar.setVisibility(View.VISIBLE);
              final DatabaseReference CommunityPhotographer;
              FirebaseAuth CommunityPhotographerAuthentication;
              final String UserID;
@@ -490,27 +552,15 @@ public class MainActivity extends AppCompatActivity {
                     editor1.commit();
 
                     startService(new Intent(MainActivity.this,RecentImageService.class));
-                    JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
-                    builder.setPeriodic(15*60*1000);
-                    builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-                    builder.setPersisted(true);
-                    jobInfo = builder.build();
-                    jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
                     jobScheduler.schedule(jobInfo);
-
 
 
                 }
 
             });
             builder.create().show();
-
-
-
-
-
-
-
+            progressBar.setVisibility(View.INVISIBLE);
+            dialog.hide();
     }
 
 }
