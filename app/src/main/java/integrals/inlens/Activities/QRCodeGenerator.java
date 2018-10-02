@@ -66,7 +66,9 @@ public class QRCodeGenerator extends AppCompatActivity {
                 final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                 SharingIntent.setType("text/plain");
                 String CommunityPostKey=CommunityID;
-                SharingIntent.putExtra(Intent.EXTRA_TEXT,"https://inlens.in/joins/"+CommunityPostKey);
+
+                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
+                        "\tLong press Link to copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
                 startActivity(SharingIntent);
 
             }
