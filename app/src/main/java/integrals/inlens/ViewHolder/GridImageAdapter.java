@@ -126,6 +126,7 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //
                 Intent i = new Intent(context ,PhotoView.class);
                 i.putParcelableArrayListExtra("data", (ArrayList<? extends Parcelable>) BlogList);
                 i.putExtra("position",position);
