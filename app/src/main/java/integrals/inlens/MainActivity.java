@@ -368,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
                                 PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
                                 PasteCloudAlbumLink.setCancelable(true);
                                 final EditText Link = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_edittext);
+
                                 Link.requestFocus();
                                 Button Done ,Cancel;
                                 final ProgressBar progressBar;

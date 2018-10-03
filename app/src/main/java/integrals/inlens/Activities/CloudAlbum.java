@@ -1,4 +1,5 @@
 package integrals.inlens.Activities;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,8 +17,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -83,10 +82,12 @@ public class CloudAlbum extends AppCompatActivity {
     private Boolean SwipeUp=false;
     private String TestCommunityID=null;
     private BottomSheetBehavior bottomSheetBehavior;
+    private Activity activity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
+        activity=this;
         SwipeControl=(Button)findViewById(R.id.SwipeControl);
         String AlbumName = getIntent().getStringExtra("AlbumName");
         CommunityID = getIntent().getStringExtra("GlobalID::");
@@ -613,8 +614,11 @@ public class CloudAlbum extends AppCompatActivity {
                             gridImageAdapter = new GridImageAdapter(
                                     getApplicationContext(),
                                     BlogList,
-                                    BlogListID
+                                    BlogListID,
+                                    activity,databaseReferencePhotoList
+
                             );
+
                             recyclerView.setAdapter(gridImageAdapter);
 
 
@@ -633,7 +637,7 @@ public class CloudAlbum extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            recyclerView.addOnItemTouchListener(
+            /*recyclerView.addOnItemTouchListener(
                     new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
@@ -653,7 +657,7 @@ public class CloudAlbum extends AppCompatActivity {
                         }
                     })
             );
-
+*/
 
 
         if(Local==true) {
@@ -677,7 +681,7 @@ public class CloudAlbum extends AppCompatActivity {
                 final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),
                         2,LinearLayoutManager.VERTICAL,false);
                 recyclerView.setLayoutManager(gridLayoutManager);
-                recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
+               /* recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                             @Override
                             public void onItemClick(View view, int position) {
 
@@ -685,39 +689,11 @@ public class CloudAlbum extends AppCompatActivity {
 
                             @Override
                             public void onLongItemClick(View view, int position) {
-                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudAlbum.this);
 
-                                // Setting Dialog Title
-                                alertDialog.setTitle("Image options...");
-
-
-                                // Setting Icon to Dialog
-                                alertDialog.setIcon(R.drawable.menu_icon);
-
-                                // Setting Positive "Yes" Button
-                                alertDialog.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int which) {
-
-                                        // Write your code here to invoke YES event
-                                        Toast.makeText(getApplicationContext(), "You clicked on YES", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-
-                                // Setting Negative "NO" Button
-                                alertDialog.setNegativeButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        // Write your code here to invoke NO event
-                                        Toast.makeText(getApplicationContext(), "2", Toast.LENGTH_SHORT).show();
-                                        dialog.cancel();
-                                    }
-                                });
-
-                                // Showing Alert Message
-                                alertDialog.show();
                             }
                         })
                 );
-
+*/
             }catch (IllegalStateException e){
                 e.printStackTrace();
             }
