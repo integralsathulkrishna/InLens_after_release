@@ -393,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                                 else{
                                                     Toast.makeText(getApplicationContext(),"Invalid Link",Toast.LENGTH_LONG).show();
-                                                }
+                                                    }
 
                                         }catch (StringIndexOutOfBoundsException e){
                                             Toast.makeText(getApplicationContext(),"Invalid Link",Toast.LENGTH_LONG).show();

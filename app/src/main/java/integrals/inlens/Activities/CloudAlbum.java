@@ -1,10 +1,12 @@
 package integrals.inlens.Activities;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -508,7 +510,7 @@ public class CloudAlbum extends AppCompatActivity {
 
     private void SetRecyclerView(String timeStart,
                                  String timeEnd,
-                                 String globalID,
+                                  String globalID,
                                  Boolean lastPost,
                                  String situationName,
                                  Boolean Local,
@@ -636,7 +638,6 @@ public class CloudAlbum extends AppCompatActivity {
                         @Override
                         public void onItemClick(View view, int position) {
                             String PostKey1 = BlogListID.get(position).toString().trim();
-
                             Intent i = new Intent(getApplicationContext(), PhotoView.class);
                             i.putParcelableArrayListExtra("data", (ArrayList<? extends Parcelable>) BlogList);
                             i.putExtra("position",position);
@@ -647,6 +648,8 @@ public class CloudAlbum extends AppCompatActivity {
 
                         @Override
                         public void onLongItemClick(View view, int position) {
+
+
                         }
                     })
             );
@@ -674,6 +677,47 @@ public class CloudAlbum extends AppCompatActivity {
                 final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),
                         2,LinearLayoutManager.VERTICAL,false);
                 recyclerView.setLayoutManager(gridLayoutManager);
+                recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+
+                            }
+
+                            @Override
+                            public void onLongItemClick(View view, int position) {
+                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudAlbum.this);
+
+                                // Setting Dialog Title
+                                alertDialog.setTitle("Image options...");
+
+
+                                // Setting Icon to Dialog
+                                alertDialog.setIcon(R.drawable.menu_icon);
+
+                                // Setting Positive "Yes" Button
+                                alertDialog.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int which) {
+
+                                        // Write your code here to invoke YES event
+                                        Toast.makeText(getApplicationContext(), "You clicked on YES", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+                                // Setting Negative "NO" Button
+                                alertDialog.setNegativeButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // Write your code here to invoke NO event
+                                        Toast.makeText(getApplicationContext(), "2", Toast.LENGTH_SHORT).show();
+                                        dialog.cancel();
+                                    }
+                                });
+
+                                // Showing Alert Message
+                                alertDialog.show();
+                            }
+                        })
+                );
+
             }catch (IllegalStateException e){
                 e.printStackTrace();
             }

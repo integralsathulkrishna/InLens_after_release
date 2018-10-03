@@ -42,7 +42,9 @@ public class PhotoView extends AppCompatActivity {
     private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     private ImageView imageView;
-    private GestureDetector gdt;
+    private Button PreviousImage,AfterImage;
+    private Boolean SetIndex=false;
+    //private GestureDetector gdt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +54,26 @@ public class PhotoView extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getSupportActionBar().hide();
         //
-
-
         setContentView(R.layout.photo_card);
         cardView = (CardView) findViewById(R.id.PhotoCardView);
+        PreviousImage=(Button)findViewById(R.id.LeftPhotoSwipe);
+        AfterImage=(Button)findViewById(R.id.RightPhotoSwipe);
         blogArrayList = getIntent().getExtras().getParcelableArrayList("data");
         Position = getIntent().getExtras().getInt("position");
         OriginalImageButton = (Button) findViewById(R.id.OriginalImageButton);
-         gdt = new GestureDetector(new GestureListener());
-
-
-
-
+  //    gdt = new GestureDetector(new GestureListener());
+        AfterImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SetAfterPhoto();
+            }
+        });
+        PreviousImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SetBeforePhoto();
+            }
+        });
         SetThumbPhoto(getApplicationContext(),
                 blogArrayList.get(Position).getImageThumb(),
                 blogArrayList.get(Position).getOriginalImageName(),
@@ -171,17 +181,34 @@ public class PhotoView extends AppCompatActivity {
                 })
                 .into(imageView);
 
-        imageView.setOnTouchListener(new View.OnTouchListener() {
+             //    imageView.setOnTouchListener(new View.OnTouchListener() {
+             //    @Override
+             //    public boolean onTouch(final View view, final MotionEvent event) {
+             //    gdt.onTouchEvent(event);
+             //    return true;
+            //}
+        //});
+        photoViewAttacher=new PhotoViewAttacher(imageView);
+        /*imageView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(final View view, final MotionEvent event) {
-                gdt.onTouchEvent(event);
-                return true;
+            public void onClick(View view) {
+                if(SetIndex==false){
+                    PreviousImage.setVisibility(View.INVISIBLE);
+                    AfterImage.setVisibility(View.INVISIBLE);
+                    SetIndex=true;
+                }
+                else{
+                    PreviousImage.setVisibility(View.VISIBLE);
+                    AfterImage.setVisibility(View.VISIBLE);
+                    SetIndex=false;
+
+                }
             }
         });
+*/
 
 
     }
-
 
 
 
@@ -212,7 +239,6 @@ public class PhotoView extends AppCompatActivity {
 
                 })
                 .into(imageView);
-        photoViewAttacher = new PhotoViewAttacher(imageView);
 
 
     }
@@ -229,8 +255,54 @@ public class PhotoView extends AppCompatActivity {
 
 
 
+   private void SetAfterPhoto(){
+        Position+=1;
+       try {
+           SetThumbPhoto(getApplicationContext(),
+                   blogArrayList.get(Position).getImageThumb(),
+                   blogArrayList.get(Position).getOriginalImageName(),
+                   blogArrayList.get(Position).getBlogTitle(),
+                   blogArrayList.get(Position).getBlogDescription(),
+                   "NULLX",
+                   blogArrayList.get(Position).getLocation(),
+                   blogArrayList.get(Position).getWeatherDetails()
+           );
+
+       }catch (IndexOutOfBoundsException e){
+           Position-=1;
+           Toast.makeText(getApplicationContext(),"Last Post",Toast.LENGTH_SHORT).show();
+           e.printStackTrace();
+
+       }
 
 
+   }
+
+   private void SetBeforePhoto(){
+       Position-=1;
+       try {
+
+           SetThumbPhoto(getApplicationContext(),
+                   blogArrayList.get(Position).getImageThumb(),
+                   blogArrayList.get(Position).getOriginalImageName(),
+                   blogArrayList.get(Position).getBlogTitle(),
+                   blogArrayList.get(Position).getBlogDescription(),
+                   "NULLX",
+                   blogArrayList.get(Position).getLocation(),
+                   blogArrayList.get(Position).getWeatherDetails()
+           );
+
+
+       }catch (IndexOutOfBoundsException e){
+           e.printStackTrace();
+           Position+=1;
+           Toast.makeText(getApplicationContext(),"First Post",Toast.LENGTH_SHORT).show();
+
+       }
+
+   }
+
+   /*
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -247,10 +319,13 @@ public class PhotoView extends AppCompatActivity {
                             blogArrayList.get(Position).getWeatherDetails()
                     );
 
+                    photoViewAttacher = new PhotoViewAttacher(imageView);
+
                 }catch (IndexOutOfBoundsException e){
                     Position-=1;
                     Toast.makeText(getApplicationContext(),"Last Post",Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
+
                 }
 
                 return false; // Right to left
@@ -267,10 +342,13 @@ public class PhotoView extends AppCompatActivity {
                             blogArrayList.get(Position).getLocation(),
                             blogArrayList.get(Position).getWeatherDetails()
                     );
+                    photoViewAttacher = new PhotoViewAttacher(imageView);
+
                 }catch (IndexOutOfBoundsException e){
                     e.printStackTrace();
                     Position+=1;
                     Toast.makeText(getApplicationContext(),"First Post",Toast.LENGTH_SHORT).show();
+
                 }
 
                 return false; // Left to right
@@ -285,5 +363,5 @@ public class PhotoView extends AppCompatActivity {
         }
     }
 
-
+*/
 }

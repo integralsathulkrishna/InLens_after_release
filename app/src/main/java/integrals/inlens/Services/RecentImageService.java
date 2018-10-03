@@ -304,7 +304,7 @@ import integrals.inlens.R;
 
 
      private void StartUpload(final int uploadID,final int Record) {
-         Toast.makeText(getApplicationContext(),"Uploading :: "+uploadID+"/"+Record,Toast.LENGTH_SHORT).show();
+         Toast.makeText(getApplicationContext(), "Uploading :: " + uploadID + "/" + Record, Toast.LENGTH_SHORT).show();
          final DatabaseReference
                  InUserReference,
                  PostDatabaseReference;
@@ -312,21 +312,21 @@ import integrals.inlens.R;
          FirebaseAuth InAuthentication;
          final FirebaseUser InUser;
          Bitmap bitmap = null;
-         Bitmap ThumbBitmap=null;
-         InAuthentication= FirebaseAuth.getInstance();
-         InUser=InAuthentication.getCurrentUser();
-         PostStorageReference= FirebaseStorage.getInstance().getReference();
+         Bitmap ThumbBitmap = null;
+         InAuthentication = FirebaseAuth.getInstance();
+         InUser = InAuthentication.getCurrentUser();
+         PostStorageReference = FirebaseStorage.getInstance().getReference();
 
-         final UploadDatabaseHelper  uploadDatabaseHelper= new UploadDatabaseHelper(getApplicationContext(),"",null,1);
-         uploadDatabaseHelper.UpdateUploadStatus(uploadID,"UPLOADING");
-         ImageFile= new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
-         OriginalImageFile=new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
-         ThumbnailFile= new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
+         final UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
+         uploadDatabaseHelper.UpdateUploadStatus(uploadID, "UPLOADING");
+         ImageFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
+         OriginalImageFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
+         ThumbnailFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
 
          // GetSituationID(uploadDatabaseHelper.GetTimeTaken(uploadID));
          // Compressing the image
          try {
-             bitmap=new Compressor(getApplicationContext())
+             bitmap = new Compressor(getApplicationContext())
                      .setMaxHeight(150)
                      .setMaxWidth(150)
                      .setQuality(100)
@@ -337,13 +337,13 @@ import integrals.inlens.R;
          }
 
          try {
-             ThumbBitmap=new Compressor(getApplicationContext())
-                            .setMaxHeight(400)
-                            .setMaxWidth(400)
-                            .setQuality(100)
-                            .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                            .compressToBitmap(ThumbnailFile);
-         }catch (IOException e){
+             ThumbBitmap = new Compressor(getApplicationContext())
+                     .setMaxHeight(400)
+                     .setMaxWidth(400)
+                     .setQuality(100)
+                     .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                     .compressToBitmap(ThumbnailFile);
+         } catch (IOException e) {
              e.printStackTrace();
          }
 
@@ -353,24 +353,24 @@ import integrals.inlens.R;
 
 
          //Accesing the title value
-         final String TitleValue= uploadDatabaseHelper.GetTextCaption(uploadID);
-         PostDatabaseReference= FirebaseDatabase.getInstance().getReference()
+         final String TitleValue = uploadDatabaseHelper.GetTextCaption(uploadID);
+         PostDatabaseReference = FirebaseDatabase.getInstance().getReference()
                  .child("Communities")
                  .child(CommunityID)
                  .child("BlogPosts");
-         InUserReference=FirebaseDatabase.getInstance().getReference().child("Users").child(InUser.getUid());
-         final StorageReference FilePath=PostStorageReference.child("CommunityPosts").child(ImageUri.getLastPathSegment());
-         Uri OriginalImageUri=Uri.fromFile(OriginalImageFile);
+         InUserReference = FirebaseDatabase.getInstance().getReference().child("Users").child(InUser.getUid());
+         final StorageReference FilePath = PostStorageReference.child("CommunityPosts").child(ImageUri.getLastPathSegment());
+         Uri OriginalImageUri = Uri.fromFile(OriginalImageFile);
          //Error Fix  1
-         final StorageReference OriginalFilePath=PostStorageReference.child("OriginalImage").child(OriginalImageUri.getLastPathSegment()+System.currentTimeMillis());
+        // final StorageReference OriginalFilePath = PostStorageReference.child("OriginalImage").child(OriginalImageUri.getLastPathSegment() + System.currentTimeMillis());
          //Error Fix 1
          //Error Fix 6
-         final StorageReference ThumbNailImage=PostStorageReference.child("OriginalImage_thumb").child(OriginalImageUri.getLastPathSegment()+System.currentTimeMillis());
+         final StorageReference ThumbNailImage = PostStorageReference.child("OriginalImage_thumb").child(OriginalImageUri.getLastPathSegment() + System.currentTimeMillis());
          //Error Fix 6
 
 
 
-         OriginalFilePath.putFile(OriginalImageUri)
+           /*OriginalFilePath.putFile(OriginalImageUri)
                           .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                               @Override
                               public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -380,116 +380,110 @@ import integrals.inlens.R;
              @Override
              public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if(task.isSuccessful()){
-                             ThumbNailImage.putFile(ThumbImageUri)
-                                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                @Override
-                                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                    DownloadThumbUri=taskSnapshot.getDownloadUrl();
-                                                    }
-                                                }).addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    OriginalFilePath.delete();
-                                                    ThumbNailImage.delete();
-                                                    uploadDatabaseHelper.UpdateUploadStatus(uploadID,"NOT_UPLOADED");
-                                                    CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-                                                    int Value=currentDatabase.GetUploadingTargetColumn();
-                                                    currentDatabase.ResetUploadTargetColumn((Value));
-                                                    currentDatabase.close();
+                */
 
-                                                    }
-                                                }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                                  @Override
-                                                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                                    if(task.isSuccessful()){
-                                                     FilePath.putFile(ImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                         @Override
-                                                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                          DownloadUri=taskSnapshot.getDownloadUrl();
-                                                          }
-                                                     }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                                         @Override
-                                                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                                         if(task.isSuccessful()){
-                                                             final DatabaseReference NewPost = PostDatabaseReference.push();
-                                                              InUserReference.addValueEventListener(new ValueEventListener() {
-                                                                  @Override
-                                                                  public void onDataChange(DataSnapshot dataSnapshot) {
+         ThumbNailImage.putFile(ThumbImageUri)
+                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                     @Override
+                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                         DownloadThumbUri = taskSnapshot.getDownloadUrl();
+                     }
+                 }).addOnFailureListener(new OnFailureListener() {
+             @Override
+             public void onFailure(@NonNull Exception e) {
+                 //OriginalFilePath.delete();
+                 ThumbNailImage.delete();
+                 uploadDatabaseHelper.UpdateUploadStatus(uploadID, "NOT_UPLOADED");
+                 CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                 int Value = currentDatabase.GetUploadingTargetColumn();
+                 currentDatabase.ResetUploadTargetColumn((Value));
+                 currentDatabase.close();
 
-                                                                      NewPost.child("BlogTitle").setValue(TitleValue);
-                                                                      NewPost.child("BlogDescription").setValue("NULLX");
-                                                                      NewPost.child("Image").setValue((DownloadUri).toString());
-                                                                      NewPost.child("ImageThumb").setValue((DownloadThumbUri).toString());
-                                                                      NewPost.child("User_ID").setValue(InUser.getUid());
-                                                                      NewPost.child("OriginalImageName").setValue(OriginalImageName);
-                                                                      NewPost.child("Location").setValue(uploadDatabaseHelper.GetLocationDetails(uploadID));
-                                                                      NewPost.child("TimeTaken").setValue(uploadDatabaseHelper.GetTimeTaken(uploadID));
-                                                                      NewPost.child("WeatherDetails").setValue(uploadDatabaseHelper.GetWeatherDetails(uploadID));
-                                                                      NewPost.child("AudioCaption").setValue("NULLX");
-                                                                      NewPost.child("PostedByProfilePic").setValue(dataSnapshot.child("Profile_picture").getValue());
-                                                                      NewPost.child("UserName").setValue(dataSnapshot.child("Name").getValue());
-                                                                      SharedPreferences sh=getApplicationContext().getSharedPreferences("UploadTargetColumn.pref", MODE_PRIVATE);
-                                                                      SharedPreferences.Editor E =sh.edit();
-                                                                      E.putInt("Upload:",(uploadID+1));
-                                                                      E.commit();
-                                                                      try {
-                                                                          uploadDatabaseHelper.UpdateUploadStatus(uploadID,"UPLOADED");
+             }
+         }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+             @Override
+             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                 if (task.isSuccessful()) {
+                     FilePath.putFile(ImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                         @Override
+                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                             DownloadUri = taskSnapshot.getDownloadUrl();
+                         }
+                     }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                         @Override
+                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                             if (task.isSuccessful()) {
+                                 final DatabaseReference NewPost = PostDatabaseReference.push();
+                                 InUserReference.addValueEventListener(new ValueEventListener() {
+                                     @Override
+                                     public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                                                      }catch (SQLiteReadOnlyDatabaseException e){
-                                                                          e.printStackTrace();
-                                                                      }
-                                                                      pictureFile .delete();
-                                                                      pictureFile1.delete();
-                                                                      CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-                                                                      int Value=currentDatabase.GetUploadingTargetColumn();
-                                                                      currentDatabase.ResetUploadTargetColumn((Value+1));
-                                                                      currentDatabase.close();
+                                         NewPost.child("BlogTitle").setValue(TitleValue);
+                                         NewPost.child("BlogDescription").setValue("NULLX");
+                                         NewPost.child("Image").setValue((DownloadUri).toString());
+                                         NewPost.child("ImageThumb").setValue((DownloadThumbUri).toString());
+                                         NewPost.child("User_ID").setValue(InUser.getUid());
+                                         NewPost.child("OriginalImageName").setValue(OriginalImageName);
+                                         NewPost.child("Location").setValue(uploadDatabaseHelper.GetLocationDetails(uploadID));
+                                         NewPost.child("TimeTaken").setValue(uploadDatabaseHelper.GetTimeTaken(uploadID));
+                                         NewPost.child("WeatherDetails").setValue(uploadDatabaseHelper.GetWeatherDetails(uploadID));
+                                         NewPost.child("AudioCaption").setValue("NULLX");
+                                         NewPost.child("PostedByProfilePic").setValue(dataSnapshot.child("Profile_picture").getValue());
+                                         NewPost.child("UserName").setValue(dataSnapshot.child("Name").getValue());
+                                         SharedPreferences sh = getApplicationContext().getSharedPreferences("UploadTargetColumn.pref", MODE_PRIVATE);
+                                         SharedPreferences.Editor E = sh.edit();
+                                         E.putInt("Upload:", (uploadID + 1));
+                                         E.commit();
+                                         try {
+                                             uploadDatabaseHelper.UpdateUploadStatus(uploadID, "UPLOADED");
 
-                                                                  }
+                                         } catch (SQLiteReadOnlyDatabaseException e) {
+                                             e.printStackTrace();
+                                         }
+                                         pictureFile.delete();
+                                         pictureFile1.delete();
+                                         CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                         int Value = currentDatabase.GetUploadingTargetColumn();
+                                         currentDatabase.ResetUploadTargetColumn((Value + 1));
+                                         currentDatabase.close();
 
-                                                                  @Override
-                                                                  public void onCancelled(DatabaseError databaseError) {
-                                                                      OriginalFilePath.delete();
-                                                                      ThumbNailImage.delete();
-                                                                      FilePath.delete();
-                                                                      uploadDatabaseHelper.UpdateUploadStatus(uploadID,"NOT_UPLOADED");
-                                                                      CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-                                                                      int Value=currentDatabase.GetUploadingTargetColumn();
-                                                                      currentDatabase.ResetUploadTargetColumn((Value));
-                                                                      currentDatabase.close();
-                                                                      }
-                                                                  });
+                                     }
 
-
-
-
-
-                                                               }
-                                                         }
-                                                     }).addOnFailureListener(new OnFailureListener() {
-                                                         @Override
-                                                         public void onFailure(@NonNull Exception e) {
-                                                             OriginalFilePath.delete();
-                                                             ThumbNailImage.delete();
-                                                             FilePath.delete();
-                                                             uploadDatabaseHelper.UpdateUploadStatus(uploadID,"NOT_UPLOADED");
-                                                             CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-                                                             int Value=currentDatabase.GetUploadingTargetColumn();
-                                                             currentDatabase.ResetUploadTargetColumn((Value));
-                                                             currentDatabase.close();
-
-                                                         }
-                                                     });
+                                     @Override
+                                     public void onCancelled(DatabaseError databaseError) {
+                                        // OriginalFilePath.delete();
+                                         ThumbNailImage.delete();
+                                         FilePath.delete();
+                                         uploadDatabaseHelper.UpdateUploadStatus(uploadID, "NOT_UPLOADED");
+                                         CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                         int Value = currentDatabase.GetUploadingTargetColumn();
+                                         currentDatabase.ResetUploadTargetColumn((Value));
+                                         currentDatabase.close();
+                                     }
+                                 });
 
 
+                             }
+                         }
+                     }).addOnFailureListener(new OnFailureListener() {
+                         @Override
+                         public void onFailure(@NonNull Exception e) {
+                             //OriginalFilePath.delete();
+                             ThumbNailImage.delete();
+                             FilePath.delete();
+                             uploadDatabaseHelper.UpdateUploadStatus(uploadID, "NOT_UPLOADED");
+                             CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                             int Value = currentDatabase.GetUploadingTargetColumn();
+                             currentDatabase.ResetUploadTargetColumn((Value));
+                             currentDatabase.close();
+
+                         }
+                     });
 
 
-
-
-
-                                                    }
-                                                }
-                                            });
+                 }
+             }
+         });
 
 
 
@@ -513,7 +507,7 @@ import integrals.inlens.R;
 
 
 
-
+/*
 
 
                   }
@@ -535,7 +529,8 @@ import integrals.inlens.R;
 
      }
 
-
+*/
+     }
      private void storeImage(Bitmap image) {
          pictureFile = getOutputMediaFile();
 
