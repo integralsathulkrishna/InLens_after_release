@@ -193,10 +193,15 @@ public class MainActivity extends AppCompatActivity {
                                 InDatabaseReference.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        CommunityID = dataSnapshot.child(getRef(position).getKey().toString()).child("CommunityID").getValue().toString().trim();
-                                        getParticipantDatabaseReference=participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
-                                        viewHolder.SetParticipants(getApplicationContext(),getParticipantDatabaseReference);
-                                      }
+                                        try {
+                                            CommunityID = dataSnapshot.child(getRef(position).getKey().toString()).child("CommunityID").getValue().toString().trim();
+                                            getParticipantDatabaseReference=participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
+                                            viewHolder.SetParticipants(getApplicationContext(),getParticipantDatabaseReference);
+
+                                        }catch (IndexOutOfBoundsException e){
+                                            e.printStackTrace();
+                                        }
+                                        }
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
@@ -244,10 +249,18 @@ public class MainActivity extends AppCompatActivity {
                             InDatabaseReference.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                    startActivity(new Intent(MainActivity.this,CloudAlbum.class)
-                                            .putExtra("AlbumName",model.getAlbumTitle())
-                                            .putExtra("GlobalID::",CommunityPostKey));
+                                    try {
+                                        CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
+                                        startActivity(new Intent(MainActivity.this,CloudAlbum.class)
+                                                .putExtra("AlbumName",model.getAlbumTitle())
+                                                .putExtra("GlobalID::",CommunityPostKey)
+                                                .putExtra("ThisID::",PostKey).putExtra("UserID::",CurrentUser));
+
+                                    }catch (NullPointerException e){
+                                        e.printStackTrace();
+                                    }
+
+
 
                                     }
 
@@ -299,12 +312,14 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                         case R.id.new_album:
+
                             SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                             if (sharedPreferences.getBoolean("UsingCommunity::",false) == true) {
                                 Toast.makeText(getApplicationContext(),"Sorry.You can't create a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
                             }
                             else{
-                                startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
+
+                                startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                             }
 
 
@@ -528,9 +543,7 @@ public class MainActivity extends AppCompatActivity {
                                 AddingAlbumToReference.child("Time").setValue(dataSnapshot.child("Time").getValue().toString());
                                 AddingAlbumToReference.child("CommunityID").setValue(CommunityID);
                                 StartServices();
-                                setIntent(null);
-
-                            }
+                                }
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {

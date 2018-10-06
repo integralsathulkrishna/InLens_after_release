@@ -359,13 +359,15 @@ import integrals.inlens.R;
                  .child(CommunityID)
                  .child("BlogPosts");
          InUserReference = FirebaseDatabase.getInstance().getReference().child("Users").child(InUser.getUid());
-         final StorageReference FilePath = PostStorageReference.child("CommunityPosts").child(ImageUri.getLastPathSegment());
+         final StorageReference FilePath = PostStorageReference.child("CommunityPosts")
+                 .child(ImageUri.getLastPathSegment());
          Uri OriginalImageUri = Uri.fromFile(OriginalImageFile);
          //Error Fix  1
         // final StorageReference OriginalFilePath = PostStorageReference.child("OriginalImage").child(OriginalImageUri.getLastPathSegment() + System.currentTimeMillis());
          //Error Fix 1
          //Error Fix 6
-         final StorageReference ThumbNailImage = PostStorageReference.child("OriginalImage_thumb").child(OriginalImageUri.getLastPathSegment() + System.currentTimeMillis());
+         final StorageReference ThumbNailImage = PostStorageReference.child("OriginalImage_thumb")
+                 .child(OriginalImageUri.getLastPathSegment() + System.currentTimeMillis());
          //Error Fix 6
 
 
@@ -635,7 +637,7 @@ import integrals.inlens.R;
 
          NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
 
-                 .setSmallIcon(R.drawable.ic_emoji_icon)
+                 .setSmallIcon(R.drawable.inlens_notification)
                  .setCustomBigContentView(remoteViews)
                  .setOngoing(true)
                  .setAutoCancel(true)

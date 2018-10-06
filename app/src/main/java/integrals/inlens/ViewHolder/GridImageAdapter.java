@@ -2,6 +2,7 @@ package integrals.inlens.ViewHolder;
 
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,7 +43,8 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
         private Activity activity;
         private FirebaseStorage mFirebaseStorage;
         private DatabaseReference databaseReference;
-    public GridImageAdapter(Context context,
+        private ProgressDialog progressDialog;
+        public GridImageAdapter(Context context,
                             List<Blog> blogList,
                             List<String> blogIDList,
                             Activity activity,
@@ -53,6 +55,7 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
         this.activity=activity;
         this.databaseReference=databaseReference;
         mFirebaseStorage=FirebaseStorage.getInstance();
+        this.progressDialog=new ProgressDialog(activity);
     }
 
     @NonNull
@@ -153,23 +156,41 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
         }
     }
     private void DeleteImage(final int position){
-        Toast.makeText(context,"Deleting Image ..Please wait",Toast.LENGTH_SHORT).show();
-        StorageReference photoRef = mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImageThumb().toString());
-        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            progressDialog.setTitle("Delete process");
+            progressDialog.setMessage("Deleting the thumb image...");
+            progressDialog.show();
+           StorageReference photoRef = mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImageThumb().toString());
+           photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                databaseReference.child(BlogIDList.get(position)).removeValue(new DatabaseReference.CompletionListener() {
+                progressDialog.setMessage("Deleting uploaded Photo...");
+                StorageReference imageRef=mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImage());
+                imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        Toast.makeText(context,"Image Deleted",Toast.LENGTH_SHORT).show();
+                    public void onSuccess(Void aVoid) {
+                        databaseReference.child(BlogIDList.get(position)).removeValue(new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                progressDialog.setMessage("Deleted");
+                                progressDialog.dismiss();
+
+                            }
+                        });
                     }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                        Toast.makeText(context,"Image Unable to delete ..Please check the internet connection",Toast.LENGTH_SHORT).show();
+                        }
                 });
+
 
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-
+                progressDialog.dismiss();
                 Toast.makeText(context,"Image Unable to delete ..Please check the internet connection",Toast.LENGTH_SHORT).show();
 
             }

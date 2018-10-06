@@ -5,12 +5,14 @@ import android.app.ProgressDialog;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -301,8 +303,8 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                 UploadProgress.setVisibility(View.INVISIBLE);
                                 SubmitButton.setVisibility(View.VISIBLE);
                                 CloudAlbumDone=true;
+                                 OngoingTask=false;
                                 StartServices();
-                                finish();
                                 }else {
 
                             }
