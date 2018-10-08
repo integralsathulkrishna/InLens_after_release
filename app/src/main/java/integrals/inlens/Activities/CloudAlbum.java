@@ -1,11 +1,9 @@
 package integrals.inlens.Activities;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -21,13 +19,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cocosw.bottomsheet.BottomSheet;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -36,8 +35,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.ramotion.cardslider.CardSliderLayoutManager;
 import com.ramotion.cardslider.CardSnapHelper;
 
@@ -51,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecyclerItemClickListener;
-import integrals.inlens.MainActivity;
 import integrals.inlens.Models.Blog;
 import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
@@ -62,7 +58,6 @@ public class CloudAlbum extends AppCompatActivity {
     private RecyclerView            recyclerView;
     private DatabaseReference       databaseReference;
     private String                  CommunityID;
-    private TextView                textViewAlbumName;
     private Calendar                calendar;
     private SituationAdapter        adapter;
     private String                  sowner,stime,stitle,sKey,sTime;
@@ -83,30 +78,25 @@ public class CloudAlbum extends AppCompatActivity {
     private String BlogTitle,ImageThumb,BlogDescription,Location;
     private String TimeTaken,UserName,User_ID,WeatherDetails,PostedByProfilePic;
     private String OriginalImageName;
-    private Dialog createNewSituation;
+    private Dialog createNewSituation , Renamesituation;
     private TextView SituationName;
     private String   Name;
     private Button SwipeControl;
     private Boolean SwipeUp=false;
     private String TestCommunityID=null;
-    private ProgressDialog progressDialog;
     private BottomSheetBehavior bottomSheetBehavior;
     private Activity activity;
-    private FirebaseStorage mFirebaseStorage;
-    private DatabaseReference deleteDatabaseReference;
-    private int ImageCountTotal=0;
-    private String ThisCommunityID,CurrentUser;
+    private BottomSheet.Builder builder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
-        activity=this;
 
+        activity=this;
         SwipeControl=(Button)findViewById(R.id.SwipeControl);
         String AlbumName = getIntent().getStringExtra("AlbumName");
         CommunityID = getIntent().getStringExtra("GlobalID::");
-        ThisCommunityID=getIntent().getStringExtra("ThisID::");
-        CurrentUser=getIntent().getStringExtra("UserID::");
         recyclerView = (RecyclerView)findViewById(R.id.SituationRecyclerView);
         SituationName=(TextView)findViewById(R.id.SituationNametxt);
         recyclerViewPhotoList=(RecyclerView)findViewById(R.id.SituationPhotos);
@@ -115,15 +105,10 @@ public class CloudAlbum extends AppCompatActivity {
         recyclerViewGrid.setVisibility(View.INVISIBLE);
         recyclerViewPhotoList.setEnabled(false);
         recyclerViewPhotoList.setVisibility(View.INVISIBLE);
-        deleteDatabaseReference=FirebaseDatabase.getInstance().getReference() .child("Users")
-                .child(CurrentUser)
-                .child("Communities").child(ThisCommunityID);
-
         databaseReferencePhotoList = FirebaseDatabase.getInstance().getReference().child("Communities")
                 .child(CommunityID).child("BlogPosts");
-        mFirebaseStorage=FirebaseStorage.getInstance();
-        final GridLayoutManager gridLayoutManager =
-                new GridLayoutManager(getApplicationContext(),1,LinearLayoutManager.VERTICAL,false);
+
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),1,LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(gridLayoutManager);
         Album = AlbumName;
         SituationList = new ArrayList<>();
@@ -131,9 +116,7 @@ public class CloudAlbum extends AppCompatActivity {
         TimeEnd="2100-8-6T13-22-45";
         TimeStart="2000-8-6T13-22-45";
         Name="Album Photos";
-        progressDialog=new ProgressDialog(CloudAlbum.this);
         LastPost=false;
-
         db = FirebaseDatabase.getInstance().getReference().child("Users");
         SharedPreferences sPreferences = getSharedPreferences("ComIDPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = sPreferences.edit();
@@ -376,8 +359,6 @@ public class CloudAlbum extends AppCompatActivity {
         Boolean Default = false;
         SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
         SharedPreferences sharedPreferences1=getSharedPreferences("Owner.pref",MODE_PRIVATE);
-        menu.add(0,2,0,"Options").setIcon(R.drawable.menu_icon)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         if (sharedPreferences.getBoolean("UsingCommunity::", Default) == true) {
         if((TestCommunityID).contentEquals(getIntent().getExtras().getString("GlobalID::"))){
@@ -388,8 +369,7 @@ public class CloudAlbum extends AppCompatActivity {
             menu.add(0, 1, 0, "Add Situation")
                     .setIcon(R.drawable.ic_add)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-           }
+        }
         }
 
 
@@ -404,70 +384,16 @@ public class CloudAlbum extends AppCompatActivity {
         if (item.getItemId() == 0) {
             startActivity(new Intent(CloudAlbum.this, QRCodeGenerator.class));
         }
-        else if(item.getItemId()==1){
+        if(item.getItemId()==1){
             createNewSituation.show();
         }
-        else if(item.getItemId()==2) {
-
-            new BottomSheet.Builder(this).title("Delete ").sheet(R.menu.cloud_album_menu).listener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case R.id.delete_cloud_album:
-                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudAlbum.this);
-
-                            // Setting Dialog Title
-                            alertDialog.setTitle("Confirm Delete...");
-
-                            // Setting Dialog Message
-                            alertDialog.setMessage("Are you sure you want delete this Cloud-Album. All posts uploaded by each participants will be lost");
-
-                            // Setting Icon to Dialog
-                            alertDialog.setIcon(R.drawable.ic_deleted);
-
-                            // Setting Positive "Yes" Button
-                            alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,int which) {
-                                    deleteDatabaseReference.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                             finish();
-                                             Toast.makeText(getApplicationContext(),"Album deleted from your account.",Toast.LENGTH_SHORT).show();
-
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(getApplicationContext(),"Unable to delete your album. Please check your network",Toast.LENGTH_SHORT).show();
-
-                                        }
-                                    });
-                                    }
-                            });
-
-                            // Setting Negative "NO" Button
-                            alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
-
-                            // Showing Alert Message
-                            alertDialog.show();
-
-
-
-
-
-
-                            break;
-                    }
-                }
-            }).show();
-
-            }
         return true;
     }
+
+
+
+
+
 
 
     @Override
@@ -542,37 +468,97 @@ public class CloudAlbum extends AppCompatActivity {
 
 
                 //Done for Implementation of Recycler View OnClick
+
+
                 recyclerView.addOnItemTouchListener(
                         new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
                             @Override
-                            public void onItemClick(View view, int position) {
+                            public void onItemClick(View view, final int position) {
 
                                 try {
-                                     if(bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED) {
-                                         TimeStart = SituationList.get(position).getSituationTime();
-                                         TimeEnd = SituationList.get(position + 1).getSituationTime();
-                                         GlobalID = CommunityID;
-                                         LastPost = false;
-                                         Name = SituationList.get(position).getTitle();
-                                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                         SetRecyclerView(TimeStart, TimeEnd, GlobalID, LastPost, Name, true, recyclerViewPhotoList);
-                                     }
-
-                                }catch (IndexOutOfBoundsException e){
                                     if(bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED) {
+                                        TimeStart = SituationList.get(position).getSituationTime();
+                                        TimeEnd = SituationList.get(position + 1).getSituationTime();
+                                        GlobalID = CommunityID;
+                                        LastPost = false;
+                                        Name = SituationList.get(position).getTitle();
+                                        SetRecyclerView(TimeStart, TimeEnd, GlobalID, LastPost, Name, true, recyclerViewPhotoList);
+                                    }
+
+                                }catch (IndexOutOfBoundsException e) {
+                                    if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                                         TimeStart = SituationList.get(position).getSituationTime();
                                         TimeEnd = SituationList.get(position).getSituationTime();
                                         GlobalID = CommunityID;
                                         LastPost = true;
                                         Name = SituationList.get(position).getTitle();
-                                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                                         SetRecyclerView(TimeStart, TimeEnd, GlobalID, LastPost, Name, true, recyclerViewPhotoList);
                                     }
                                 }
                             }
 
                             @Override
-                            public void onLongItemClick(View view, int position) {
+                            public void onLongItemClick(View view, final int position) {
+
+
+                              BottomSheet.Builder BottomS =  new BottomSheet.Builder(CloudAlbum.this);
+                              BottomS.title("Edit Situation : "+SituationList.get(position).getTitle())
+                                        .sheet(R.menu.situationmenu).listener(new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                        switch (i)
+                                        {
+                                            case R.id.renamesituation :
+                                                RenameSituation(SituationIDList.get(position));
+                                                Renamesituation.show();
+                                                break;
+                                            case R.id.deletesituation:
+                                            {
+                                                if(SituationIDList.size()<=1)
+                                                {
+                                                    Toast.makeText(getApplicationContext(),"Unable to perform deletion. Album should have at least one situation.",Toast.LENGTH_LONG).show();
+                                                }
+                                                else
+                                                {
+
+                                                    final android.app.AlertDialog.Builder alertbuilder = new android.app.AlertDialog.Builder(CloudAlbum.this);
+                                                    alertbuilder.setTitle("Delete Situation "+SituationList.get(position).getTitle())
+                                                            .setMessage("You are about to delete the situation. Are you sure you want to continue ?")
+                                                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialogInterface, int i) {
+
+                                                                    dialogInterface.dismiss();
+                                                                }
+                                                            })
+                                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(final DialogInterface dialogInterface, int i) {
+
+                                                                    databaseReference.child(SituationIDList.get(position)).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<Void> task) {
+
+                                                                            Toast.makeText(CloudAlbum.this,"Successfully deleted the situation",Toast.LENGTH_LONG).show();
+                                                                            dialogInterface.dismiss();
+                                                                        }
+                                                                    });
+
+                                                                }
+                                                            })
+                                                            .create()
+                                                            .show();
+
+                                                }
+
+                                            }
+
+                                            break;
+                                        }
+
+                                    }
+                                    }).show();
                             }
                         })
                 );
@@ -589,9 +575,22 @@ public class CloudAlbum extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if(bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED)
+        {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
+
     private void SetRecyclerView(String timeStart,
                                  String timeEnd,
-                                  String globalID,
+                                 String globalID,
                                  Boolean lastPost,
                                  String situationName,
                                  Boolean Local,
@@ -717,7 +716,27 @@ public class CloudAlbum extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            /*recyclerView.addOnItemTouchListener(
+                    new RecyclerItemClickListener(CloudAlbum.this, recyclerView ,new RecyclerItemClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            String PostKey1 = BlogListID.get(position).toString().trim();
+                            Intent i = new Intent(getApplicationContext(), PhotoView.class);
+                            i.putParcelableArrayListExtra("data", (ArrayList<? extends Parcelable>) BlogList);
+                            i.putExtra("position",position);
+                            startActivity(i);
 
+
+                        }
+
+                        @Override
+                        public void onLongItemClick(View view, int position) {
+
+
+                        }
+                    })
+            );
+*/
 
 
         if(Local==true) {
@@ -764,160 +783,7 @@ public class CloudAlbum extends AppCompatActivity {
     }
 
 
-
-    /*private void DeleteCloudAlbum(final int position) {
-
-
-            final StorageReference photoRef = mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImageThumb().toString());
-            photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    StorageReference imageRef = mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImage());
-                    imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            deleteDatabaseReference.child(BlogListID.get(position)).removeValue(new DatabaseReference.CompletionListener() {
-                                @Override
-                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                                    Toast.makeText(getApplicationContext(),"Image Deleted"+position,Toast.LENGTH_SHORT).show();
-
-                                }
-                            });
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getApplicationContext(), "Image Unable to delete ..Please check the internet connection", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    Toast.makeText(getApplicationContext(), "Image Unable to delete ..Please check the internet connection", Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
-
-    }
-
-
-*/
-
-
-  /*  private void LoadBlogData() {
-        try {
-
-            databaseReferencePhotoList.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    BlogList.clear();
-                    BlogListID.clear();
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-
-                        if (snapshot.hasChildren()) {
-                            try {
-
-
-                                if (CheckIntervel(snapshot.child("TimeTaken").getValue().toString(), "2000-8-6T13-22-45", "2100-8-6T13-22-45")) {
-                                    String BlogListIDString = snapshot.getKey();
-                                    if (snapshot.hasChild("Image")) {
-                                        String photoThumb = snapshot.child("Image").getValue().toString();
-                                        PhotoThumb = photoThumb;
-                                    }
-
-                                    if (snapshot.hasChild("BlogTitle")) {
-                                        String blogTitle = snapshot.child("BlogTitle").getValue().toString();
-                                        BlogTitle = blogTitle;
-                                    }
-
-                                    if (snapshot.hasChild("Location")) {
-                                        String location = snapshot.child("Location").getValue().toString();
-                                        Location = location;
-                                    }
-
-                                    if (snapshot.hasChild("TimeTaken")) {
-                                        String timeTaken = snapshot.child("TimeTaken").getValue().toString();
-                                        TimeTaken = timeTaken;
-                                    }
-
-                                    if (snapshot.hasChild("OriginalImageName")) {
-                                        String originalImageName = snapshot.child("OriginalImageName").getValue().toString();
-                                        OriginalImageName = originalImageName;
-                                    }
-                                    if (snapshot.hasChild("ImageThumb")) {
-                                        String imageThumb = snapshot.child("ImageThumb").getValue().toString();
-                                        ImageThumb = imageThumb;
-                                    }
-
-
-                                    if (snapshot.hasChild("WeatherDetails")) {
-                                        String weatherDetails = snapshot.child("WeatherDetails").getValue().toString();
-                                        WeatherDetails = weatherDetails;
-                                    }
-
-
-                                    if (snapshot.hasChild("UserName")) {
-                                        String userName = snapshot.child("UserName").getValue().toString();
-                                        UserName = userName;
-                                    }
-
-
-                                    if (snapshot.hasChild("User_ID")) {
-                                        String user_id = snapshot.child("User_ID").getValue().toString();
-                                        User_ID = user_id;
-                                    }
-
-                                    if (snapshot.hasChild("PostedByProfilePic")) {
-                                        String postedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
-                                        PostedByProfilePic = postedByProfilePic;
-                                    }
-
-                                    if (!BlogListID.contains(BlogListIDString)) {
-                                        BlogListID.add(BlogListIDString);
-                                        Blog model = new Blog("", PhotoThumb, ImageThumb,
-                                                "", BlogTitle, Location, TimeTaken,
-                                                UserName, User_ID,
-                                                WeatherDetails,
-                                                PostedByProfilePic,
-                                                OriginalImageName);
-                                        BlogList.add(model);
-                                        ImageCountTotal=ImageCountTotal+1;
-                                    }
-                                } else
-                                {
-                                }
-                            }catch (NullPointerException e){
-                                e.printStackTrace();
-                            }
-                        }
-
-                        }
-
-
-                }
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        }
-
-
-
-    }*/
-
-
-        private boolean CheckIntervel(String timeTaken, String timeStart, String timeEnd) {
+    private boolean CheckIntervel(String timeTaken, String timeStart, String timeEnd) {
         Boolean Result=false;
         try{
             SimpleDateFormat objSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss");
@@ -945,40 +811,69 @@ public class CloudAlbum extends AppCompatActivity {
         return Result;
         }
 
-/*    private class DeleteImages extends AsyncTask<String, Void, String> {
 
 
-        @Override
-        protected String doInBackground(String... strings) {
-            for(int i=0;i<ImageCountTotal;i++){
-                DeleteCloudAlbum(i);
+    private void RenameSituation(final String s) {
+
+        Renamesituation = new Dialog(CloudAlbum.this);
+        Renamesituation.setContentView(R.layout.create_new_situation_layout);
+        Renamesituation.setCancelable(false);
+        final EditText SituationName = Renamesituation.findViewById(R.id.situation_name);
+        SituationName.requestFocus();
+        Button Done ,Cancel;
+        Done =   Renamesituation.findViewById(R.id.done_btn);
+        Cancel = Renamesituation.findViewById(R.id.cancel_btn);
+        Done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(!TextUtils.isEmpty(SituationName.getText().toString()))
+                {
+                    databaseReference.child(s).child("name").setValue(SituationName.getText().toString().trim()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if(task.isSuccessful())
+                            {
+
+                                Toast.makeText(CloudAlbum.this,"Situation renamed as : "+SituationName.getText().toString(),Toast.LENGTH_SHORT).show();
+                                SituationName.setText("");
+                                Renamesituation.dismiss();
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            if(e.toString().contains("FirebaseNetworkException"))
+                                Toast.makeText(CloudAlbum.this,"Not Connected to Internet.",Toast.LENGTH_SHORT).show();
+                            else
+                                Toast.makeText(CloudAlbum.this,"Unable to rename new Situation.", Toast.LENGTH_SHORT).show();
+
+                            SituationName.setText("");
+                        }
+                    });
+                    Renamesituation.dismiss();
+                }
+                else
+                {
+                    Toast.makeText(CloudAlbum.this,"No name given",Toast.LENGTH_LONG).show();
+                }
+
             }
+        });
 
-            return "Excecuted";
-        }
+        Cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Renamesituation.dismiss();
+            }
+        });
 
-
-        @Override
-        protected void onPostExecute(String s) {
-            finish();
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-        }
     }
-*/
+
+
+
 }
 
 

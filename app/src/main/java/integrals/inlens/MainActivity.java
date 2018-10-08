@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +27,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +37,7 @@ import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
+import integrals.inlens.Activities.AlbumCoverEditActivity;
 import integrals.inlens.Activities.CloudAlbum;
 import integrals.inlens.Activities.CreateCloudAlbum;
 import integrals.inlens.Activities.LoginActivity;
@@ -55,13 +55,13 @@ import integrals.inlens.ViewHolder.AlbumViewHolder;
 public class MainActivity extends AppCompatActivity {
     private RecyclerView MemoryRecyclerView;
     private DatabaseReference InDatabaseReference;
-    private String CommunityPostKey;
+    private String CommunityPostKey, AlbumCoverEditKey;
     private ComponentName componentName;
     private String CurrentUser;
     private FirebaseAuth InAuthentication;
     private FirebaseUser firebaseUser;
     private DatabaseReference participantDatabaseReference,
-            getParticipantDatabaseReference;
+            getParticipantDatabaseReference , ComRef;
     private String CommunityID;
     private Intent intent;
     private static final int JOB_ID=7907;
@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private JobInfo jobInfo;
     private LayoutAnimationController animation;
     private Dialog PasteCloudAlbumLink;
+    private ProgressBar MainLoadingProgressBar;
     //
     //
     // Import from Elson.............................................................................
@@ -133,16 +134,7 @@ public class MainActivity extends AppCompatActivity {
         linearLayoutManager.setStackFromEnd(true);
         linearLayoutManager.setReverseLayout(true);
         MemoryRecyclerView.setLayoutManager(linearLayoutManager);
-
-
-
-
-
-
-
-
-
-
+        MainLoadingProgressBar = findViewById(R.id.mainloadingpbar);
 
 
     }
@@ -166,9 +158,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Downloading Recycler View
+        MainLoadingProgressBar.setVisibility(View.VISIBLE);
         try {
+
             InDatabaseReference=
-                            FirebaseDatabase
+                    FirebaseDatabase
                             .getInstance()
                             .getReference()
                             .child("Users")
@@ -189,29 +183,24 @@ public class MainActivity extends AppCompatActivity {
                     viewHolder.SetAlbumTime("Event occured on  "+ model.getTime());
                     viewHolder.SetProfilePic(getApplicationContext(),model.getPostedByProfilePic());
                     viewHolder.SetAlbumDescription(model.getAlbumDescription());
-                            try {
-                                InDatabaseReference.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        try {
-                                            CommunityID = dataSnapshot.child(getRef(position).getKey().toString()).child("CommunityID").getValue().toString().trim();
-                                            getParticipantDatabaseReference=participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
-                                            viewHolder.SetParticipants(getApplicationContext(),getParticipantDatabaseReference);
-
-                                        }catch (IndexOutOfBoundsException e){
-                                            e.printStackTrace();
-                                        }
-                                        }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                            }catch (NullPointerException e) {
+                    try {
+                        InDatabaseReference.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                CommunityID = dataSnapshot.child(getRef(position).getKey().toString()).child("CommunityID").getValue().toString().trim();
+                                getParticipantDatabaseReference=participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
+                                viewHolder.SetParticipants(getApplicationContext(),getParticipantDatabaseReference);
                             }
-                            viewHolder.ShareButton.setOnClickListener(new View.OnClickListener() {
-                            final String PostKeyS=getRef(position).getKey().toString().trim();
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }catch (NullPointerException e) {
+                    }
+                    viewHolder.ShareButton.setOnClickListener(new View.OnClickListener() {
+                        final String PostKeyS=getRef(position).getKey().toString().trim();
 
 
                         @Override
@@ -249,20 +238,12 @@ public class MainActivity extends AppCompatActivity {
                             InDatabaseReference.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    try {
-                                        CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                        startActivity(new Intent(MainActivity.this,CloudAlbum.class)
-                                                .putExtra("AlbumName",model.getAlbumTitle())
-                                                .putExtra("GlobalID::",CommunityPostKey)
-                                                .putExtra("ThisID::",PostKey).putExtra("UserID::",CurrentUser));
+                                    CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
+                                    startActivity(new Intent(MainActivity.this,CloudAlbum.class)
+                                            .putExtra("AlbumName",model.getAlbumTitle())
+                                            .putExtra("GlobalID::",CommunityPostKey));
 
-                                    }catch (NullPointerException e){
-                                        e.printStackTrace();
-                                    }
-
-
-
-                                    }
+                                }
 
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
@@ -272,8 +253,41 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
-                 }
 
+                    viewHolder.AlbuymCoverEditBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            final String PostKey=getRef(position).getKey().toString().trim();
+
+                            InDatabaseReference.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                    AlbumCoverEditKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
+                                    if(!TextUtils.isEmpty(AlbumCoverEditKey))
+                                    {
+                                        startActivity(new Intent(MainActivity.this, AlbumCoverEditActivity.class).putExtra("Albumkey",AlbumCoverEditKey));
+
+                                    }
+                                    else
+                                    {
+                                        Toast.makeText(MainActivity.this,"Unable to perform edit now.",Toast.LENGTH_LONG).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+
+                        }
+                    });
+
+                    MainLoadingProgressBar.setVisibility(View.INVISIBLE);
+                }
 
 
             };
@@ -294,8 +308,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-
     }
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 0, 0, "Add Participant")
@@ -312,14 +328,12 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                         case R.id.new_album:
-
                             SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                             if (sharedPreferences.getBoolean("UsingCommunity::",false) == true) {
                                 Toast.makeText(getApplicationContext(),"Sorry.You can't create a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
                             }
                             else{
-
-                                startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                                startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
                             }
 
 
@@ -543,7 +557,9 @@ public class MainActivity extends AppCompatActivity {
                                 AddingAlbumToReference.child("Time").setValue(dataSnapshot.child("Time").getValue().toString());
                                 AddingAlbumToReference.child("CommunityID").setValue(CommunityID);
                                 StartServices();
-                                }
+                                setIntent(null);
+
+                            }
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {

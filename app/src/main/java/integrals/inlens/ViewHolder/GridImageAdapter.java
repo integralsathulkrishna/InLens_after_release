@@ -2,10 +2,10 @@ package integrals.inlens.ViewHolder;
 
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -17,10 +17,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,6 +40,7 @@ import java.util.List;
 import integrals.inlens.Activities.PhotoView;
 import integrals.inlens.Models.Blog;
 import integrals.inlens.R;
+import io.reactivex.annotations.Nullable;
 
 public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.GridImageViewHolder> {
         private Context      context;
@@ -43,8 +49,7 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
         private Activity activity;
         private FirebaseStorage mFirebaseStorage;
         private DatabaseReference databaseReference;
-        private ProgressDialog progressDialog;
-        public GridImageAdapter(Context context,
+    public GridImageAdapter(Context context,
                             List<Blog> blogList,
                             List<String> blogIDList,
                             Activity activity,
@@ -55,7 +60,6 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
         this.activity=activity;
         this.databaseReference=databaseReference;
         mFirebaseStorage=FirebaseStorage.getInstance();
-        this.progressDialog=new ProgressDialog(activity);
     }
 
     @NonNull
@@ -66,7 +70,9 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
     }
 
     @Override
-    public void onBindViewHolder(@NonNull GridImageViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final GridImageViewHolder holder, final int position) {
+
+        holder.CardLoadingPBar.setVisibility(View.VISIBLE);
         RequestOptions requestOptions=new RequestOptions()
                 .centerCrop()
                 .override(176,176);
@@ -75,6 +81,21 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
                 .thumbnail(0.1f)
                 .apply(requestOptions)
                 .into(holder.imageView);
+
+        Glide.with(context).load(BlogList.get(position).getImage()).thumbnail(0.1f)
+                .apply(requestOptions).listener(new RequestListener<Drawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                holder.CardLoadingPBar.setVisibility(View.INVISIBLE);
+                return false;
+            }
+        }).into(holder.imageView);
+
         holder.OptionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -148,49 +169,33 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
     public class GridImageViewHolder extends RecyclerView.ViewHolder{
         public ImageView imageView;
         public Button    OptionButton;
+        public ProgressBar CardLoadingPBar;
         public GridImageViewHolder(View itemView) {
             super(itemView);
             imageView=(ImageView)itemView.findViewById(R.id.PhotoViewPhotoViewCard);
             OptionButton=(Button)itemView.findViewById(R.id.OptionsButton);
+            CardLoadingPBar = itemView.findViewById(R.id.cardloadingpbar);
 
         }
     }
     private void DeleteImage(final int position){
-            progressDialog.setTitle("Delete process");
-            progressDialog.setMessage("Deleting the thumb image...");
-            progressDialog.show();
-           StorageReference photoRef = mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImageThumb().toString());
-           photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+        Toast.makeText(context,"Deleting Image ..Please wait",Toast.LENGTH_SHORT).show();
+        StorageReference photoRef = mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImageThumb().toString());
+        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                progressDialog.setMessage("Deleting uploaded Photo...");
-                StorageReference imageRef=mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImage());
-                imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                databaseReference.child(BlogIDList.get(position)).removeValue(new DatabaseReference.CompletionListener() {
                     @Override
-                    public void onSuccess(Void aVoid) {
-                        databaseReference.child(BlogIDList.get(position)).removeValue(new DatabaseReference.CompletionListener() {
-                            @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                progressDialog.setMessage("Deleted");
-                                progressDialog.dismiss();
-
-                            }
-                        });
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        Toast.makeText(context,"Image Deleted",Toast.LENGTH_SHORT).show();
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                        Toast.makeText(context,"Image Unable to delete ..Please check the internet connection",Toast.LENGTH_SHORT).show();
-                        }
                 });
-
 
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                progressDialog.dismiss();
+
                 Toast.makeText(context,"Image Unable to delete ..Please check the internet connection",Toast.LENGTH_SHORT).show();
 
             }

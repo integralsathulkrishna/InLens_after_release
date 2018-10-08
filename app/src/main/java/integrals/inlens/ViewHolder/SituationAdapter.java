@@ -1,28 +1,46 @@
 package integrals.inlens.ViewHolder;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.cocosw.bottomsheet.BottomSheet;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import integrals.inlens.Models.SituationModel;
+
+import integrals.inlens.Activities.CloudAlbum;
 import integrals.inlens.R;
+import integrals.inlens.Models.SituationModel;
+
 
 public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.SituationViewHolder> {
 
@@ -31,9 +49,72 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     List<String> SIdList;
     int count;
     DatabaseReference databaseReference;
+    BottomSheet.Builder builder;
+
     String CommunityID;
     DatabaseReference membersref;
     List MembersList = new ArrayList();
+    Dialog  Renamesituation;
+
+
+
+    private void RenameSituation(final String s) {
+
+        Renamesituation = new Dialog(context);
+        Renamesituation.setContentView(R.layout.create_new_situation_layout);
+        Renamesituation.setCancelable(false);
+        final EditText SituationName = Renamesituation.findViewById(R.id.situation_name);
+        SituationName.requestFocus();
+        Button Done ,Cancel;
+        Done =   Renamesituation.findViewById(R.id.done_btn);
+        Cancel = Renamesituation.findViewById(R.id.cancel_btn);
+        Done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(!TextUtils.isEmpty(SituationName.getText().toString()))
+                {
+                    databaseReference.child(s).child("name").setValue(SituationName.getText().toString().trim()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if(task.isSuccessful())
+                            {
+
+                                Toast.makeText(context,"Situation renamed as : "+SituationName.getText().toString(),Toast.LENGTH_SHORT).show();
+                                SituationName.setText("");
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            if(e.toString().contains("FirebaseNetworkException"))
+                                Toast.makeText(context,"Not Connected to Internet.",Toast.LENGTH_SHORT).show();
+                            else
+                                Toast.makeText(context,"Unable to rename new Situation.", Toast.LENGTH_SHORT).show();
+
+                            SituationName.setText("");
+                        }
+                    });
+                    Renamesituation.dismiss();
+                }
+                else
+                {
+                    Toast.makeText(context,"No name given",Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+
+        Cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Renamesituation.dismiss();
+            }
+        });
+
+    }
 
 
     public SituationAdapter(Context context, List<SituationModel> situation,
@@ -98,7 +179,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
 
 
-        long t = Long.parseLong(Situation.get(position).getTime());
+        final long t = Long.parseLong(Situation.get(position).getTime());
         CharSequence time = DateUtils.getRelativeDateTimeString(context,t,DateUtils.SECOND_IN_MILLIS,DateUtils.WEEK_IN_MILLIS,DateUtils.FORMAT_ABBREV_ALL);
         holder.Time.setText(String.format("@ %s", time.toString()));
         holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
@@ -136,9 +217,6 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
         final Map member = new HashMap();
         member.put("memid",FirebaseAuth.getInstance().getCurrentUser().getUid());
-
-
-
         holder.Join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -186,6 +264,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
         TextView Name , Count , Time , Title,SituationLogo;
         Button Join,View;
+        ImageButton SituationEditBtn;
 
         public SituationViewHolder(View itemView) {
             super(itemView);

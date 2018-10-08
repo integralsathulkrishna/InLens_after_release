@@ -174,6 +174,7 @@ public class QRCodeReader extends AppCompatActivity
 
                     StartServices();
 
+
                 }
                 builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                     @Override

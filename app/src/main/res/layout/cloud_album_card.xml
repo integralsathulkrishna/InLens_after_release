@@ -89,7 +89,19 @@
                 android:layout_gravity="right"
                 android:layout_margin="5dp"
                 android:background="@drawable/ic_add_participant_black"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:maxLength="20"/>
+
+            <ImageButton
+                android:id="@+id/changecover"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_gravity="right"
+                android:layout_margin="5dp"
+                android:maxLength="20"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_edit_black_24dp"/>
 
             <TextView
                 android:id="@+id/AlbumDescription"
@@ -99,7 +111,8 @@
                 android:layout_centerHorizontal="true"
                 android:text="Album Description"
                 android:textColor="@color/colorPrimary"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:maxLength="30"/>
 
             <TextView
                 android:id="@+id/AlbumTitle"

@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -30,11 +31,13 @@ import integrals.inlens.R;
 
     private View view;
     public Button ShareButton;
+    public ImageButton AlbuymCoverEditBtn;
 
     public AlbumViewHolder(View ItemView) {
         super(ItemView);
         view=ItemView;
         ShareButton=(Button)view.findViewById(R.id.ShareAlbum);
+        AlbuymCoverEditBtn = view.findViewById(R.id.changecover);
         }
 
 
@@ -42,7 +45,7 @@ import integrals.inlens.R;
          ImageView imageView=(ImageView)view.findViewById(R.id.CloudAlbumCover);
         RequestOptions requestOptions=new RequestOptions()
                 .fitCenter();
-        ;
+
         Glide.with(context)
                 .load(Uri)
                 .thumbnail(0.1f)

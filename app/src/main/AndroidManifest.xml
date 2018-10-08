@@ -17,9 +17,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/inlens_logo_m"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/inlens_logo_m"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
@@ -117,7 +117,8 @@
 
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.PhotoView" />
-
+        <activity android:name=".Activities.AlbumCoverEditActivity"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>
