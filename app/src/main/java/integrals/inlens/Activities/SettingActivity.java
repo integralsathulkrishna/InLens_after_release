@@ -360,13 +360,11 @@ public class SettingActivity extends AppCompatActivity {
 
         else if(TextUtils.isEmpty(MyId))
         {
-            startActivity(new Intent(this,MainActivity.class));
             finish();
 
         }
         else
         {
-            startActivity(new Intent(this,MainActivity.class));
             finish();
         }
     }
@@ -506,6 +504,16 @@ public class SettingActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Flow();
+        }
+
+    private void Flow(){
+        finish();
+        startActivity(new Intent(SettingActivity.this,MainActivity.class));
+    }
 
 
 }

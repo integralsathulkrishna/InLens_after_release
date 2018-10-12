@@ -28,6 +28,7 @@ import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 
 public class AlbumCoverEditActivity extends AppCompatActivity {
@@ -202,7 +203,11 @@ public class AlbumCoverEditActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Flow();
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -229,4 +234,19 @@ public class AlbumCoverEditActivity extends AppCompatActivity {
 
 
     }
+
+
+
+
+
+
+
+
+    private void Flow(){
+        finish();
+        startActivity(new Intent(AlbumCoverEditActivity.this,MainActivity.class));
+        }
+
+
+
 }

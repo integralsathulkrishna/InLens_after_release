@@ -117,7 +117,7 @@ import integrals.inlens.R;
 
          noty = new NotificationCompat.Builder(this);
          noty.setAutoCancel(true);
-         noty.setSmallIcon(R.mipmap.ic_launcher);
+         noty.setSmallIcon(R.drawable.inlens_notification);
          noty.setContentTitle("New Situation Detected");
          Intent intent = new Intent(this, MainActivity.class);
          intent.putExtra("code",1);
@@ -254,7 +254,7 @@ import integrals.inlens.R;
                      String notificationid = snapshot.getKey();
                      String sitname = snapshot.child("name").getValue().toString();
                      String ownername = snapshot.child("ownername").getValue().toString();
-                     noty.setContentText(ownername+" has created a new situation, "+sitname+". Check it out now.");
+                     noty.setContentText("  New situation created , "+sitname+". Check it out now.");
                      NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                      manager.notify(notyid,noty.build());
                      ComNotyRef.child(notificationid).removeValue();
@@ -635,7 +635,7 @@ import integrals.inlens.R;
 
          NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
 
-                 .setSmallIcon(R.drawable.ic_emoji_icon)
+                 .setSmallIcon(R.drawable.inlens_notification)
                  .setCustomBigContentView(remoteViews)
                  .setOngoing(true)
                  .setAutoCancel(true)

@@ -1,5 +1,4 @@
 package integrals.inlens;
-
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -11,8 +10,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.provider.ContactsContract;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,7 +18,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.Button;
 import android.widget.EditText;
@@ -70,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private LayoutAnimationController animation;
     private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
+
     //
     //
     // Import from Elson.............................................................................
@@ -113,12 +110,16 @@ public class MainActivity extends AppCompatActivity {
         firebaseUser=InAuthentication.getCurrentUser();
         try{
             if(firebaseUser==null){
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                finish();
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
+                    }else{
+                    if(firebaseUser.isEmailVerified()==false){
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
+                    }else {
+                    CurrentUser = firebaseUser.getUid();
                 }
-                 else {
-                CurrentUser = firebaseUser.getUid();
-                      }
+            }
 
          }
         catch (NullPointerException e){
@@ -187,10 +188,17 @@ public class MainActivity extends AppCompatActivity {
                         InDatabaseReference.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                CommunityID = dataSnapshot.child(getRef(position).getKey().toString()).child("CommunityID").getValue().toString().trim();
-                                getParticipantDatabaseReference=participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
-                                viewHolder.SetParticipants(getApplicationContext(),getParticipantDatabaseReference);
-                            }
+                                try {
+                                    CommunityID = dataSnapshot.child(getRef(position).getKey().toString()).child("CommunityID").getValue().toString().trim();
+                                    getParticipantDatabaseReference=participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
+                                    viewHolder.SetParticipants(getApplicationContext(),getParticipantDatabaseReference);
+
+                                }catch (IndexOutOfBoundsException e){
+                                    e.printStackTrace();
+                                }catch (NullPointerException e){
+                                    e.printStackTrace();
+                                }
+                               }
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
@@ -238,10 +246,18 @@ public class MainActivity extends AppCompatActivity {
                             InDatabaseReference.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                    startActivity(new Intent(MainActivity.this,CloudAlbum.class)
-                                            .putExtra("AlbumName",model.getAlbumTitle())
-                                            .putExtra("GlobalID::",CommunityPostKey));
+                                    try {
+                                        CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
+                                        startActivity(new Intent(MainActivity.this,CloudAlbum.class)
+                                                .putExtra("AlbumName",model.getAlbumTitle())
+                                                .putExtra("GlobalID::",CommunityPostKey)
+                                                .putExtra("LocalID::",PostKey)
+                                                .putExtra("UserID::",CurrentUser));
+
+                                    }catch (NullPointerException e){
+                                        e.printStackTrace();
+                                    }
+
 
                                 }
 

@@ -1,6 +1,7 @@
 package integrals.inlens.Activities;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -46,6 +47,7 @@ public class RegisterUser extends AppCompatActivity {
             mPassword = (EditText) findViewById(R.id.Password);
             mCreateBtn = (Button) findViewById(R.id.ProceedButton);
             progressDialog = new ProgressDialog(this);
+            progressDialog.setCancelable(false);
             getSupportActionBar().setTitle("User Registration");
             VerifiedButton.setEnabled(false);
             mCreateBtn.setOnClickListener(new View.OnClickListener() {
@@ -150,13 +152,25 @@ public class RegisterUser extends AppCompatActivity {
         }
 
         private void  sendEmailVerification(){
+
         final FirebaseUser firebaseUser=mAuth.getCurrentUser();
         if(firebaseUser!=null){
             firebaseUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                Toast.makeText(getApplicationContext(),"E-mail verification send. Please check your mail and click the link.",Toast.LENGTH_LONG).show();
-                VerifiedButton.setEnabled(true);
+                    final android.app.AlertDialog.Builder alertbuilder = new android.app.AlertDialog.Builder(RegisterUser.this);
+                    alertbuilder.setTitle("Verify E-mail")
+                            .setMessage("Verify your E-mail address for InLens registration ,\n then login with the given E-mail ID .")
+                            .setPositiveButton("Proceed", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(final DialogInterface dialogInterface, int i) {
+                                    finish();
+                                }
+                            })
+                            .setCancelable(false)
+                            .create()
+                            .show();
+                    VerifiedButton.setEnabled(true);
                 }
             });
         }
@@ -166,6 +180,7 @@ public class RegisterUser extends AppCompatActivity {
         private void checkEmailVerification(){
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user.reload();
         if(user.isEmailVerified())
         {
             startActivity(new Intent(RegisterUser.this,SettingActivity.class));
@@ -179,7 +194,9 @@ public class RegisterUser extends AppCompatActivity {
 
     }
 
-
-
+    @Override
+    public void onBackPressed() {
+       Toast.makeText(getApplicationContext(),"Registration incomplete. Cannot go back",Toast.LENGTH_SHORT).show();
+    }
 }
 

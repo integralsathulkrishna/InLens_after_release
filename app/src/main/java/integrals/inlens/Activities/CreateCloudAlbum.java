@@ -47,6 +47,7 @@ import java.util.Map;
 
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
+import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 import integrals.inlens.Services.RecentImageService;
 
@@ -376,8 +377,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
 
 
-    private void CreateSituation(){
-        {
+    private void CreateSituation()
+    {
+
             CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
             final String CommunityID=currentDatabase.GetLiveCommunityID();
             databaseReference = FirebaseDatabase.getInstance().getReference().child("Communities")
@@ -442,14 +444,23 @@ public class CreateCloudAlbum extends AppCompatActivity {
                         Toast.makeText(CreateCloudAlbum.this,"Unable to create new Situation.", Toast.LENGTH_SHORT).show();
                 }
             });
-        }
+
 
 
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Flow();
 
+    }
 
+    private void Flow(){
+        finish();
+        startActivity(new Intent(CreateCloudAlbum.this,MainActivity.class));
+    }
 
 
 

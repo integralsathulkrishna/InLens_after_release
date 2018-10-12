@@ -38,6 +38,7 @@ import integrals.inlens.R;
         view=ItemView;
         ShareButton=(Button)view.findViewById(R.id.ShareAlbum);
         AlbuymCoverEditBtn = view.findViewById(R.id.changecover);
+
         }
 
 
@@ -117,4 +118,8 @@ import integrals.inlens.R;
 
 
      }
+
+
+
+
   }

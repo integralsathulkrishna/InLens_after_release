@@ -24,6 +24,7 @@ import info.androidhive.barcode.BarcodeReader;
 import integrals.inlens.Helper.CurrentDatabase;
 
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
+import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 import integrals.inlens.Services.RecentImageService;
 
@@ -209,7 +210,16 @@ public class QRCodeReader extends AppCompatActivity
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Flow();
+    }
 
+    private void Flow(){
+        finish();
+        startActivity(new Intent(QRCodeReader.this,MainActivity.class));
+    }
 }
 
 

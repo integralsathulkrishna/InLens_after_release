@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecyclerItemClickListener;
+import integrals.inlens.MainActivity;
 import integrals.inlens.Models.Blog;
 import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
@@ -57,13 +59,14 @@ import integrals.inlens.ViewHolder.SituationAdapter;
 public class CloudAlbum extends AppCompatActivity {
     private RecyclerView            recyclerView;
     private DatabaseReference       databaseReference;
+    private String                  CommunityIDLocal;
     private String                  CommunityID;
     private Calendar                calendar;
     private SituationAdapter        adapter;
     private String                  sowner,stime,stitle,sKey,sTime;
     private List<SituationModel>    SituationList;
     private List<String>            SituationIDList;
-    private DatabaseReference       db,ComNotyRef;
+    private DatabaseReference       db,ComNotyRef,deleteDatabaseReference;
     private String                  Album;
     private Button                  NewSituation;
     private String                  ReturnName="Oops";
@@ -87,6 +90,8 @@ public class CloudAlbum extends AppCompatActivity {
     private BottomSheetBehavior bottomSheetBehavior;
     private Activity activity;
     private BottomSheet.Builder builder;
+    private String LocalID;
+    private String CurrentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +99,12 @@ public class CloudAlbum extends AppCompatActivity {
         setContentView(R.layout.ac_cloud_album);
 
         activity=this;
+        CommunityIDLocal=getIntent().getStringExtra("PostKeyLocal::");
         SwipeControl=(Button)findViewById(R.id.SwipeControl);
         String AlbumName = getIntent().getStringExtra("AlbumName");
         CommunityID = getIntent().getStringExtra("GlobalID::");
+        LocalID=getIntent().getStringExtra("LocalID::");
+        CurrentUser=getIntent().getStringExtra("UserID::");
         recyclerView = (RecyclerView)findViewById(R.id.SituationRecyclerView);
         SituationName=(TextView)findViewById(R.id.SituationNametxt);
         recyclerViewPhotoList=(RecyclerView)findViewById(R.id.SituationPhotos);
@@ -107,6 +115,13 @@ public class CloudAlbum extends AppCompatActivity {
         recyclerViewPhotoList.setVisibility(View.INVISIBLE);
         databaseReferencePhotoList = FirebaseDatabase.getInstance().getReference().child("Communities")
                 .child(CommunityID).child("BlogPosts");
+
+        deleteDatabaseReference=FirebaseDatabase
+                .getInstance()
+                .getReference()
+                .child("Users")
+                .child(CurrentUser)
+                .child("Communities").child(LocalID);
 
         final GridLayoutManager gridLayoutManager = new GridLayoutManager(getApplicationContext(),1,LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(gridLayoutManager);
@@ -365,11 +380,17 @@ public class CloudAlbum extends AppCompatActivity {
             menu.add(0, 0, 0, "Add Participant")
                     .setIcon(R.drawable.ic_add_participant)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+
         if(sharedPreferences1.getBoolean("ThisOwner::",false) ==true) {
             menu.add(0, 1, 0, "Add Situation")
                     .setIcon(R.drawable.ic_add)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
+            menu.add(0, 2, 0, "Delete Album")
+                    .setIcon(R.drawable.menu_icon)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
         }
 
 
@@ -387,6 +408,20 @@ public class CloudAlbum extends AppCompatActivity {
         if(item.getItemId()==1){
             createNewSituation.show();
         }
+        if(item.getItemId()==2){
+            new BottomSheet.Builder(this).title("title").sheet(R.menu.cloud_album_menu).listener(new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case R.id.delete_cloud_album:
+                            DeleteCurrentAlbum();
+                            break;
+                    }
+                }
+            }).show();
+
+        }
+
         return true;
     }
 
@@ -872,7 +907,35 @@ public class CloudAlbum extends AppCompatActivity {
 
     }
 
+    private void DeleteCurrentAlbum(){
+                deleteDatabaseReference.removeValue().addOnSuccessListener(
+                        new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                             Toast.makeText(getApplicationContext(),"Album removed",Toast.LENGTH_SHORT).show();
+                             finish();
 
+                            }
+                        }
+                ).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(),"Unable to remove album . Please check your internet connection.",Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Flow();
+    }
+
+    private void Flow(){
+        finish();
+        startActivity(new Intent(CloudAlbum.this,MainActivity.class));
+    }
 
 }
 

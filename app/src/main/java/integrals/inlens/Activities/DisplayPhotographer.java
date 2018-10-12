@@ -1,5 +1,6 @@
 package integrals.inlens.Activities;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 
 public class DisplayPhotographer extends AppCompatActivity {
@@ -49,5 +51,15 @@ public class DisplayPhotographer extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Flow();
+    }
+
+    private void Flow(){
+        finish();
+        startActivity(new Intent(DisplayPhotographer.this,MainActivity.class));
+    }
 
 }
