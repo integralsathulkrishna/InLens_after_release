@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
 
+    private int EDIT_COUNT;
     //
     //
     // Import from Elson.............................................................................
@@ -158,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        EDIT_COUNT=0;
         // Downloading Recycler View
         MainLoadingProgressBar.setVisibility(View.VISIBLE);
         try {
@@ -248,7 +250,6 @@ public class MainActivity extends AppCompatActivity {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     try {
                                         CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                        finish();
                                         startActivity(new Intent(MainActivity.this,CloudAlbum.class)
                                                 .putExtra("AlbumName",model.getAlbumTitle())
                                                 .putExtra("GlobalID::",CommunityPostKey)
@@ -275,20 +276,21 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
 
-                            final String PostKey=getRef(position).getKey().toString().trim();
-
+                            final String PostKey= getRef(position).getKey().trim();
                             InDatabaseReference.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
 
+                                    EDIT_COUNT++;
+
                                     AlbumCoverEditKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                    if(!TextUtils.isEmpty(AlbumCoverEditKey))
+                                    if(!TextUtils.isEmpty(AlbumCoverEditKey) && EDIT_COUNT==1)
                                     {
-                                        finish();
+
                                         startActivity(new Intent(MainActivity.this, AlbumCoverEditActivity.class).putExtra("Albumkey",AlbumCoverEditKey));
 
                                     }
-                                    else
+                                    else if(TextUtils.isEmpty(AlbumCoverEditKey) && EDIT_COUNT==1)
                                     {
                                         Toast.makeText(MainActivity.this,"Unable to perform edit now.",Toast.LENGTH_LONG).show();
                                     }

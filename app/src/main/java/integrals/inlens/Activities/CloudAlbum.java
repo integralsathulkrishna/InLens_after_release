@@ -1,6 +1,7 @@
 package integrals.inlens.Activities;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -92,11 +93,14 @@ public class CloudAlbum extends AppCompatActivity {
     private BottomSheet.Builder builder;
     private String LocalID;
     private String CurrentUser;
+    private Activity cloudalbumcontext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
+
+        cloudalbumcontext = this;
 
         activity=this;
         CommunityIDLocal=getIntent().getStringExtra("PostKeyLocal::");
@@ -497,8 +501,8 @@ public class CloudAlbum extends AppCompatActivity {
 
                 adapter = new SituationAdapter(getApplicationContext(),
                         SituationList,
-                        SituationIDList,db,
-                        CommunityID,databaseReference);
+                        SituationIDList,databaseReference,
+                        CommunityID,cloudalbumcontext);
                 recyclerView.setAdapter(adapter);
 
 
@@ -535,65 +539,6 @@ public class CloudAlbum extends AppCompatActivity {
                             @Override
                             public void onLongItemClick(View view, final int position) {
 
-
-                              BottomSheet.Builder BottomS =  new BottomSheet.Builder(CloudAlbum.this);
-                              BottomS.title("Edit Situation : "+SituationList.get(position).getTitle())
-                                        .sheet(R.menu.situationmenu).listener(new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                                        switch (i)
-                                        {
-                                            case R.id.renamesituation :
-                                                RenameSituation(SituationIDList.get(position));
-                                                Renamesituation.show();
-                                                break;
-                                            case R.id.deletesituation:
-                                            {
-                                                if(SituationIDList.size()<=1)
-                                                {
-                                                    Toast.makeText(getApplicationContext(),"Unable to perform deletion. Album should have at least one situation.",Toast.LENGTH_LONG).show();
-                                                }
-                                                else
-                                                {
-
-                                                    final android.app.AlertDialog.Builder alertbuilder = new android.app.AlertDialog.Builder(CloudAlbum.this);
-                                                    alertbuilder.setTitle("Delete Situation "+SituationList.get(position).getTitle())
-                                                            .setMessage("You are about to delete the situation. Are you sure you want to continue ?")
-                                                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(DialogInterface dialogInterface, int i) {
-
-                                                                    dialogInterface.dismiss();
-                                                                }
-                                                            })
-                                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(final DialogInterface dialogInterface, int i) {
-
-                                                                    databaseReference.child(SituationIDList.get(position)).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                        @Override
-                                                                        public void onComplete(@NonNull Task<Void> task) {
-
-                                                                            Toast.makeText(CloudAlbum.this,"Successfully deleted the situation",Toast.LENGTH_LONG).show();
-                                                                            dialogInterface.dismiss();
-                                                                        }
-                                                                    });
-
-                                                                }
-                                                            })
-                                                            .create()
-                                                            .show();
-
-                                                }
-
-                                            }
-
-                                            break;
-                                        }
-
-                                    }
-                                    }).show();
                             }
                         })
                 );
@@ -929,12 +874,7 @@ public class CloudAlbum extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Flow();
-    }
-
-    private void Flow(){
         finish();
-        startActivity(new Intent(CloudAlbum.this,MainActivity.class));
     }
 
 }

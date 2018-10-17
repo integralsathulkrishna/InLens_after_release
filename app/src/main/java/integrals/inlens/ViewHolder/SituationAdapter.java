@@ -47,20 +47,25 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     Context context;
     List<SituationModel> Situation;
     List<String> SIdList;
-    int count;
     DatabaseReference databaseReference;
-    BottomSheet.Builder builder;
-
     String CommunityID;
-    DatabaseReference membersref;
+    Activity CloudAlbum;
     List MembersList = new ArrayList();
     Dialog  Renamesituation;
 
 
+    public SituationAdapter(Context context, List<SituationModel> situation, List<String> SIdList, DatabaseReference databaseReference, String communityID,  Activity cloudAlbum) {
+        this.context = context;
+        Situation = situation;
+        this.SIdList = SIdList;
+        this.databaseReference = databaseReference;
+        CommunityID = communityID;
+        CloudAlbum = cloudAlbum;
+    }
 
     private void RenameSituation(final String s) {
 
-        Renamesituation = new Dialog(context);
+        Renamesituation = new Dialog(CloudAlbum);
         Renamesituation.setContentView(R.layout.create_new_situation_layout);
         Renamesituation.setCancelable(false);
         final EditText SituationName = Renamesituation.findViewById(R.id.situation_name);
@@ -117,17 +122,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     }
 
 
-    public SituationAdapter(Context context, List<SituationModel> situation,
-                            List<String> SIdList,
-                            DatabaseReference databaseReference,
-                            String communityID, DatabaseReference membersref) {
-        this.context = context;
-        Situation = situation;
-        this.SIdList = SIdList;
-        this.databaseReference = databaseReference;
-        CommunityID = communityID;
-        this.membersref = membersref;
-    }
+
 
     @NonNull
     @Override
@@ -140,100 +135,12 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     public void onBindViewHolder(@NonNull final SituationViewHolder holder, final int position) {
 
 
-        membersref.child(SIdList.get(position)).child("posts").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                count=0;
-                for (DataSnapshot snapshot:dataSnapshot.getChildren())
-                {
-                    if(snapshot.hasChildren())
-                       count++;
-                }
-                holder.Count.setText(String.format("%d Posts", count));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-        //Toast.makeText(context,Situation.get(position).getCreatedby(),Toast.LENGTH_SHORT).show();
-
-
-        databaseReference.child(Situation.get(position).getCreatedby()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                String name = dataSnapshot.child("Name").getValue().toString();
-                holder.Name.setText(String.format("By : %s",name));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-
-
         final long t = Long.parseLong(Situation.get(position).getTime());
         CharSequence time = DateUtils.getRelativeDateTimeString(context,t,DateUtils.SECOND_IN_MILLIS,DateUtils.WEEK_IN_MILLIS,DateUtils.FORMAT_ABBREV_ALL);
         holder.Time.setText(String.format("@ %s", time.toString()));
         holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
         holder.SituationLogo.setText(String.format("%s", Situation.get(position).getTitle().charAt(0)));
-        membersref.child(SIdList.get(position)).child("members").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                MembersList.clear();
-
-                for(DataSnapshot snapshot :dataSnapshot.getChildren())
-                {
-                    String memberid = snapshot.child("memid").getValue().toString();
-                    if(!MembersList.contains(memberid))
-                    {
-                        MembersList.add(memberid);
-                    }
-                }
-
-                if(MembersList.contains(FirebaseAuth.getInstance().getCurrentUser().getUid()))
-                {
-                    holder.Join.setVisibility(View.GONE);
-
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-        final Map member = new HashMap();
-        member.put("memid",FirebaseAuth.getInstance().getCurrentUser().getUid());
-        holder.Join.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-                membersref.child(SIdList.get(position)).child("members").push().setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-
-                        if(task.isSuccessful())
-                            Toast.makeText(context,"Successfully joined the new situation",Toast.LENGTH_LONG).show();
-
-                    }
-                });
-
-            }
-        });
 
         holder.View.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -250,6 +157,92 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
             }
         });
 
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+
+                BottomSheet.Builder BottomS =  new BottomSheet.Builder(CloudAlbum);
+                BottomS.title("Edit Situation : "+Situation.get(position).getTitle())
+                        .sheet(R.menu.situationmenu).listener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        switch (i)
+                        {
+                            case R.id.renamesituation :
+                                RenameSituation(SIdList.get(position));
+                                Renamesituation.show();
+                                break;
+                            case R.id.deletesituation:
+                            {
+                                if(SIdList.size()<=1)
+                                {
+                                    Toast.makeText(context,"Unable to perform deletion. Album should have at least one situation.",Toast.LENGTH_LONG).show();
+                                }
+                                else
+                                {
+
+                                    final android.app.AlertDialog.Builder alertbuilder = new android.app.AlertDialog.Builder(CloudAlbum);
+                                    alertbuilder.setTitle("Delete Situation "+Situation.get(position).getTitle())
+                                            .setMessage("You are about to delete the situation. Are you sure you want to continue ?")
+                                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+
+                                                    dialogInterface.dismiss();
+                                                }
+                                            })
+                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(final DialogInterface dialogInterface, int i) {
+
+
+
+                                                    databaseReference.child(SIdList.get(position)).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+
+                                                            Toast.makeText(context,"Successfully deleted the situation",Toast.LENGTH_LONG).show();
+                                                            dialogInterface.dismiss();
+                                                        }
+                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+
+                                                            Toast.makeText(context,"Failed to delete the situation",Toast.LENGTH_LONG).show();
+                                                            dialogInterface.dismiss();
+                                                        }
+                                                    });
+
+
+                                                }
+                                            })
+                                            .create()
+                                            .show();
+
+                                }
+
+                            }
+
+                            break;
+                        }
+
+                    }
+                }).show();
+
+                return false;
+            }
+        });
+
+        holder.SituationEditBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+
+            }
+        });
 
     }
 
@@ -275,6 +268,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
             Join = itemView.findViewById(R.id.situajoin);
             View = itemView.findViewById(R.id.situaview);
             SituationLogo=itemView.findViewById(R.id.SituationLogo);
+            SituationEditBtn = itemView.findViewById(R.id.situationeditbtn);
         }
     }
 }

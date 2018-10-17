@@ -91,7 +91,6 @@ public class AlbumCoverEditActivity extends AppCompatActivity {
 
                 CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
-                        .setCropShape(CropImageView.CropShape.RECTANGLE)
                         .setAspectRatio((int) 36,20)
                         .setFixAspectRatio(true)
                         .start(AlbumCoverEditActivity.this);
@@ -144,7 +143,6 @@ public class AlbumCoverEditActivity extends AppCompatActivity {
                                                                         Toast.makeText(AlbumCoverEditActivity.this,"Successfully uploaded new cover.",Toast.LENGTH_LONG).show();
                                                                         CoverEditProgressBar.setVisibility(View.INVISIBLE);
                                                                         onBackPressed();
-
                                                                     }
                                                                     else
                                                                     {
@@ -204,20 +202,11 @@ public class AlbumCoverEditActivity extends AppCompatActivity {
         }
     }
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Flow();
-    }
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==GALLERY_PICK && resultCode == RESULT_OK){
 
             Uri imageUri = data.getData();
-
-            CropImage.activity(imageUri)
-                    .setCropShape(CropImageView.CropShape.RECTANGLE)
-                    .start(this);
             finish();
 
         }
@@ -234,19 +223,5 @@ public class AlbumCoverEditActivity extends AppCompatActivity {
 
 
     }
-
-
-
-
-
-
-
-
-    private void Flow(){
-        finish();
-        startActivity(new Intent(AlbumCoverEditActivity.this,MainActivity.class));
-        }
-
-
 
 }
