@@ -58,6 +58,7 @@ public class PhotoView extends AppCompatActivity {
     private ImageView imageView;
     private Button PreviousImage,AfterImage;
     private Boolean SetIndex=false;
+    private int TotalPosts;
     //private GestureDetector gdt;
 
     @Override
@@ -73,6 +74,7 @@ public class PhotoView extends AppCompatActivity {
         PreviousImage=(Button)findViewById(R.id.LeftPhotoSwipe);
         AfterImage=(Button)findViewById(R.id.RightPhotoSwipe);
         blogArrayList = getIntent().getExtras().getParcelableArrayList("data");
+        TotalPosts=blogArrayList.size();
         Position = getIntent().getExtras().getInt("position");
         OriginalImageButton = (Button) findViewById(R.id.OriginalImageButton);
   //    gdt = new GestureDetector(new GestureListener());
@@ -221,7 +223,7 @@ public class PhotoView extends AppCompatActivity {
         });
 */
 
-            //new DownloadFileFrontImagesFromURL().execute("");
+         //   new DownloadFileFrontImagesFromURL().execute("");
     }
 
 
@@ -337,7 +339,9 @@ public class PhotoView extends AppCompatActivity {
                try {
                    downloadPosition = Position + 1;
                    ImageUrl = blogArrayList.get(downloadPosition).getImageThumb();
-                   DownloadImageFromPath(ImageUrl);
+                   if(downloadPosition<TotalPosts) {
+                       DownloadImageFromPath(ImageUrl);
+                   }
 
                } catch (IndexOutOfBoundsException e) {
 
