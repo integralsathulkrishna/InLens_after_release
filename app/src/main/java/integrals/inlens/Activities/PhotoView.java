@@ -221,7 +221,7 @@ public class PhotoView extends AppCompatActivity {
         });
 */
 
-           // new DownloadFileFrontImagesFromURL().execute("");
+            new DownloadFileFrontImagesFromURL().execute("");
     }
 
 
@@ -316,7 +316,116 @@ public class PhotoView extends AppCompatActivity {
 
    }
 
-   /*
+
+       private class DownloadFileFrontImagesFromURL extends AsyncTask<String, Integer, String> {
+           private String FileName;
+           private int i;
+           private String ImageUrl;
+           private int downloadPosition;
+
+           /**
+            * Before starting background thread Show Progress Bar Dialog
+            */
+           @Override
+           protected void onPreExecute() {
+               super.onPreExecute();
+           }
+
+           @Override
+           protected String doInBackground(String... f_url) {
+
+               try {
+                   downloadPosition = Position + 1;
+                   ImageUrl = blogArrayList.get(downloadPosition).getImageThumb();
+                   DownloadImageFromPath(ImageUrl);
+
+               } catch (IndexOutOfBoundsException e) {
+
+               } catch (Exception e) {
+                   Toast.makeText(getApplicationContext(), "Download failed..", Toast.LENGTH_SHORT).show();
+               }
+
+               return "Excecuted";
+           }
+
+           /**
+            * Updating progress bar
+            */
+           protected void onProgressUpdate(Integer... progress) {
+               Toast.makeText(getApplicationContext(), "Downloading ...." + downloadPosition, Toast.LENGTH_SHORT).show();
+
+           }
+
+           @Override
+           protected void onPostExecute(String file_url) {
+               // dismiss the dialog after the file was downloaded
+               WriteData(downloadPosition, FileName);
+               Toast.makeText(getApplicationContext(), "Download complete....." + downloadPosition, Toast.LENGTH_SHORT).show();
+           }
+
+           private void DownloadImageFromPath(String path) {
+               InputStream in = null;
+               Bitmap bmp = null;
+               int responseCode = -1;
+               try {
+
+                   URL url = new URL(path);//"http://192.xx.xx.xx/mypath/img1.jpg
+                   HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                   con.setDoInput(true);
+                   con.connect();
+                   responseCode = con.getResponseCode();
+                   if (responseCode == HttpURLConnection.HTTP_OK) {
+                       //download
+                       in = con.getInputStream();
+                       bmp = BitmapFactory.decodeStream(in);
+                       in.close();
+                       SaveBitmap(bmp);
+                   }
+
+               } catch (Exception ex) {
+                   Log.e("Exception", ex.toString());
+               }
+           }
+
+           private void SaveBitmap(Bitmap bmp) {
+               File BitmapFile = new File(Environment.getExternalStorageDirectory()
+                       + "/Android/data/"
+                       + getApplicationContext().getPackageName()
+                       + "/Files/Downloaded" + System.currentTimeMillis() + ".jpg");
+               BitmapFile.mkdirs();
+               if (BitmapFile.exists())
+                   BitmapFile.delete();
+               try {
+                   FileOutputStream out = new FileOutputStream(BitmapFile);
+                   bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                   out.flush();
+                   out.close();
+                   FileName = BitmapFile.getAbsolutePath().toString();
+               } catch (Exception e) {
+                   e.printStackTrace();
+               }
+           }
+
+
+       }
+
+
+
+
+
+    private void WriteData(int i, String fileName) {
+
+        blogArrayList.get(i).setImageThumb(fileName);
+
+    }
+
+
+
+
+}
+
+
+/*
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -378,111 +487,3 @@ public class PhotoView extends AppCompatActivity {
     }
 
 */
-
-    private class DownloadFileFrontImagesFromURL extends AsyncTask<String, Integer, String> {
-        private String FileName;
-        private int i;
-        private String ImageUrl;
-        private int downloadPosition;
-        /**
-         * Before starting background thread Show Progress Bar Dialog
-         * */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-         @Override
-         protected String doInBackground(String... f_url) {
-
-             try {
-                 downloadPosition=Position+1;
-                 ImageUrl=blogArrayList.get(downloadPosition).getImageThumb();
-                 DownloadImageFromPath(ImageUrl);
-
-             }catch (IndexOutOfBoundsException e){
-
-             } catch (Exception e) {
-                 Toast.makeText(getApplicationContext(),"Download failed..",Toast.LENGTH_SHORT).show();
-             }
-
-            return "Excecuted";
-        }
-
-        /**
-         * Updating progress bar
-         * */
-        protected void onProgressUpdate(Integer... progress) {
-            Toast.makeText(getApplicationContext(),"Downloading ...."+downloadPosition,Toast.LENGTH_SHORT).show();
-
-        }
-
-        @Override
-        protected void onPostExecute(String file_url) {
-            // dismiss the dialog after the file was downloaded
-            WriteData(downloadPosition,FileName);
-            Toast.makeText(getApplicationContext(),"Download complete....."+downloadPosition,Toast.LENGTH_SHORT).show();
-        }
-        private void DownloadImageFromPath(String path){
-            InputStream in =null;
-            Bitmap bmp=null;
-            int responseCode = -1;
-            try{
-
-                URL url = new URL(path);//"http://192.xx.xx.xx/mypath/img1.jpg
-                HttpURLConnection con = (HttpURLConnection)url.openConnection();
-                con.setDoInput(true);
-                con.connect();
-                responseCode = con.getResponseCode();
-                if(responseCode == HttpURLConnection.HTTP_OK)
-                {
-                    //download
-                    in = con.getInputStream();
-                    bmp = BitmapFactory.decodeStream(in);
-                    in.close();
-                    SaveBitmap(bmp);
-                    }
-
-            }
-            catch(Exception ex){
-                Log.e("Exception",ex.toString());
-            }
-        }
-
-            private void SaveBitmap(Bitmap bmp) {
-            File BitmapFile=new File(Environment.getExternalStorageDirectory()
-                        + "/Android/data/"
-                        + getApplicationContext().getPackageName()
-                        + "/Files/Downloaded"+System.currentTimeMillis()+".jpg");
-                BitmapFile.mkdirs();
-                if (BitmapFile.exists())
-                    BitmapFile.delete();
-                try {
-                    FileOutputStream out = new FileOutputStream(BitmapFile);
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                    out.flush();
-                    out.close();
-                    FileName=BitmapFile.getAbsolutePath().toString();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-
-    }
-
-
-
-
-
-
-
-
-    private void WriteData(int i, String fileName) {
-    blogArrayList.get(i).setImageThumb(fileName);
-
-    }
-
-
-
-
-}
