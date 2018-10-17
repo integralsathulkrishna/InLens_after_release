@@ -221,7 +221,7 @@ public class PhotoView extends AppCompatActivity {
         });
 */
 
-            new DownloadFileFrontImagesFromURL().execute("");
+            //new DownloadFileFrontImagesFromURL().execute("");
     }
 
 
