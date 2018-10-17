@@ -248,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     try {
                                         CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
+                                        finish();
                                         startActivity(new Intent(MainActivity.this,CloudAlbum.class)
                                                 .putExtra("AlbumName",model.getAlbumTitle())
                                                 .putExtra("GlobalID::",CommunityPostKey)
@@ -283,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
                                     AlbumCoverEditKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
                                     if(!TextUtils.isEmpty(AlbumCoverEditKey))
                                     {
+                                        finish();
                                         startActivity(new Intent(MainActivity.this, AlbumCoverEditActivity.class).putExtra("Albumkey",AlbumCoverEditKey));
 
                                     }
@@ -349,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(),"Sorry.You can't create a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
                             }
                             else{
+                                finish();
                                 startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
                             }
 
@@ -361,6 +364,7 @@ public class MainActivity extends AppCompatActivity {
                             }else
 
                             {
+                                finish();
                                 startActivity(new Intent(MainActivity.this, QRCodeReader.class));
 
                             }
@@ -369,6 +373,7 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
                         break;
                         case R.id.profile_pic:
+                            finish();
                             startActivity(new Intent(MainActivity.this, SettingActivity.class));
                             break;
                         case R.id.quit_cloud_album:

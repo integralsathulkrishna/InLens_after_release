@@ -54,12 +54,7 @@ public class DisplayPhotographer extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Flow();
     }
 
-    private void Flow(){
-        finish();
-        startActivity(new Intent(DisplayPhotographer.this,MainActivity.class));
-    }
 
 }

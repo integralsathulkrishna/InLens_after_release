@@ -101,6 +101,7 @@ import integrals.inlens.R;
                  viewHolder.InView.setOnClickListener(new View.OnClickListener() {
                      @Override
                      public void onClick(View v) {
+
                          Intent i= new Intent(context,DisplayPhotographer.class);
                          i.putExtra("EMAIL_ID", model.getEmail_ID());
                          i.putExtra("PROFILE_PIC", model.getProfile_picture());

@@ -123,8 +123,7 @@ public class RegisterUser extends AppCompatActivity {
 
 
                                 if(task.isSuccessful()){
-
-                                    progressDialog.dismiss();
+                                    progressDialog.setMessage("Sending E-mail verfification. Please wait");
                                     sendEmailVerification();
 
                                 }
@@ -159,8 +158,8 @@ public class RegisterUser extends AppCompatActivity {
                 @Override
                 public void onSuccess(Void aVoid) {
                     final android.app.AlertDialog.Builder alertbuilder = new android.app.AlertDialog.Builder(RegisterUser.this);
-                    alertbuilder.setTitle("Verify E-mail")
-                            .setMessage("Verify your E-mail address for InLens registration ,\n then login with the given E-mail ID .")
+                    progressDialog.dismiss();
+                    alertbuilder.setTitle("Verify E-mail").setMessage("Verify your E-mail address for InLens registration , then login with the provided \n E-mail address and password .")
                             .setPositiveButton("Proceed", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(final DialogInterface dialogInterface, int i) {

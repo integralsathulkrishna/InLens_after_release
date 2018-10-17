@@ -1,11 +1,16 @@
 package integrals.inlens.Activities;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +28,16 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Random;
 
 import integrals.inlens.Models.Blog;
 import integrals.inlens.R;
@@ -119,11 +133,11 @@ public class PhotoView extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
 
-
-
-
-
+    }
 
     public void SetThumbPhoto(final Context context,
                               final String ImageUri,
@@ -207,7 +221,7 @@ public class PhotoView extends AppCompatActivity {
         });
 */
 
-
+           // new DownloadFileFrontImagesFromURL().execute("");
     }
 
 
@@ -364,4 +378,111 @@ public class PhotoView extends AppCompatActivity {
     }
 
 */
+
+    private class DownloadFileFrontImagesFromURL extends AsyncTask<String, Integer, String> {
+        private String FileName;
+        private int i;
+        private String ImageUrl;
+        private int downloadPosition;
+        /**
+         * Before starting background thread Show Progress Bar Dialog
+         * */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+         @Override
+         protected String doInBackground(String... f_url) {
+
+             try {
+                 downloadPosition=Position+1;
+                 ImageUrl=blogArrayList.get(downloadPosition).getImageThumb();
+                 DownloadImageFromPath(ImageUrl);
+
+             }catch (IndexOutOfBoundsException e){
+
+             } catch (Exception e) {
+                 Toast.makeText(getApplicationContext(),"Download failed..",Toast.LENGTH_SHORT).show();
+             }
+
+            return "Excecuted";
+        }
+
+        /**
+         * Updating progress bar
+         * */
+        protected void onProgressUpdate(Integer... progress) {
+            Toast.makeText(getApplicationContext(),"Downloading ...."+downloadPosition,Toast.LENGTH_SHORT).show();
+
+        }
+
+        @Override
+        protected void onPostExecute(String file_url) {
+            // dismiss the dialog after the file was downloaded
+            WriteData(downloadPosition,FileName);
+            Toast.makeText(getApplicationContext(),"Download complete....."+downloadPosition,Toast.LENGTH_SHORT).show();
+        }
+        private void DownloadImageFromPath(String path){
+            InputStream in =null;
+            Bitmap bmp=null;
+            int responseCode = -1;
+            try{
+
+                URL url = new URL(path);//"http://192.xx.xx.xx/mypath/img1.jpg
+                HttpURLConnection con = (HttpURLConnection)url.openConnection();
+                con.setDoInput(true);
+                con.connect();
+                responseCode = con.getResponseCode();
+                if(responseCode == HttpURLConnection.HTTP_OK)
+                {
+                    //download
+                    in = con.getInputStream();
+                    bmp = BitmapFactory.decodeStream(in);
+                    in.close();
+                    SaveBitmap(bmp);
+                    }
+
+            }
+            catch(Exception ex){
+                Log.e("Exception",ex.toString());
+            }
+        }
+
+            private void SaveBitmap(Bitmap bmp) {
+            File BitmapFile=new File(Environment.getExternalStorageDirectory()
+                        + "/Android/data/"
+                        + getApplicationContext().getPackageName()
+                        + "/Files/Downloaded"+System.currentTimeMillis()+".jpg");
+                BitmapFile.mkdirs();
+                if (BitmapFile.exists())
+                    BitmapFile.delete();
+                try {
+                    FileOutputStream out = new FileOutputStream(BitmapFile);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                    out.flush();
+                    out.close();
+                    FileName=BitmapFile.getAbsolutePath().toString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+    }
+
+
+
+
+
+
+
+
+    private void WriteData(int i, String fileName) {
+    blogArrayList.get(i).setImageThumb(fileName);
+
+    }
+
+
+
+
 }
