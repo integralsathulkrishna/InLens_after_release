@@ -117,7 +117,7 @@
 
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.PhotoView" />
-        <activity android:name=".Activities.AlbumCoverEditActivity"/>
+        <activity android:name=".Activities.CoverEditActivity"></activity>
     </application>
 
 </manifest>

@@ -93,6 +93,7 @@ public class CloudAlbum extends AppCompatActivity {
     private BottomSheet.Builder builder;
     private String LocalID;
     private String CurrentUser;
+    private EditText SitEditName;
     private Activity cloudalbumcontext;
 
     @Override
@@ -165,8 +166,8 @@ public class CloudAlbum extends AppCompatActivity {
         createNewSituation = new Dialog(CloudAlbum.this);
         createNewSituation.setContentView(R.layout.create_new_situation_layout);
         createNewSituation.setCancelable(false);
-        final EditText SituationName = createNewSituation.findViewById(R.id.situation_name);
-        SituationName.requestFocus();
+        SitEditName = createNewSituation.findViewById(R.id.situation_name);
+        SitEditName.requestFocus();
         Button Done ,Cancel;
         Done =   createNewSituation.findViewById(R.id.done_btn);
         Cancel = createNewSituation.findViewById(R.id.cancel_btn);
@@ -174,7 +175,7 @@ public class CloudAlbum extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(!TextUtils.isEmpty(SituationName.getText().toString()))
+                if(!TextUtils.isEmpty(SitEditName.getText().toString()))
                 {
                     calendar=Calendar.getInstance();
                     String SituationTimeIntervel=calendar.get(Calendar.YEAR)+ "-"
@@ -185,7 +186,7 @@ public class CloudAlbum extends AppCompatActivity {
                             +calendar.get(Calendar.SECOND);
 
                     Map situationmap = new HashMap();
-                    situationmap.put("name",SituationName.getText().toString().trim());
+                    situationmap.put("name",SitEditName.getText().toString().trim());
                     situationmap.put("time", ServerValue.TIMESTAMP);
                     situationmap.put("owner", FirebaseAuth.getInstance().getCurrentUser().getUid());
                     final String push_id =databaseReference.push().getKey();
@@ -411,6 +412,8 @@ public class CloudAlbum extends AppCompatActivity {
         }
         if(item.getItemId()==1){
             createNewSituation.show();
+            int countdef = SituationIDList.size()+1;
+            SitEditName.setText(String.format("Situation ID : sit-%s", String.valueOf(countdef)));
         }
         if(item.getItemId()==2){
             new BottomSheet.Builder(this).title("title").sheet(R.menu.cloud_album_menu).listener(new DialogInterface.OnClickListener() {
@@ -521,6 +524,7 @@ public class CloudAlbum extends AppCompatActivity {
                                         GlobalID = CommunityID;
                                         LastPost = false;
                                         Name = SituationList.get(position).getTitle();
+                                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                                         SetRecyclerView(TimeStart, TimeEnd, GlobalID, LastPost, Name, true, recyclerViewPhotoList);
                                     }
 
@@ -531,6 +535,7 @@ public class CloudAlbum extends AppCompatActivity {
                                         GlobalID = CommunityID;
                                         LastPost = true;
                                         Name = SituationList.get(position).getTitle();
+                                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                                         SetRecyclerView(TimeStart, TimeEnd, GlobalID, LastPost, Name, true, recyclerViewPhotoList);
                                     }
                                 }
@@ -793,64 +798,6 @@ public class CloudAlbum extends AppCompatActivity {
 
 
 
-    private void RenameSituation(final String s) {
-
-        Renamesituation = new Dialog(CloudAlbum.this);
-        Renamesituation.setContentView(R.layout.create_new_situation_layout);
-        Renamesituation.setCancelable(false);
-        final EditText SituationName = Renamesituation.findViewById(R.id.situation_name);
-        SituationName.requestFocus();
-        Button Done ,Cancel;
-        Done =   Renamesituation.findViewById(R.id.done_btn);
-        Cancel = Renamesituation.findViewById(R.id.cancel_btn);
-        Done.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(!TextUtils.isEmpty(SituationName.getText().toString()))
-                {
-                    databaseReference.child(s).child("name").setValue(SituationName.getText().toString().trim()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-
-                            if(task.isSuccessful())
-                            {
-
-                                Toast.makeText(CloudAlbum.this,"Situation renamed as : "+SituationName.getText().toString(),Toast.LENGTH_SHORT).show();
-                                SituationName.setText("");
-                                Renamesituation.dismiss();
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                            if(e.toString().contains("FirebaseNetworkException"))
-                                Toast.makeText(CloudAlbum.this,"Not Connected to Internet.",Toast.LENGTH_SHORT).show();
-                            else
-                                Toast.makeText(CloudAlbum.this,"Unable to rename new Situation.", Toast.LENGTH_SHORT).show();
-
-                            SituationName.setText("");
-                        }
-                    });
-                    Renamesituation.dismiss();
-                }
-                else
-                {
-                    Toast.makeText(CloudAlbum.this,"No name given",Toast.LENGTH_LONG).show();
-                }
-
-            }
-        });
-
-        Cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Renamesituation.dismiss();
-            }
-        });
-
-    }
 
     private void DeleteCurrentAlbum(){
                 deleteDatabaseReference.removeValue().addOnSuccessListener(

@@ -209,17 +209,6 @@ public class QRCodeReader extends AppCompatActivity
         builder.create().show();
 
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Flow();
-    }
-
-    private void Flow(){
-        finish();
-        startActivity(new Intent(QRCodeReader.this,MainActivity.class));
-    }
 }
 
 

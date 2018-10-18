@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.CoverEditActivity">
+
+    <ImageView
+        android:id="@+id/covereditimgview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="300dp"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/image_avatar"/>
+
+    <Button
+        android:id="@+id/uploadbtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/border"
+        android:padding="10dp"
+        android:text="Upload"
+        android:textColor="#3e3d63" />
+
+
+    <TextView
+    android:id="@+id/ptext"
+    android:text="Tap on theimage to change cover photo."
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="100dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"/>
+
+    <ProgressBar
+        android:layout_below="@id/covereditimgview"
+        android:id="@+id/horizontalprogressbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"/>
+
+
+</RelativeLayout>

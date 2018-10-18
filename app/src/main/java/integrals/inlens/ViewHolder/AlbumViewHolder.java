@@ -45,6 +45,7 @@ import integrals.inlens.R;
     public void SetAlbumCover(Context context,String Uri){
          ImageView imageView=(ImageView)view.findViewById(R.id.CloudAlbumCover);
         RequestOptions requestOptions=new RequestOptions()
+                .placeholder(R.drawable.image_avatar)
                 .fitCenter();
 
         Glide.with(context)
@@ -66,6 +67,7 @@ import integrals.inlens.R;
         ImageView imageView=(ImageView)view.findViewById(R.id.CreatedByProfilePic);
          RequestOptions requestOptions=new RequestOptions()
                  .centerCrop()
+                 .placeholder(R.drawable.ic_account_circle)
                  .override(176,176);
          ;
          Glide.with(context)

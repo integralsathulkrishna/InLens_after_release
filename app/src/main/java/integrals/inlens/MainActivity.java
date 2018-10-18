@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +27,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,9 +38,19 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import integrals.inlens.Activities.AlbumCoverEditActivity;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.io.File;
+
 import integrals.inlens.Activities.CloudAlbum;
+import integrals.inlens.Activities.CoverEditActivity;
 import integrals.inlens.Activities.CreateCloudAlbum;
 import integrals.inlens.Activities.LoginActivity;
 import integrals.inlens.Activities.QRCodeReader;
@@ -67,7 +83,10 @@ public class MainActivity extends AppCompatActivity {
     private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
 
-    private int EDIT_COUNT;
+    private int EDIT_COUNT, CLICK_COUNT;
+    private DatabaseReference ProgressRef;
+
+    private String PostKeyForEdit;
     //
     //
     // Import from Elson.............................................................................
@@ -104,10 +123,9 @@ public class MainActivity extends AppCompatActivity {
            }
 
 
-
-
         //User Authentication
         InAuthentication= FirebaseAuth.getInstance();
+        ProgressRef = FirebaseDatabase.getInstance().getReference().child("Users");
         firebaseUser=InAuthentication.getCurrentUser();
         try{
             if(firebaseUser==null){
@@ -138,6 +156,24 @@ public class MainActivity extends AppCompatActivity {
         MemoryRecyclerView.setLayoutManager(linearLayoutManager);
         MainLoadingProgressBar = findViewById(R.id.mainloadingpbar);
 
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null)
+        {
+            ProgressRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if(!dataSnapshot.hasChild("Communities"))
+                    {
+                        MainLoadingProgressBar.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
 
     }
     // Added By Elson
@@ -160,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         EDIT_COUNT=0;
+        CLICK_COUNT=0;
         // Downloading Recycler View
         MainLoadingProgressBar.setVisibility(View.VISIBLE);
         try {
@@ -210,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
                     }catch (NullPointerException e) {
                     }
                     viewHolder.ShareButton.setOnClickListener(new View.OnClickListener() {
-                        final String PostKeyS=getRef(position).getKey().toString().trim();
+                        final String PostKeyS= getRef(position).getKey().trim();
 
 
                         @Override
@@ -232,42 +269,27 @@ public class MainActivity extends AppCompatActivity {
 
                                 }
                             });
-
-
-
-
-
-
                         }
                     });
                     viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            final String PostKey=getRef(position).getKey().toString().trim();
+                            final String PostKey= getRef(position).getKey().trim();
+                            CLICK_COUNT++;
+                            if(CLICK_COUNT==1 && !TextUtils.isEmpty(PostKey))
+                                     {
+                                        try {
+                                            startActivity(new Intent(MainActivity.this,CloudAlbum.class)
+                                                    .putExtra("AlbumName",model.getAlbumTitle())
+                                                    .putExtra("GlobalID::",PostKey)
+                                                    .putExtra("LocalID::",PostKey)
+                                                    .putExtra("UserID::",CurrentUser));
 
-                            InDatabaseReference.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    try {
-                                        CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                        startActivity(new Intent(MainActivity.this,CloudAlbum.class)
-                                                .putExtra("AlbumName",model.getAlbumTitle())
-                                                .putExtra("GlobalID::",CommunityPostKey)
-                                                .putExtra("LocalID::",PostKey)
-                                                .putExtra("UserID::",CurrentUser));
-
-                                    }catch (NullPointerException e){
-                                        e.printStackTrace();
+                                        }catch (NullPointerException e){
+                                            e.printStackTrace();
+                                        }
                                     }
 
-
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
 
                         }
                     });
@@ -276,34 +298,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
 
-                            final String PostKey= getRef(position).getKey().trim();
-                            InDatabaseReference.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                    EDIT_COUNT++;
-
-                                    AlbumCoverEditKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                    if(!TextUtils.isEmpty(AlbumCoverEditKey) && EDIT_COUNT==1)
-                                    {
-
-                                        startActivity(new Intent(MainActivity.this, AlbumCoverEditActivity.class).putExtra("Albumkey",AlbumCoverEditKey));
-
-                                    }
-                                    else if(TextUtils.isEmpty(AlbumCoverEditKey) && EDIT_COUNT==1)
-                                    {
-                                        Toast.makeText(MainActivity.this,"Unable to perform edit now.",Toast.LENGTH_LONG).show();
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-
-
-                        }
+                            PostKeyForEdit =getRef(position).getKey().trim();
+                            startActivity(new Intent(MainActivity.this,CoverEditActivity.class).putExtra("PostKey",PostKeyForEdit));                        }
                     });
 
                     MainLoadingProgressBar.setVisibility(View.INVISIBLE);
@@ -353,7 +349,6 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(),"Sorry.You can't create a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
                             }
                             else{
-                                finish();
                                 startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
                             }
 
@@ -366,7 +361,6 @@ public class MainActivity extends AppCompatActivity {
                             }else
 
                             {
-                                finish();
                                 startActivity(new Intent(MainActivity.this, QRCodeReader.class));
 
                             }
@@ -375,7 +369,6 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
                         break;
                         case R.id.profile_pic:
-                            finish();
                             startActivity(new Intent(MainActivity.this, SettingActivity.class));
                             break;
                         case R.id.quit_cloud_album:
@@ -622,6 +615,9 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.INVISIBLE);
             dialog.hide();
     }
+
+
+
 
 }
 

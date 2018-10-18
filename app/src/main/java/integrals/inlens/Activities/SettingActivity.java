@@ -157,6 +157,7 @@ public class SettingActivity extends AppCompatActivity {
 
                         RequestOptions requestOptions=new RequestOptions()
                                 .centerCrop()
+                                .placeholder(R.drawable.ic_account_200dp)
                                 .override(176,176);
 
                         Glide.with(getApplicationContext())
@@ -504,16 +505,6 @@ public class SettingActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Flow();
-        }
-
-    private void Flow(){
-        finish();
-        startActivity(new Intent(SettingActivity.this,MainActivity.class));
-    }
 
 
 }
