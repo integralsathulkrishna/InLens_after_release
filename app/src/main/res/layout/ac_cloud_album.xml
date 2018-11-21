@@ -46,7 +46,7 @@
         android:background="@android:color/white"
         app:behavior_hideable="true"
         app:behavior_peekHeight="210dp"
-        app:elevation="4dp "
+        app:elevation="4dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
         <Button
