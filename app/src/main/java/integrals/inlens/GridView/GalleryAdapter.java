@@ -2,9 +2,12 @@ package integrals.inlens.GridView;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -17,11 +20,13 @@ import integrals.inlens.R;
 
 public class GalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    public int Positions[];
     public Context context;
     public List<ImageModel> data = new ArrayList<>();
     private View v;
     private RecyclerView.ViewHolder viewHolder;
-
+    private int Total;
+    private Boolean FirstImageClicked=false;
     public GalleryAdapter(Context context, List<ImageModel> data) {
         this.context = context;
         this.data = data;
@@ -39,24 +44,17 @@ public class GalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         RequestOptions requestOptions=new RequestOptions()
-
-                .override(200,200)
+                .override(360,240)
                 .diskCacheStrategy(DiskCacheStrategy.ALL);
 
         Glide.with(context).load(data.get(position).getUrl())
                     .thumbnail(0.5f)
                     .apply(requestOptions)
-                    .into(((MyItemHolder) holder).mImg)
-                     ;
-
-
-
-
+                    .into(((MyItemHolder) holder).mImg);
 
     }
-
 
 
 
@@ -66,13 +64,14 @@ public class GalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return data.size();
     }
 
+
+
     public static class MyItemHolder extends RecyclerView.ViewHolder {
         ImageView mImg;
 
 
         public MyItemHolder(View itemView) {
             super(itemView);
-
             mImg = (ImageView) itemView.findViewById(R.id.item_img);
 
             }

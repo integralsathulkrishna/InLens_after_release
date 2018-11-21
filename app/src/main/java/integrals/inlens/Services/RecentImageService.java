@@ -1,14 +1,24 @@
  package integrals.inlens.Services;
 
+import android.app.AlertDialog;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.job.JobScheduler;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteReadOnlyDatabaseException;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -45,8 +55,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import id.zelory.compressor.Compressor;
+import integrals.inlens.Helper.BitmapConfig;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
@@ -81,8 +93,13 @@ import integrals.inlens.R;
      private String MyUserID;
      private NotificationCompat.Builder noty  ;
      private static int notyid =808679;
-
-
+     long[] pattern = {};
+     String AlbumTime;
+     private int RecentImage=0;
+     private BitmapConfig bitmapConfig;
+     private int COMPRESSION_WIDTH=400;
+     private int COMPRESSION_HEIGHT=400;
+     private String AlbumExpiry="";
      /*
      private String       sowner,stime,stitle,sKey,sTime;
      private DatabaseReference databaseReference;
@@ -105,9 +122,11 @@ import integrals.inlens.R;
      @Override
          public void onCreate() {
          super.onCreate();
+
+
+
          handler=new Handler();
          remoteViews=new RemoteViews(getPackageName(),R.layout.notification_layout);
-
 
          if(FirebaseAuth.getInstance().getCurrentUser()!=null)
          {
@@ -124,116 +143,129 @@ import integrals.inlens.R;
          PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
          noty.setContentIntent(pendingIntent);
          noty.setSound(Uri.parse("android.resource://" + getPackageName() + "/raw/impulse"));
-
-
-
+         //Added for perfect uploading;
+         UploadDatabaseHelper uploadDatabaseHelper=new UploadDatabaseHelper(getApplicationContext(),"",null,1);
+         CurrentDatabase      currentDatabase     =new CurrentDatabase(getApplicationContext(),"",null,1);
+         AlbumExpiry=currentDatabase.GetAlbumExpiry();
+         uploadDatabaseHelper.UpdateUploadStatus(currentDatabase.GetUploadingTargetColumn(),"NOT_UPLOADED");
+         currentDatabase.close();
+         uploadDatabaseHelper.close();
+         //
          Toast.makeText(getApplicationContext(),"InLens  Service created.",Toast.LENGTH_SHORT).show();
     }
 
          @Override
          public int onStartCommand(Intent intent, int flags, int startId) {
-
-        runnable=new Runnable() {
-            @Override
-            public void run() {
-
-
-                Projection[0] = new String[]{
-                        MediaStore.Images.ImageColumns._ID,
-                        MediaStore.Images.ImageColumns.DATA,
-                        MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
-                        MediaStore.Images.ImageColumns.DATE_MODIFIED,
-                        MediaStore.Images.ImageColumns.MIME_TYPE
-
-                };
+             runnable=new Runnable() {
+                 @Override
+                 public void run() {
 
 
+                     if (CheckAlbumActive() <=0) {
 
-                Cursor cursor = getApplicationContext().getContentResolver().
-                                query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                Projection[0], null, null,
-                                        MediaStore.Images.ImageColumns.DATE_MODIFIED + " DESC");
+                         Projection[0] = new String[]{
+                                 MediaStore.Images.ImageColumns._ID,
+                                 MediaStore.Images.ImageColumns.DATA,
+                                 MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+                                 MediaStore.Images.ImageColumns.DATE_MODIFIED,
+                                 MediaStore.Images.ImageColumns.MIME_TYPE
 
-
-                try {
-
-                    if (cursor.moveToFirst()) {
-                        ImageLocation[0] = cursor.getString(1);
-                        file[0] = new File(ImageLocation[0]);
-                        file1[0] = new File(ImageLocation[0]);
-
-                        if (file[0].exists()) {
-                            String CurrentImageX = "KKKK";
-                            sharedPreferences1[0] = getApplicationContext().getSharedPreferences("PhotoUpdate.pref", Context.MODE_PRIVATE);
-                            CurrentImage[0] = sharedPreferences1[0].getString("CurrentImage::", CurrentImageX);
-                            if (ImageLocation[0].contentEquals(CurrentImage[0])) {
-                                //Do not do anything,if the current image matches the image in SharedPreference
-                            } else if ((!ImageLocation[0].contains("/WhatsApp/")) && !ImageLocation[0].contains("/Screenshots/") && !ImageLocation[0].contains(CurrentImage[0])) {
-                                calendar=Calendar.getInstance();
-                                String TimeTaken=  calendar.get(Calendar.YEAR)+ "-"
-                                        +calendar.get(Calendar.MONTH)+"-"
-                                        +calendar.get(Calendar.DAY_OF_MONTH)+"T"
-                                        +calendar.get(Calendar.HOUR_OF_DAY)+"-"
-                                        +calendar.get(Calendar.MINUTE)+"-"
-                                        +calendar.get(Calendar.SECOND);
-
-                                RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
-                                recentImageDatabase.InsertUploadValues(
-                                        ImageLocation[0].toString(),
-                                        "NULL",
-                                        "NULL",
-                                        "NULL",
-                                        TimeTaken,
-                                        "NULL",
-                                        "NULL",
-                                        "NULL",
-                                        "NULL",
-                                        "NULL"
-                                );
-                                try {
-                                    bitmap1[0] = new Compressor(getApplicationContext())
-                                            .setMaxHeight(100)
-                                            .setMaxWidth(125)
-                                            .setQuality(100)
-
-                                            .setCompressFormat(Bitmap.CompressFormat.WEBP)
-                                            .compressToBitmap(file1[0]);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                CreateNotification();
-                                SharedPreferences.Editor e = sharedPreferences1[0].edit();
-                                e.putString("CurrentImage::", ImageLocation[0]);
-                                e.apply();
-                                CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                int Value = currentDatabase.GetRecentTotal();
-                                currentDatabase.ResetResentTotal((Value + 1));
-                                currentDatabase.close();
-                                cursor.close();
-
-                            }
-
-                        } else {
-                            Projection[0] = null;
-
-                        }
-
-                    }
-                }
-                //Error Fix 7
-                catch (NullPointerException e){
-                    e.printStackTrace();
-                }
-
-                //Situation Operation
-                SituationOperation();
-
-                //Upload Operation
-                UploadOperation();
-                handler.postDelayed(this,2500);
+                         };
 
 
+                         Cursor cursor = getApplicationContext().getContentResolver().
+                                 query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                         Projection[0], null, null,
+                                         MediaStore.Images.ImageColumns.DATE_MODIFIED + " DESC");
 
+
+                         try {
+
+                             if (cursor.moveToFirst()) {
+                                 ImageLocation[0] = cursor.getString(1);
+                                 file[0] = new File(ImageLocation[0]);
+                                 file1[0] = new File(ImageLocation[0]);
+
+                                 if (file[0].exists()) {
+                                     String CurrentImageX = "KKKK";
+                                     sharedPreferences1[0] = getApplicationContext().getSharedPreferences("PhotoUpdate.pref", Context.MODE_PRIVATE);
+                                     CurrentImage[0] = sharedPreferences1[0].getString("CurrentImage::", CurrentImageX);
+                                     if (ImageLocation[0].contentEquals(CurrentImage[0])) {
+                                         //Do not do anything,if the current image matches the image in SharedPreference
+                                     } else if ((!ImageLocation[0].contains("/WhatsApp/")) && !ImageLocation[0].contains("/Screenshots/") && !ImageLocation[0].contains(CurrentImage[0])) {
+                                         calendar = Calendar.getInstance();
+                                         String TimeTaken = calendar.get(Calendar.YEAR) + "-"
+                                                 + calendar.get(Calendar.MONTH) + "-"
+                                                 + calendar.get(Calendar.DAY_OF_MONTH) + "T"
+                                                 + calendar.get(Calendar.HOUR_OF_DAY) + "-"
+                                                 + calendar.get(Calendar.MINUTE) + "-"
+                                                 + calendar.get(Calendar.SECOND);
+
+                                         RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
+                                         recentImageDatabase.InsertUploadValues(
+                                                 ImageLocation[0].toString(),
+                                                 "NULL",
+                                                 "NULL",
+                                                 "NULL",
+                                                 TimeTaken,
+                                                 "NULL",
+                                                 "NULL",
+                                                 "NULL",
+                                                 "NULL",
+                                                 "NULL"
+                                         );
+                                         //try {
+                                         //  bitmap1[0] = new Compressor(getApplicationContext())
+                                         //        .setMaxHeight(100)
+                                         //      .setMaxWidth(125)
+                                         //    .setQuality(100)
+
+                                         //  .setCompressFormat(Bitmap.CompressFormat.WEBP)
+                                         //  .compressToBitmap(file1[0]);
+                                         // } catch (IOException e) {
+                                         //    e.printStackTrace();
+                                         //}
+                                         CreateNotification();
+                                         SharedPreferences.Editor e = sharedPreferences1[0].edit();
+                                         e.putString("CurrentImage::", ImageLocation[0]);
+                                         e.apply();
+                                         CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                         int Value = currentDatabase.GetRecentTotal();
+                                         currentDatabase.ResetResentTotal((Value + 1));
+                                         currentDatabase.close();
+                                         cursor.close();
+
+                                     }
+
+                                 } else {
+                                     Projection[0] = null;
+
+                                 }
+
+                             }
+                         }
+                         //Error Fix 7
+                         catch (NullPointerException e) {
+                             e.printStackTrace();
+                         }
+
+                         //Situation Operation
+                         SituationOperation();
+                         //Upload Operation
+                         UploadOperation();
+
+
+                         handler.postDelayed(this, 2500);
+
+
+                     } else if (CheckAlbumActive() > 0) {
+                         CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                         if (currentDatabase1.GetUploadingTargetColumn() >= currentDatabase1.GetUploadingTotal()) {
+                             QuitCloudAlbum(0);
+                         } else {
+                             QuitCloudAlbum(1);
+                         }
+                     }
 
             }
         };
@@ -242,6 +274,98 @@ import integrals.inlens.R;
         return START_STICKY;
 
     }
+
+     private void QuitCloudAlbum(int XYZ) {
+
+             if(XYZ==1){
+             //Do not Quit Cloud-Album because photos are being uploaded
+             }else {
+             final SharedPreferences sharedPreferences4=getSharedPreferences("Owner.pref",MODE_PRIVATE);
+             CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+             final DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference()
+                     .child("Communities")
+                     .child(currentDatabase.GetLiveCommunityID())
+                     .child("ActiveIndex");
+                     if (sharedPreferences4.getBoolean("ThisOwner::", false) == true) {
+                         databaseReference.setValue("F")
+                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                     @Override
+                                     public void onSuccess(Void aVoid) {
+                                         CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                         currentDatabase.DeleteDatabase();
+                                         RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
+                                         recentImageDatabase.DeleteDatabase();
+                                         UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
+                                         uploadDatabaseHelper.DeleteDatabase();
+                                         SharedPreferences sharedPreferencesC = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                         SharedPreferences.Editor editorC = sharedPreferencesC.edit();
+                                         editorC.putBoolean("UsingCommunity::", false);
+                                         editorC.commit();
+                                         stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                                         JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+                                         jobScheduler.cancel(7907);
+                                         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                         notificationManager.cancelAll();
+                                         Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
+
+                                     }
+                                 }).addOnFailureListener(new OnFailureListener() {
+                             @Override
+                             public void onFailure(@NonNull Exception e) {
+                             }
+                         });
+                     }else {
+                         CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                         currentDatabase1.DeleteDatabase();
+                         RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
+                         recentImageDatabase.DeleteDatabase();
+                         UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
+                         uploadDatabaseHelper.DeleteDatabase();
+                         SharedPreferences sharedPreferencesC = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                         SharedPreferences.Editor editorC = sharedPreferencesC.edit();
+                         editorC.putBoolean("UsingCommunity::", false);
+                         editorC.commit();
+                         stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                         JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+                         jobScheduler.cancel(7907);
+                         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                         notificationManager.cancelAll();
+                         Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show(); }
+                 }
+               }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     private int CheckAlbumActive() {
+         Calendar calendarW=Calendar.getInstance();
+         AlbumTime = calendarW.get(Calendar.DAY_OF_MONTH) + "-" + (calendarW.get(Calendar.MONTH)+1) + "-" + calendarW.get(Calendar.YEAR);
+         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+         Date d1 = null,d2=null;
+         try {
+
+             d1=dateFormat.parse(AlbumTime);
+             d2=dateFormat.parse(AlbumExpiry);
+
+         } catch (ParseException e) {
+             e.printStackTrace();
+         }
+
+         return d1.compareTo(d2);
+     }
 
      private void SituationOperation() {
 
@@ -287,6 +411,7 @@ import integrals.inlens.R;
                  if(UPLOAD_STATUS.contentEquals("NOT_UPLOADED")) {
 
                      StartUpload(UploadingIntegerID,Record);
+
                  }
 
              }catch (NullPointerException e){
@@ -326,9 +451,27 @@ import integrals.inlens.R;
          // GetSituationID(uploadDatabaseHelper.GetTimeTaken(uploadID));
          // Compressing the image
          try {
+             Bitmap config=BitmapFactory.decodeFile(ThumbnailFile.getAbsolutePath());
+             BitmapConfig bitmapConfig=new BitmapConfig(config);
+             if(bitmapConfig.GetPhotoType()==bitmapConfig.POTRAIT){
+                 COMPRESSION_HEIGHT=700;
+                 COMPRESSION_WIDTH=470;
+                 Toast.makeText(getApplicationContext(),"Potrait",Toast.LENGTH_SHORT).show();
+                 }
+                 else if(bitmapConfig.GetPhotoType()==bitmapConfig.LANDSCAPE) {
+                 COMPRESSION_HEIGHT=470;
+                 COMPRESSION_WIDTH=700;
+                 Toast.makeText(getApplicationContext(),"Landscape",Toast.LENGTH_SHORT).show();
+             }
+
+         }catch (NullPointerException e){
+             e.printStackTrace();
+         }
+
+         try {
              bitmap = new Compressor(getApplicationContext())
-                     .setMaxHeight(150)
-                     .setMaxWidth(150)
+                     .setMaxHeight(100)
+                     .setMaxWidth(100)
                      .setQuality(100)
                      .setCompressFormat(Bitmap.CompressFormat.JPEG)
                      .compressToBitmap(ImageFile);
@@ -338,8 +481,8 @@ import integrals.inlens.R;
 
          try {
              ThumbBitmap = new Compressor(getApplicationContext())
-                     .setMaxHeight(400)
-                     .setMaxWidth(400)
+                     .setMaxHeight(COMPRESSION_HEIGHT)
+                     .setMaxWidth(COMPRESSION_WIDTH)
                      .setQuality(100)
                      .setCompressFormat(Bitmap.CompressFormat.JPEG)
                      .compressToBitmap(ThumbnailFile);
@@ -612,8 +755,9 @@ import integrals.inlens.R;
 
 
      private void CreateNotification() {
-
-         remoteViews.setImageViewBitmap(R.id.UploadImageViewNotification, bitmap1[0]);
+       RecentImage++;
+       //  remoteViews.setImageViewBitmap(R.id.UploadImageViewNotification, bitmap1[0]);
+           remoteViews.setTextViewText(R.id.recentImageTextView,RecentImage +" recent image(s) updated for album.\n Tap to upload each");
          NotificationManager notificationManager =
                          (NotificationManager)
                          getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -633,12 +777,16 @@ import integrals.inlens.R;
          remoteViews.setOnClickPendingIntent(R.id.GotoUploadActivity, pendingIntent3);
 
 
-         NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
+         NotificationCompat.Builder builder =
+                 (NotificationCompat.Builder)
+                         new NotificationCompat.Builder(getApplicationContext())
+                         .setDefaults(Notification.DEFAULT_ALL)
+                         .setOnlyAlertOnce(true)
+                         .setContent(remoteViews)
+                         .setWhen(System.currentTimeMillis())
 
-                 .setSmallIcon(R.drawable.inlens_notification)
-                 .setCustomBigContentView(remoteViews)
-                 .setOngoing(true)
-                 .setAutoCancel(true)
+                 .setSmallIcon(R.drawable.inlens_logo_m)
+                 .setPriority(Notification.PRIORITY_MAX)
                  ;
          builder.setContentIntent(pendingIntent);
          notificationManager.notify(0, builder.build());
@@ -816,14 +964,6 @@ import integrals.inlens.R;
 
 
 */
-
-
-
-
-
-
-
-
 
 
 

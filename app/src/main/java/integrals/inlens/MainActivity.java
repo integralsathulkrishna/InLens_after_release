@@ -1,4 +1,5 @@
 package integrals.inlens;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,6 +11,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,8 +26,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,9 +41,19 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import integrals.inlens.Activities.AlbumCoverEditActivity;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.io.File;
+
 import integrals.inlens.Activities.CloudAlbum;
+import integrals.inlens.Activities.CoverEditActivity;
 import integrals.inlens.Activities.CreateCloudAlbum;
 import integrals.inlens.Activities.LoginActivity;
 import integrals.inlens.Activities.QRCodeReader;
@@ -67,7 +86,11 @@ public class MainActivity extends AppCompatActivity {
     private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
 
-    private int EDIT_COUNT;
+    private int EDIT_COUNT, CLICK_COUNT;
+    private DatabaseReference ProgressRef;
+
+    private String PostKeyForEdit;
+    private Activity activity;
     //
     //
     // Import from Elson.............................................................................
@@ -95,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPersisted(true);
         jobInfo=builder.build();
         jobScheduler=(JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-
+        activity=this;
         //1.Service Running Continuation
         RecentImageService recentImageService;
         recentImageService = new RecentImageService(getApplicationContext());
@@ -104,10 +127,9 @@ public class MainActivity extends AppCompatActivity {
            }
 
 
-
-
         //User Authentication
         InAuthentication= FirebaseAuth.getInstance();
+        ProgressRef = FirebaseDatabase.getInstance().getReference().child("Users");
         firebaseUser=InAuthentication.getCurrentUser();
         try{
             if(firebaseUser==null){
@@ -138,6 +160,24 @@ public class MainActivity extends AppCompatActivity {
         MemoryRecyclerView.setLayoutManager(linearLayoutManager);
         MainLoadingProgressBar = findViewById(R.id.mainloadingpbar);
 
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null)
+        {
+            ProgressRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if(!dataSnapshot.hasChild("Communities"))
+                    {
+                        MainLoadingProgressBar.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
 
     }
     // Added By Elson
@@ -160,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         EDIT_COUNT=0;
+        CLICK_COUNT=0;
         // Downloading Recycler View
         MainLoadingProgressBar.setVisibility(View.VISIBLE);
         try {
@@ -210,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
                     }catch (NullPointerException e) {
                     }
                     viewHolder.ShareButton.setOnClickListener(new View.OnClickListener() {
-                        final String PostKeyS=getRef(position).getKey().toString().trim();
+                        final String PostKeyS= getRef(position).getKey().trim();
 
 
                         @Override
@@ -232,42 +273,27 @@ public class MainActivity extends AppCompatActivity {
 
                                 }
                             });
-
-
-
-
-
-
                         }
                     });
                     viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            final String PostKey=getRef(position).getKey().toString().trim();
+                            final String PostKey= getRef(position).getKey().trim();
+                            CLICK_COUNT++;
+                            if(CLICK_COUNT==1 && !TextUtils.isEmpty(PostKey))
+                                     {
+                                        try {
+                                            startActivity(new Intent(MainActivity.this,CloudAlbum.class)
+                                                    .putExtra("AlbumName",model.getAlbumTitle())
+                                                    .putExtra("GlobalID::",PostKey)
+                                                    .putExtra("LocalID::",PostKey)
+                                                    .putExtra("UserID::",CurrentUser));
 
-                            InDatabaseReference.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    try {
-                                        CommunityPostKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                        startActivity(new Intent(MainActivity.this,CloudAlbum.class)
-                                                .putExtra("AlbumName",model.getAlbumTitle())
-                                                .putExtra("GlobalID::",CommunityPostKey)
-                                                .putExtra("LocalID::",PostKey)
-                                                .putExtra("UserID::",CurrentUser));
-
-                                    }catch (NullPointerException e){
-                                        e.printStackTrace();
+                                        }catch (NullPointerException e){
+                                            e.printStackTrace();
+                                        }
                                     }
 
-
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
 
                         }
                     });
@@ -276,34 +302,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
 
-                            final String PostKey= getRef(position).getKey().trim();
-                            InDatabaseReference.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                    EDIT_COUNT++;
-
-                                    AlbumCoverEditKey=dataSnapshot.child(PostKey).child("CommunityID").getValue().toString().trim();
-                                    if(!TextUtils.isEmpty(AlbumCoverEditKey) && EDIT_COUNT==1)
-                                    {
-
-                                        startActivity(new Intent(MainActivity.this, AlbumCoverEditActivity.class).putExtra("Albumkey",AlbumCoverEditKey));
-
-                                    }
-                                    else if(TextUtils.isEmpty(AlbumCoverEditKey) && EDIT_COUNT==1)
-                                    {
-                                        Toast.makeText(MainActivity.this,"Unable to perform edit now.",Toast.LENGTH_LONG).show();
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-
-
-                        }
+                            PostKeyForEdit =getRef(position).getKey().trim();
+                            startActivity(new Intent(MainActivity.this,CoverEditActivity.class).putExtra("PostKey",PostKeyForEdit));                        }
                     });
 
                     MainLoadingProgressBar.setVisibility(View.INVISIBLE);
@@ -349,11 +349,9 @@ public class MainActivity extends AppCompatActivity {
                     switch (which) {
                         case R.id.new_album:
                             SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                            if (sharedPreferences.getBoolean("UsingCommunity::",false) == true) {
-                                Toast.makeText(getApplicationContext(),"Sorry.You can't create a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
-                            }
-                            else{
-                                finish();
+                            if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
+                                Toast.makeText(getApplicationContext(), "Sorry.You can't create a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+                            } else {
                                 startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
                             }
 
@@ -361,51 +359,35 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case R.id.scan_qr:
                             SharedPreferences sharedPreferences1 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                            if (sharedPreferences1.getBoolean("UsingCommunity::",false) == true) {
-                                Toast.makeText(getApplicationContext(),"Sorry,You can't scan a new Cloud-Album before you quit the current one.",Toast.LENGTH_LONG).show();
-                            }else
+                            if (sharedPreferences1.getBoolean("UsingCommunity::", false) == true) {
+                                Toast.makeText(getApplicationContext(), "Sorry,You can't scan a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+                            } else
 
                             {
-                                finish();
                                 startActivity(new Intent(MainActivity.this, QRCodeReader.class));
 
                             }
                             break;
                         case R.id.upload_activity:
                             startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
-                        break;
+                            break;
                         case R.id.profile_pic:
-                            finish();
                             startActivity(new Intent(MainActivity.this, SettingActivity.class));
                             break;
                         case R.id.quit_cloud_album:
-                            AlertDialog.Builder builder =new AlertDialog.Builder(MainActivity.this);
-                            builder.setCancelable(true);
-                            builder.setTitle("Quit Cloud-Album");
-                            builder.setMessage("Are you sure you want to quit the current community");
+                            SharedPreferences sharedPreferences3 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                            if (sharedPreferences3.getBoolean("UsingCommunity::", false) == true) {
+                                CurrentDatabase currentDatabase1=new CurrentDatabase(getApplicationContext(),"",null,1);
+                                if(currentDatabase1.GetUploadingTargetColumn()>=currentDatabase1.GetUploadingTotal()){
+                                   QuitCloudAlbum(0);
+                               }else {
+                                   QuitCloudAlbum(1);
+                               }
 
-                            builder.setPositiveButton(" OK ", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
-                                    currentDatabase.DeleteDatabase();
-                                    RecentImageDatabase recentImageDatabase=new RecentImageDatabase(getApplicationContext(),"",null,1);
-                                    recentImageDatabase.DeleteDatabase();
-                                    UploadDatabaseHelper uploadDatabaseHelper= new UploadDatabaseHelper(getApplicationContext(),"",null,1);
-                                    uploadDatabaseHelper.DeleteDatabase();
-                                    SharedPreferences sharedPreferencesC=getSharedPreferences("InCommunity.pref",MODE_PRIVATE);
-                                    SharedPreferences.Editor editorC=sharedPreferencesC.edit();
-                                    editorC.putBoolean("UsingCommunity::",false);
-                                    editorC.commit();
-                                    stopService(new Intent(MainActivity.this, RecentImageService.class));
-                                    JobScheduler jobScheduler=(JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                                    jobScheduler.cancel(7907);
-                                    NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-                                    notificationManager.cancelAll();
-                                    Toast.makeText(getApplicationContext(),"Successfully left from the current community",Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                            builder.create().show();
+                            }
+                            else{
+                                    Toast.makeText(getApplicationContext(),"No Active Cloud-Album to quit.",Toast.LENGTH_SHORT).show(); }
+
                             break;
 
 
@@ -480,6 +462,75 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void QuitCloudAlbum( int XYZ){
+        String Txt=" ";
+        if(XYZ==1){
+            Txt="Selected images will not be uploaded to the Cloud-Album.";
+        }
+        final SharedPreferences sharedPreferences4=getSharedPreferences("Owner.pref",MODE_PRIVATE);
+        CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+        final DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference()
+                .child("Communities")
+                .child(currentDatabase.GetLiveCommunityID())
+                .child("ActiveIndex");
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setCancelable(true);
+        builder.setTitle("Quit Cloud-Album");
+        builder.setMessage("Are you sure you want to quit the current community ."+Txt);
+        builder.setPositiveButton(" OK ", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if (sharedPreferences4.getBoolean("ThisOwner::", false) == true) {
+                    databaseReference.setValue("F")
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                    currentDatabase.DeleteDatabase();
+                                    RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
+                                    recentImageDatabase.DeleteDatabase();
+                                    UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
+                                    uploadDatabaseHelper.DeleteDatabase();
+                                    SharedPreferences sharedPreferencesC = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                    SharedPreferences.Editor editorC = sharedPreferencesC.edit();
+                                    editorC.putBoolean("UsingCommunity::", false);
+                                    editorC.commit();
+                                    stopService(new Intent(MainActivity.this, RecentImageService.class));
+                                    JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+                                    jobScheduler.cancel(7907);
+                                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                    notificationManager.cancelAll();
+                                    Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "Error . Please try again", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }else {
+                    CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                    currentDatabase.DeleteDatabase();
+                    RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
+                    recentImageDatabase.DeleteDatabase();
+                    UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
+                    uploadDatabaseHelper.DeleteDatabase();
+                    SharedPreferences sharedPreferencesC = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                    SharedPreferences.Editor editorC = sharedPreferencesC.edit();
+                    editorC.putBoolean("UsingCommunity::", false);
+                    editorC.commit();
+                    stopService(new Intent(MainActivity.this, RecentImageService.class));
+                    JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+                    jobScheduler.cancel(7907);
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.cancelAll();
+                    Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show(); }
+            }
+        });
+        builder.create().show();
+    }
 
 
 
@@ -508,121 +559,164 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 */
-    private void AddToCloud(String substring,ProgressBar progressBar,Dialog dialog) {
-             progressBar.setVisibility(View.VISIBLE);
-             final DatabaseReference CommunityPhotographer;
-             FirebaseAuth CommunityPhotographerAuthentication;
-             final String UserID;
-             final DatabaseReference UserData;
-             final String CommunityID =substring;
-             final DatabaseReference[] databaseReference = new DatabaseReference[1];
-             final DatabaseReference databaseReference2;
-             CommunityPhotographerAuthentication = FirebaseAuth.getInstance();
-            UserData = FirebaseDatabase.getInstance()
-                    .getReference()
-                    .child("Users")
-                    .child(CommunityPhotographerAuthentication.getCurrentUser()
-                            .getUid());
-            UserID = CommunityPhotographerAuthentication.getCurrentUser().getUid();
-            databaseReference[0] = FirebaseDatabase.getInstance().getReference();
-            CommunityPhotographer = FirebaseDatabase.getInstance()
-                    .getReference()
-                    .child("Communities")
-                    .child(CommunityID)
-                    .child("CommunityPhotographer");
-            databaseReference2=FirebaseDatabase
-                    .getInstance()
-                    .getReference()
-                    .child("Communities")
-                    .child(CommunityID);
+    private void AddToCloud(String substring, final ProgressBar progressBar, final Dialog dialog) {
+        progressBar.setVisibility(View.VISIBLE);
+        final DatabaseReference CommunityPhotographer;
+        FirebaseAuth CommunityPhotographerAuthentication;
+        final String UserID;
+        final DatabaseReference UserData;
+        final String CommunityID = substring;
+        final DatabaseReference[] databaseReference = new DatabaseReference[1];
+        final DatabaseReference databaseReference2,databaseReference3,databaseReference4;
+        CommunityPhotographerAuthentication = FirebaseAuth.getInstance();
+        UserData = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("Users")
+                .child(CommunityPhotographerAuthentication.getCurrentUser()
+                        .getUid());
+        UserID = CommunityPhotographerAuthentication.getCurrentUser().getUid();
+        databaseReference[0] = FirebaseDatabase.getInstance().getReference();
+        CommunityPhotographer = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("Communities")
+                .child(CommunityID)
+                .child("CommunityPhotographer");
+        databaseReference2 = FirebaseDatabase
+                .getInstance()
+                .getReference()
+                .child("Communities")
+                .child(CommunityID);
+        databaseReference4=databaseReference2.child("AlbumExpiry");
+        databaseReference3=databaseReference2.child("ActiveIndex");
+        databaseReference3.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue().equals("T")){
 
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setCancelable(true);
-            builder.setTitle("Join");
-            builder.setMessage("Join this Cloud-Album. Proceed joining it ?");
-            builder.setPositiveButton(" YES ", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-                        CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
-                        currentDatabase.InsertUploadValues(CommunityID,0,1,0);
-                        currentDatabase.close();
-
-
-                        final DatabaseReference NewPhotographer = CommunityPhotographer.push();
-                        UserData.addValueEventListener(new ValueEventListener() {
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                        builder.setCancelable(true);
+                        builder.setTitle("Join");
+                        builder.setMessage("Join this Cloud-Album. Proceed joining it ?");
+                        builder.setPositiveButton(" YES ", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                NewPhotographer.child("Photographer_UID").setValue(UserID);
-                                NewPhotographer.child("Name").setValue(dataSnapshot.child("Name").getValue());
-                                NewPhotographer.child("Profile_picture").setValue(dataSnapshot.child("Profile_picture").getValue());
-                                NewPhotographer.child("Email_ID").setValue(dataSnapshot.child("Email").getValue());
+                            public void onClick(DialogInterface dialog, int which) {
+
+
+
+                                final DatabaseReference NewPhotographer = CommunityPhotographer.push();
+                                UserData.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        NewPhotographer.child("Photographer_UID").setValue(UserID);
+                                        NewPhotographer.child("Name").setValue(dataSnapshot.child("Name").getValue());
+                                        NewPhotographer.child("Profile_picture").setValue(dataSnapshot.child("Profile_picture").getValue());
+                                        NewPhotographer.child("Email_ID").setValue(dataSnapshot.child("Email").getValue());
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                                databaseReference[0] = databaseReference[0].child("Users").child(UserID).child("Communities");
+                                final DatabaseReference AddingAlbumToReference = databaseReference[0].child(CommunityID);
+                                databaseReference2.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        AddingAlbumToReference.child("AlbumTitle").setValue(dataSnapshot.child("AlbumTitle").getValue().toString());
+                                        AddingAlbumToReference.child("AlbumDescription").setValue(dataSnapshot.child("AlbumDescription").getValue().toString());
+                                        AddingAlbumToReference.child("AlbumCoverImage").setValue(dataSnapshot.child("AlbumCoverImage").getValue().toString());
+                                        AddingAlbumToReference.child("User_ID").setValue(dataSnapshot.child("User_ID").getValue().toString());
+                                        AddingAlbumToReference.child("PostedByProfilePic").setValue(dataSnapshot.child("PostedByProfilePic").getValue().toString());
+                                        AddingAlbumToReference.child("UserName").setValue(dataSnapshot.child("UserName").getValue().toString());
+                                        AddingAlbumToReference.child("Time").setValue(dataSnapshot.child("Time").getValue().toString());
+                                        AddingAlbumToReference.child("CommunityID").setValue(CommunityID);
+
+
+                                        databaseReference4.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                String ALBT=dataSnapshot.getValue().toString();
+                                                CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                                currentDatabase.InsertUploadValues(CommunityID, 0, 1, 0,ALBT,1,1);
+                                                currentDatabase.close();
+                                                Toast.makeText(getApplicationContext(),"Setting up database till "+ALBT,Toast.LENGTH_SHORT).show();
+                                                StartServices();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                        setIntent(null);
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                        Toast.makeText(getApplicationContext(), "Sorry network error...please try again", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+
+                                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                    }
+                                });
+                            }
+
+                            private void StartServices() {
+                                SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean("UsingCommunity::", true);
+                                editor.commit();
+                                SharedPreferences sharedPreferences1 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
+                                SharedPreferences.Editor editor1 = sharedPreferences1.edit();
+                                editor1.putBoolean("ThisOwner::", false);
+                                editor1.commit();
+
+                                startService(new Intent(MainActivity.this, RecentImageService.class));
+                                jobScheduler.schedule(jobInfo);
+
 
                             }
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
                         });
-
-                        databaseReference[0] = databaseReference[0].child("Users").child(UserID).child("Communities");
-                        final DatabaseReference AddingAlbumToReference= databaseReference[0].push();
-                        databaseReference2.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                AddingAlbumToReference.child("AlbumTitle").setValue(dataSnapshot.child("AlbumTitle").getValue().toString());
-                                AddingAlbumToReference.child("AlbumDescription").setValue(dataSnapshot.child("AlbumDescription").getValue().toString());
-                                AddingAlbumToReference.child("AlbumCoverImage").setValue(dataSnapshot.child("AlbumCoverImage").getValue().toString());
-                                AddingAlbumToReference.child("User_ID").setValue(dataSnapshot.child("User_ID").getValue().toString());
-                                AddingAlbumToReference.child("PostedByProfilePic").setValue(dataSnapshot.child("PostedByProfilePic").getValue().toString());
-                                AddingAlbumToReference.child("UserName").setValue(dataSnapshot.child("UserName").getValue().toString());
-                                AddingAlbumToReference.child("Time").setValue(dataSnapshot.child("Time").getValue().toString());
-                                AddingAlbumToReference.child("CommunityID").setValue(CommunityID);
-                                StartServices();
-                                setIntent(null);
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Toast.makeText(getApplicationContext(),"Sorry network error...please try again",Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        builder.create().show();
+                        progressBar.setVisibility(View.INVISIBLE);
+                        dialog.hide();
 
 
-
-
-
-                    builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                }else
+                    {
+                    Toast.makeText(getApplicationContext(),"Album time expired. You can't participate in this Cloud-Album.",Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.INVISIBLE);
+                        dialog.hide();
                         }
-                    });
-                }
+            }
 
-                private void StartServices() {
-                    SharedPreferences sharedPreferences=getSharedPreferences("InCommunity.pref",MODE_PRIVATE);
-                    SharedPreferences.Editor editor=sharedPreferences.edit();
-                    editor.putBoolean("UsingCommunity::",true);
-                    editor.commit();
-                    SharedPreferences sharedPreferences1 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
-                    SharedPreferences.Editor editor1 = sharedPreferences1.edit();
-                    editor1.putBoolean("ThisOwner::", false);
-                    editor1.commit();
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-                    startService(new Intent(MainActivity.this,RecentImageService.class));
-                    jobScheduler.schedule(jobInfo);
+            }
+        });
 
 
-                }
 
-            });
-            builder.create().show();
-            progressBar.setVisibility(View.INVISIBLE);
-            dialog.hide();
+
+
+
+
+
+
+
+
     }
 
-}
+   }
 
 

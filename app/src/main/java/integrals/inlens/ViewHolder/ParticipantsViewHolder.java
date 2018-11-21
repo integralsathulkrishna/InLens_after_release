@@ -27,6 +27,7 @@ public  class ParticipantsViewHolder extends RecyclerView.ViewHolder{
     public void setProfile_picture(Context context, String ImageVi){
         ImageView PostImage=(ImageView) InView.findViewById(R.id.participants_profile_pic);
         RequestOptions requestOptions=new RequestOptions()
+                .placeholder(R.drawable.ic_account_circle)
                 .fitCenter();
         ;
         Glide.with(context)
@@ -35,11 +36,10 @@ public  class ParticipantsViewHolder extends RecyclerView.ViewHolder{
                 .apply(requestOptions)
                 .into(PostImage);
     }
-    public void setUserName(String UserName){
+     void setUserName(String UserName){
         TextView textView=(TextView)InView.findViewById(R.id.participants_username);
         textView.setText(UserName);
     }
-
 
 
 

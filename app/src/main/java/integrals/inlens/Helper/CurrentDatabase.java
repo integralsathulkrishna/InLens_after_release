@@ -27,17 +27,23 @@ public class CurrentDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE CURRENT( ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "LIVECOMMUNITY TEXT,UPLOADING_TOTAL INTEGER,UPLOADING_TARGET_COLUMN INTEGER," +
-                "RECENT_TOTAL INTEGER);");
+                "RECENT_TOTAL INTEGER, ALBUMEXPIRY TEXT,RECENT_IMAGE_INDEX INTEGER,UPLOADING_INDEX INTEGER);");
 
 
     }
 
-    public void InsertUploadValues(String LiveCommunityID,int UploadingTotal,int UploadingTargetColumn,int RecentTotal) {
+    public void InsertUploadValues(String LiveCommunityID,int UploadingTotal,int UploadingTargetColumn,
+                                   int RecentTotal, String AlbumExpiry,int RecentImageIndex,int UploadingIndex) {
         ContentValues contentValues = new ContentValues();
         contentValues.put("LIVECOMMUNITY", LiveCommunityID);
         contentValues.put("UPLOADING_TOTAL",UploadingTotal);
         contentValues.put("UPLOADING_TARGET_COLUMN",UploadingTargetColumn);
         contentValues.put("RECENT_TOTAL",RecentTotal);
+        contentValues.put("ALBUMEXPIRY",AlbumExpiry);
+        contentValues.put("RECENT_IMAGE_INDEX",RecentImageIndex);
+        contentValues.put("UPLOADING_INDEX",UploadingIndex);
+        //if(Uploading Index=0 Do not Upload
+        //if(Uploading Index=1 Upload
         this.getWritableDatabase().insertOrThrow("CURRENT", "", contentValues);
 
         }
@@ -50,12 +56,38 @@ public class CurrentDatabase extends SQLiteOpenHelper {
         }
         return S;
     }
+    public String GetAlbumExpiry() {
+        String S=null;
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT * FROM CURRENT WHERE ID =" + 1, null);
+        while (cursor.moveToNext()) {
+            S= cursor.getString(5);
+        }
+        return S;
+    }
 
     public int GetUploadingTotal() {
         int S=0;
         Cursor cursor = this.getReadableDatabase().rawQuery("SELECT * FROM CURRENT WHERE ID =" + 1, null);
         while (cursor.moveToNext()) {
             S= cursor.getInt(2);
+        }
+        return S;
+    }
+
+    public int GetRecentImageIndex() {
+        int S=0;
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT * FROM CURRENT WHERE ID =" + 1, null);
+        while (cursor.moveToNext()) {
+            S= cursor.getInt(6);
+        }
+        return S;
+    }
+
+    public int GetRecentUploadingIndex() {
+        int S=0;
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT * FROM CURRENT WHERE ID =" + 1, null);
+        while (cursor.moveToNext()) {
+            S= cursor.getInt(7);
         }
         return S;
     }
@@ -96,6 +128,16 @@ public class CurrentDatabase extends SQLiteOpenHelper {
         this.getWritableDatabase().execSQL("UPDATE CURRENT" + " SET RECENT_TOTAL='" + FinalValue + "' WHERE ID='" + 1 + "'");
 
     }
+
+    public void ResetRecentImageIndex(int FinalValue){
+        this.getWritableDatabase().execSQL("UPDATE CURRENT" + " SET RECENT_IMAGE_INDEX='" + FinalValue + "' WHERE ID='" + 1 + "'");
+
+    }
+    public void ResetUploadingIndex(int FinalValue){
+        this.getWritableDatabase().execSQL("UPDATE CURRENT" + " SET UPLOADING_INDEX='" + FinalValue + "' WHERE ID='" + 1 + "'");
+
+    }
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

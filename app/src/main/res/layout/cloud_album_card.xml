@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
+    android:elevation="10dp"
     app:cardBackgroundColor="@color/colorPrimary"
     app:cardCornerRadius="2dp"
     app:cardElevation="0dp">
@@ -20,6 +21,8 @@
             android:layout_below="@+id/AlbumDetailLayout"
             android:layout_centerVertical="false"
             android:layout_gravity="center_vertical"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
             app:srcCompat="@color/colorPrimary" />
 
         <RelativeLayout
@@ -33,7 +36,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_marginBottom="0.7dp"
                 android:layout_marginTop="0.7dp"
                 android:background="@color/colorPrimary"
                 android:text="Event occured on 1/2/2019"
@@ -48,8 +50,8 @@
             android:id="@+id/ParticipantLayout"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_alignParentBottom="false"
             android:layout_below="@+id/CloudAlbumCover"
+            android:layout_alignParentBottom="false"
             android:layout_gravity="bottom"
             android:background="#FFF">
 
@@ -89,8 +91,8 @@
                 android:layout_gravity="right"
                 android:layout_margin="5dp"
                 android:background="@drawable/ic_add_participant_black"
-                android:visibility="gone"
-                android:maxLength="20"/>
+                android:maxLength="20"
+                android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/changecover"
@@ -99,9 +101,9 @@
                 android:layout_alignParentEnd="true"
                 android:layout_gravity="right"
                 android:layout_margin="5dp"
-                android:maxLength="20"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_edit_black_24dp"/>
+                android:maxLength="20"
+                android:src="@drawable/ic_edit_black_24dp" />
 
             <TextView
                 android:id="@+id/AlbumDescription"
@@ -109,10 +111,10 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/AlbumTitle"
                 android:layout_centerHorizontal="true"
+                android:maxLength="30"
                 android:text="Album Description"
                 android:textColor="@color/colorPrimary"
-                android:textSize="12sp"
-                android:maxLength="30"/>
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/AlbumTitle"
@@ -127,9 +129,10 @@
                 android:id="@+id/CreatedByProfilePic"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginBottom="1dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
+                android:layout_marginBottom="1dp"
+                android:src="@drawable/ic_account_circle"
                 android:visibility="visible"
                 app:civ_border_color="@android:color/white"
                 app:civ_border_width="2dp"

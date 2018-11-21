@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
-    android:background="@android:color/white">
+    android:background="@color/colorPrimary">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="#FFFF">
 
 
-    <TextView
-        android:id="@+id/SituationLogo"
-        android:layout_width="34dp"
-        android:layout_height="32dp"
-        android:layout_centerVertical="true"
-        android:layout_margin="10dp"
-        android:background="@drawable/circle"
-        android:text="L"
-        android:textAlignment="center"
-        android:textColor="@android:color/white"
-        android:textSize="19sp" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -129,4 +123,6 @@
         android:background="@color/colorPrimary">
 
     </RelativeLayout>
-</RelativeLayout>
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

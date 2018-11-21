@@ -73,5 +73,4 @@ public class InLensJobScheduler extends JobService {
         return false;
     }
 
-
-}
+    }

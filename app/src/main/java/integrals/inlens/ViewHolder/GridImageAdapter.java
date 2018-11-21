@@ -49,6 +49,7 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
         private Activity activity;
         private FirebaseStorage mFirebaseStorage;
         private DatabaseReference databaseReference;
+
     public GridImageAdapter(Context context,
                             List<Blog> blogList,
                             List<String> blogIDList,

@@ -127,7 +127,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     @NonNull
     @Override
     public SituationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.situation_layout,parent,false);
+        View view = LayoutInflater.from(context).inflate(R.layout.situation_layout_f,parent,false);
         return new SituationViewHolder(view);
     }
 
@@ -135,27 +135,11 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     public void onBindViewHolder(@NonNull final SituationViewHolder holder, final int position) {
 
 
-        final long t = Long.parseLong(Situation.get(position).getTime());
-        CharSequence time = DateUtils.getRelativeDateTimeString(context,t,DateUtils.SECOND_IN_MILLIS,DateUtils.WEEK_IN_MILLIS,DateUtils.FORMAT_ABBREV_ALL);
-        holder.Time.setText(String.format("@ %s", time.toString()));
+        holder.Time.setText(String.format("@ %s", Situation.get(position).getTime()));
         holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
         holder.SituationLogo.setText(String.format("%s", Situation.get(position).getTitle().charAt(0)));
 
 
-        holder.View.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*
-                Intent intent = new Intent(context, MainActivity.class);
-                intent.putExtra("ComID",CommunityID);
-                intent.putExtra("SituationID",SIdList.get(position));
-                intent.putExtra("title",Situation.get(position).getTitle());
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-                */
-
-            }
-        });
 
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -235,14 +219,6 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
             }
         });
 
-        holder.SituationEditBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-
-            }
-        });
 
     }
 
@@ -262,13 +238,9 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
         public SituationViewHolder(View itemView) {
             super(itemView);
             Name = itemView.findViewById(R.id.createdby);
-            Count = itemView.findViewById(R.id.numberofpost);
             Time = itemView.findViewById(R.id.createdtime);
             Title = itemView.findViewById( R.id.situationtitle);
-            Join = itemView.findViewById(R.id.situajoin);
-            View = itemView.findViewById(R.id.situaview);
             SituationLogo=itemView.findViewById(R.id.SituationLogo);
-            SituationEditBtn = itemView.findViewById(R.id.situationeditbtn);
         }
     }
 }

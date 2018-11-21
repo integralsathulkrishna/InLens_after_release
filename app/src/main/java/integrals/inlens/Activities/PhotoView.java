@@ -28,16 +28,10 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Random;
+
+import javax.microedition.khronos.opengles.GL;
 
 import integrals.inlens.Models.Blog;
 import integrals.inlens.R;
@@ -56,9 +50,10 @@ public class PhotoView extends AppCompatActivity {
     private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     private ImageView imageView;
-    private Button PreviousImage,AfterImage;
-    private Boolean SetIndex=false;
+    private Button PreviousImage, AfterImage;
+    private Boolean SetIndex = false;
     private int TotalPosts;
+    private boolean Visible=false;
     //private GestureDetector gdt;
 
     @Override
@@ -71,13 +66,13 @@ public class PhotoView extends AppCompatActivity {
         //
         setContentView(R.layout.photo_card);
         cardView = (CardView) findViewById(R.id.PhotoCardView);
-        PreviousImage=(Button)findViewById(R.id.LeftPhotoSwipe);
-        AfterImage=(Button)findViewById(R.id.RightPhotoSwipe);
+        PreviousImage = (Button) findViewById(R.id.LeftPhotoSwipe);
+        AfterImage = (Button) findViewById(R.id.RightPhotoSwipe);
         blogArrayList = getIntent().getExtras().getParcelableArrayList("data");
-        TotalPosts=blogArrayList.size();
+        TotalPosts = blogArrayList.size();
         Position = getIntent().getExtras().getInt("position");
         OriginalImageButton = (Button) findViewById(R.id.OriginalImageButton);
-  //    gdt = new GestureDetector(new GestureListener());
+        //    gdt = new GestureDetector(new GestureListener());
         AfterImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,29 +92,22 @@ public class PhotoView extends AppCompatActivity {
                 blogArrayList.get(Position).getBlogDescription(),
                 "NULLX",
                 blogArrayList.get(Position).getLocation(),
-                blogArrayList.get(Position).getWeatherDetails()
-
+                blogArrayList.get(Position).getWeatherDetails(),Position
 
 
         );
         OriginalImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                if (OriginalImageViewed == false) {
-                    LoadOriginalPhoto(getApplicationContext(),
-                            blogArrayList.get(Position).getOriginalImageName());
-                    OriginalImageViewed = true;
-                } else {
-                    SetThumbPhoto(getApplicationContext(),
-                            blogArrayList.get(Position).getImageThumb(),
-                            blogArrayList.get(Position).getOriginalImageName(),
-                            blogArrayList.get(Position).getBlogTitle(),
-                            blogArrayList.get(Position).getBlogDescription(),
-                            "NULLX",
-                            blogArrayList.get(Position).getLocation(),
-                            blogArrayList.get(Position).getWeatherDetails()
-                    );
-                    OriginalImageViewed = false;
+            public void onClick(View view){
+                if(AfterImage.isShown()||PreviousImage.isShown()) {
+                    OriginalImageButton.setBackgroundResource(R.drawable.ic_close);
+                    AfterImage.setVisibility(View.INVISIBLE);
+                    PreviousImage.setVisibility(View.INVISIBLE);
+
+                }else {
+                    OriginalImageButton.setBackgroundResource(R.drawable.ic_original_image);
+                    AfterImage.setVisibility(View.VISIBLE);
+                    PreviousImage.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -148,7 +136,10 @@ public class PhotoView extends AppCompatActivity {
             , final String getBlogDescription,
                               final String PostKey
             , final String LocationT
-            , final String Weather) {
+            , final String Weather, final int Pos) {
+
+
+
         OriginalImageButton.setBackgroundResource(R.drawable.ic_original_image);
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.ImageProgress);
         final ImageView imageView = (ImageView) findViewById(R.id.PhotoCardImageView);
@@ -158,6 +149,8 @@ public class PhotoView extends AppCompatActivity {
         TextView CaptionText = (TextView) findViewById(R.id.CaptionTextView);
         TextView WeatherText = (TextView) findViewById(R.id.WeatherText);
         TextView LocationText = (TextView) findViewById(R.id.LocationText);
+
+
         if (getBlogTitle.contentEquals("NULLX")) {
             CaptionLayout.setVisibility(View.GONE);
         } else {
@@ -176,9 +169,10 @@ public class PhotoView extends AppCompatActivity {
         }
 
         progressBar.setVisibility(View.VISIBLE);
-
+        AfterImage.setVisibility(View.INVISIBLE);
         Glide.with(context)
                 .load(ImageUri)
+
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -190,21 +184,27 @@ public class PhotoView extends AppCompatActivity {
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                         progressBar.setVisibility(View.GONE);
+                        try {
+                            DownloadImageCache(blogArrayList.get(Pos+1).getImageThumb());
+                            }catch (IndexOutOfBoundsException e){
+                            e.printStackTrace();
+                        }
                         return false;
+
                     }
 
 
                 })
                 .into(imageView);
 
-             //    imageView.setOnTouchListener(new View.OnTouchListener() {
-             //    @Override
-             //    public boolean onTouch(final View view, final MotionEvent event) {
-             //    gdt.onTouchEvent(event);
-             //    return true;
-            //}
+        //    imageView.setOnTouchListener(new View.OnTouchListener() {
+        //    @Override
+        //    public boolean onTouch(final View view, final MotionEvent event) {
+        //    gdt.onTouchEvent(event);
+        //    return true;
+        //}
         //});
-        photoViewAttacher=new PhotoViewAttacher(imageView);
+        photoViewAttacher = new PhotoViewAttacher(imageView);
         /*imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -223,17 +223,15 @@ public class PhotoView extends AppCompatActivity {
         });
 */
 
-         //   new DownloadFileFrontImagesFromURL().execute("");
+        //   new DownloadFileFrontImagesFromURL().execute("");
     }
-
-
 
 
     private void LoadOriginalPhoto(final Context context,
                                    final String OriginalImageUri
     ) {
-        OriginalImageButton.setBackgroundResource(R.drawable.ic_close);
-        ImageView imageView = (ImageView) findViewById(R.id.PhotoCardImageView);
+
+      /*    ImageView imageView = (ImageView) findViewById(R.id.PhotoCardImageView);
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.ImageProgress);
         progressBar.setVisibility(View.VISIBLE);
         Glide.with(context)
@@ -255,8 +253,78 @@ public class PhotoView extends AppCompatActivity {
 
                 })
                 .into(imageView);
+*/
+
+    }
 
 
+    private void SetAfterPhoto() {
+        Position += 1;
+        try {
+            SetThumbPhoto(getApplicationContext(),
+                    blogArrayList.get(Position).getImageThumb(),
+                    blogArrayList.get(Position).getOriginalImageName(),
+                    blogArrayList.get(Position).getBlogTitle(),
+                    blogArrayList.get(Position).getBlogDescription(),
+                    "NULLX",
+                    blogArrayList.get(Position).getLocation(),
+                    blogArrayList.get(Position).getWeatherDetails(),Position
+            );
+
+        } catch (IndexOutOfBoundsException e) {
+            Position -= 1;
+            Toast.makeText(getApplicationContext(), "Last Post", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+
+        }
+
+
+    }
+
+    private void SetBeforePhoto() {
+        Position -= 1;
+        try {
+
+            SetThumbPhoto(getApplicationContext(),
+                    blogArrayList.get(Position).getImageThumb(),
+                    blogArrayList.get(Position).getOriginalImageName(),
+                    blogArrayList.get(Position).getBlogTitle(),
+                    blogArrayList.get(Position).getBlogDescription(),
+                    "NULLX",
+                    blogArrayList.get(Position).getLocation(),
+                    blogArrayList.get(Position).getWeatherDetails(),Position
+            );
+
+
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+            Position += 1;
+            Toast.makeText(getApplicationContext(), "First Post", Toast.LENGTH_SHORT).show();
+
+        }
+
+    }
+
+    private void DownloadImageCache(String Url){
+      //  Glide.with(getApplicationContext())
+         //       .load(Url)
+        //       .preload();
+
+        Glide.with(getApplicationContext())
+                .load(Url)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        AfterImage.setVisibility(View.VISIBLE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        AfterImage.setVisibility(View.VISIBLE);
+                        return false;
+                    }
+                }).preload();
     }
 
 
@@ -271,63 +339,28 @@ public class PhotoView extends AppCompatActivity {
 
 
 
-   private void SetAfterPhoto(){
-        Position+=1;
-       try {
-           SetThumbPhoto(getApplicationContext(),
-                   blogArrayList.get(Position).getImageThumb(),
-                   blogArrayList.get(Position).getOriginalImageName(),
-                   blogArrayList.get(Position).getBlogTitle(),
-                   blogArrayList.get(Position).getBlogDescription(),
-                   "NULLX",
-                   blogArrayList.get(Position).getLocation(),
-                   blogArrayList.get(Position).getWeatherDetails()
-           );
-
-       }catch (IndexOutOfBoundsException e){
-           Position-=1;
-           Toast.makeText(getApplicationContext(),"Last Post",Toast.LENGTH_SHORT).show();
-           e.printStackTrace();
-
-       }
 
 
-   }
-
-   private void SetBeforePhoto(){
-       Position-=1;
-       try {
-
-           SetThumbPhoto(getApplicationContext(),
-                   blogArrayList.get(Position).getImageThumb(),
-                   blogArrayList.get(Position).getOriginalImageName(),
-                   blogArrayList.get(Position).getBlogTitle(),
-                   blogArrayList.get(Position).getBlogDescription(),
-                   "NULLX",
-                   blogArrayList.get(Position).getLocation(),
-                   blogArrayList.get(Position).getWeatherDetails()
-           );
 
 
-       }catch (IndexOutOfBoundsException e){
-           e.printStackTrace();
-           Position+=1;
-           Toast.makeText(getApplicationContext(),"First Post",Toast.LENGTH_SHORT).show();
-
-       }
-
-   }
 
 
-       private class DownloadFileFrontImagesFromURL extends AsyncTask<String, Integer, String> {
+
+
+
+
+
+
+
+
+
+
+
+      /* private class DownloadFileFrontImagesFromURL extends AsyncTask<String, Integer, String> {
            private String FileName;
            private int i;
            private String ImageUrl;
            private int downloadPosition;
-
-           /**
-            * Before starting background thread Show Progress Bar Dialog
-            */
            @Override
            protected void onPreExecute() {
                super.onPreExecute();
@@ -351,10 +384,6 @@ public class PhotoView extends AppCompatActivity {
 
                return "Excecuted";
            }
-
-           /**
-            * Updating progress bar
-            */
            protected void onProgressUpdate(Integer... progress) {
                Toast.makeText(getApplicationContext(), "Downloading ...." + downloadPosition, Toast.LENGTH_SHORT).show();
 
@@ -491,3 +520,4 @@ public class PhotoView extends AppCompatActivity {
     }
 
 */
+}

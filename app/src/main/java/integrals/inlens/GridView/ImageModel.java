@@ -29,6 +29,7 @@ public class ImageModel implements Parcelable {
         }
     };
 
+
     public String getName() { return name; }
 
     public void setName(String name) {

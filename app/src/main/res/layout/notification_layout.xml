@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="180dp"
+    android:layout_height="60dp"
     android:background="@android:color/white">
 
 
@@ -11,10 +10,11 @@
         android:id="@+id/AddForUpload"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="40dp"
-        android:layout_marginTop="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginRight="30dp"
         android:background="@drawable/ic_cloud_upload"
         android:elevation="24dp"
         android:gravity="center_vertical" />
@@ -23,21 +23,22 @@
         android:id="@+id/UploadImageViewNotification"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="15dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
         android:layout_marginLeft="20dp"
-        android:background="@android:color/black" />
+        android:layout_marginBottom="15dp"
+        android:background="@android:color/black"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/GotoUploadActivity"
         android:layout_width="26dp"
         android:layout_height="27dp"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="20dp"
+        android:layout_alignParentBottom="true"
         android:layout_marginRight="40dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/ic_recent_images"
         android:visibility="gone" />
 
@@ -45,11 +46,37 @@
         android:id="@+id/GoToUploadTask"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/AddForUpload"
-        android:layout_marginBottom="36dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="17dp"
+        android:layout_marginEnd="140dp"
+        android:layout_marginRight="100dp"
         android:background="@drawable/ic_attach_icon"
         android:elevation="24dp"
-        android:rotation="45" />
+        android:rotation="45"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="17dp"
+        android:background="@drawable/inlens_notification_" />
+
+    <TextView
+        android:id="@+id/recentImageTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="false"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="17sp"
+        android:layout_marginBottom="10dp"
+        android:text="Recent image updated"
+        android:textColor="@android:color/black"
+        android:textSize="12sp" />
 
 </RelativeLayout>

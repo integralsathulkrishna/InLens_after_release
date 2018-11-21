@@ -33,7 +33,7 @@
             android:layout_marginEnd="20dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
-            android:text="Enter the name for the new situation."
+            android:text="Enter the name for the new situation. Default name is given below"
             android:textSize="13sp" />
 
         <EditText
