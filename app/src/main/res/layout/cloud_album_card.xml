@@ -136,7 +136,6 @@
                 android:visibility="visible"
                 app:civ_border_color="@android:color/white"
                 app:civ_border_width="2dp"
-                android:src="@drawable/ic_account_circle"
                 app:srcCompat="@color/colorPrimary" />
 
         </RelativeLayout>
