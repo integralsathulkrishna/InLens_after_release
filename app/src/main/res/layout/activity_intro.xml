@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.IntroActivity">
+
+    <TextView
+        android:id="@+id/appname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="InLens"
+        android:layout_marginTop="40dp"
+        android:textSize="30sp"
+        android:textColor="@color/colorPrimary"/>
+    <TextView
+        android:id="@+id/appwelcome"
+        android:layout_below="@id/appname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Welcomes you"
+        android:layout_marginTop="10dp"
+        android:textSize="25sp"
+        android:textColor="@color/colorPrimary"/>
+
+    <ImageView
+        android:id="@+id/appicon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/inlens_logo_m"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/appwelcome"
+        android:layout_marginTop="40dp"/>
+
+    <TextView
+        android:id="@+id/apptagline"
+        android:layout_below="@id/appicon"
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorPrimary"
+        android:textSize="16sp"
+        />
+
+    <Button
+        android:id="@+id/introsignup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:padding="10dp"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
+        android:text="Sign Up"
+        android:textSize="13sp"
+        android:textColor="#3E3D63"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="60dp"
+        android:layout_marginEnd="50dp"/>
+
+    <Button
+        android:id="@+id/introsignin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="60dp"
+        android:layout_marginStart="50dp"
+        android:padding="10dp"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
+        android:text="Sign In"
+        android:textSize="13sp"
+        android:textColor="#3E3D63" />
+
+    <TextView
+        android:id="@+id/appabout"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="By InLens Team."
+        android:textColor="@color/colorPrimary"
+        android:textSize="14sp"
+        />
+
+</RelativeLayout>
