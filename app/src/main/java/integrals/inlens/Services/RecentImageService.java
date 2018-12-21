@@ -178,7 +178,7 @@ import integrals.inlens.R;
                                          Projection[0], null, null,
                                          MediaStore.Images.ImageColumns.DATE_MODIFIED + " DESC");
 
-
+                            //Cursor Control
                          try {
 
                              if (cursor.moveToFirst()) {
