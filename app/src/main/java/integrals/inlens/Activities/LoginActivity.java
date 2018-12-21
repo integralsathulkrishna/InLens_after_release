@@ -41,7 +41,6 @@ public class LoginActivity extends AppCompatActivity {
     private Button            LoginButton;
     private FirebaseAuth      InAuth;
     private DatabaseReference InDatabaseUser;
-    private Button            CreateAccountButton;
     private ProgressDialog    InProgressDialogue;
     private int               INTID=3939;
     private FirebaseAuth      InAuthentication;
@@ -51,9 +50,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getSupportActionBar().hide();
         setContentView(R.layout.activity_login);
 
         Ask.on(this)
@@ -73,23 +69,13 @@ public class LoginActivity extends AppCompatActivity {
         EmailField=(EditText)findViewById(R.id.EmailEditText);
         PassWordField=(EditText)findViewById(R.id.PasswordField);
         LoginButton=(Button)findViewById(R.id.LogInButton);
-        CreateAccountButton=(Button)findViewById(R.id.CreateUser);
         ForgotPassword=(TextView)findViewById(R.id.ForgotPassword);
         InAuth=FirebaseAuth.getInstance();
         InDatabaseUser= FirebaseDatabase.getInstance().getReference().child("Users");
         InDatabaseUser.keepSynced(true);
 
         InProgressDialogue=new ProgressDialog(this);
-        getSupportActionBar().setElevation(0);
 
-        CreateAccountButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                finish();
-                startActivity(new Intent(LoginActivity.this,RegisterUser.class));
-            }
-
-        });
         LoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

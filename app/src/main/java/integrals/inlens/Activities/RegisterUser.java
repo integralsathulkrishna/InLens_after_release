@@ -27,6 +27,7 @@ public class RegisterUser extends AppCompatActivity {
     private EditText mDisplayName;
     private EditText mEmail;
     private EditText mPassword;
+    private EditText ReTypePassword;
 
     private Button mCreateBtn;
     private Button VerifiedButton;
@@ -45,37 +46,43 @@ public class RegisterUser extends AppCompatActivity {
             VerifiedButton=(Button)findViewById(R.id.VerifiedButton);
             mEmail = (EditText) findViewById(R.id.EmailField);
             mPassword = (EditText) findViewById(R.id.Password);
+            ReTypePassword = findViewById(R.id.RePassword);
             mCreateBtn = (Button) findViewById(R.id.ProceedButton);
             progressDialog = new ProgressDialog(this);
             progressDialog.setCancelable(false);
             getSupportActionBar().setTitle("User Registration");
             VerifiedButton.setEnabled(false);
+
             mCreateBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String display_name =mDisplayName.getText().toString();
                     String email =mEmail.getText().toString();
                     String password =mPassword.getText().toString();
-
-                    if(TextUtils.isEmpty(display_name)||TextUtils.isEmpty(email)||TextUtils.isEmpty(password)) {
-
-
-                        Toast.makeText(RegisterUser.this,"Check the details you entered", Toast.LENGTH_LONG).show();
-                    }
-                    else{
-                        if(password.length()<=7){
-                            Toast.makeText(getApplicationContext(),"Retype Password it  must contain minimum 8 charachters",Toast.LENGTH_SHORT).show();
-                        }
-                        else
-                        {
-                            progressDialog.setMessage("Registering user. Please wait...");
-                            progressDialog.show();
-                            register_user(display_name,email,password);
-                        }
-
+                    String repassword = ReTypePassword.getText().toString();
+                    if(!password.equals(repassword))
+                    {
+                        Toast.makeText(RegisterUser.this, "Passwords do not match", Toast.LENGTH_LONG).show();
 
                     }
+                    else
+                    {
+                        if (TextUtils.isEmpty(display_name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
 
+
+                            Toast.makeText(RegisterUser.this, "Check the details you entered", Toast.LENGTH_LONG).show();
+                        } else {
+                            if (password.length() <= 7) {
+                                Toast.makeText(getApplicationContext(), "Retype Password it  must contain minimum 8 charachters", Toast.LENGTH_SHORT).show();
+                            } else {
+                                progressDialog.setMessage("Registering user. Please wait...");
+                                progressDialog.show();
+                                register_user(display_name, email, password);
+                            }
+
+
+                        }
+                    }
                 }
             });
 
@@ -195,8 +202,7 @@ public class RegisterUser extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-     //No Flow  ///
-       Toast.makeText(getApplicationContext(),"Registration incomplete. Cannot go back",Toast.LENGTH_SHORT).show();
+        super.onBackPressed();
     }
 }
 
