@@ -74,6 +74,7 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
     public void onBindViewHolder(@NonNull final GridImageViewHolder holder, final int position) {
 
         holder.CardLoadingPBar.setVisibility(View.VISIBLE);
+
         RequestOptions requestOptions=new RequestOptions()
                 .centerCrop()
                 .override(176,176);

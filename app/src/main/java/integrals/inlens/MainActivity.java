@@ -88,6 +88,7 @@ import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.Models.AlbumModel;
 import integrals.inlens.Services.RecentImageService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
+import integrals.inlens.Weather.Model.Main;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -456,27 +457,33 @@ public class MainActivity extends AppCompatActivity {
 
                                     ProfileUserEmail.setText(String.format("Email : %s", dbemail));
 
-                                    RequestOptions requestOptions=new RequestOptions()
-                                            .placeholder(R.drawable.ic_account_200dp)
-                                            .fitCenter();
+                                    if(!TextUtils.isEmpty(dbimage))
+                                    {
+                                        RequestOptions requestOptions=new RequestOptions()
+                                                .fitCenter();
 
-                                    Glide.with(MainActivity.this)
-                                            .load(dbimage)
-                                            .apply(requestOptions)
-                                            .listener(new RequestListener<Drawable>() {
-                                                @Override
-                                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                                    progressBar.setVisibility(View.GONE);
-                                                    return false;
-                                                }
+                                        Glide.with(MainActivity.this)
+                                                .load(dbimage)
+                                                .apply(requestOptions)
+                                                .listener(new RequestListener<Drawable>() {
+                                                    @Override
+                                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                                        progressBar.setVisibility(View.GONE);
+                                                        return false;
+                                                    }
 
-                                                @Override
-                                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                                    progressBar.setVisibility(View.GONE);
-                                                    return false;
-                                                }
-                                            })
-                                            .into(UserImage);
+                                                    @Override
+                                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                                        progressBar.setVisibility(View.GONE);
+                                                        return false;
+                                                    }
+                                                })
+                                                .into(UserImage);
+                                    }
+                                    else
+                                    {
+                                        Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
+                                    }
 
                                     ProfileuserName.setText(dbname);
                                     ProfileDialog.show();

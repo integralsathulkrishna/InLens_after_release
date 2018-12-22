@@ -5,9 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,9 +22,11 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +43,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.ramotion.cardslider.CardSliderLayoutManager;
 import com.ramotion.cardslider.CardSnapHelper;
 
@@ -96,10 +107,23 @@ public class CloudAlbum extends AppCompatActivity {
     private EditText SitEditName;
     private Activity cloudalbumcontext;
 
+    //QR CODE DIALOG
+    private   String PhotographerID;
+    ImageView QRCodeImageView;
+    ActionBar actionBar;
+    private String Default="No current community";
+    private String QRCommunityID="1122333311101";
+    private TextView textView;
+    private Button InviteLinkButton;
+    private Dialog QRCodeDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
+
+        //QRCODE INIT
+        QRCodeInit();
 
         cloudalbumcontext = this;
 
@@ -164,6 +188,7 @@ public class CloudAlbum extends AppCompatActivity {
 
         // new situation layout
         createNewSituation = new Dialog(CloudAlbum.this);
+        createNewSituation.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         createNewSituation.setContentView(R.layout.create_new_situation_layout);
         createNewSituation.setCancelable(false);
         SitEditName = createNewSituation.findViewById(R.id.situation_name);
@@ -356,6 +381,58 @@ public class CloudAlbum extends AppCompatActivity {
 
     }
 
+    private void QRCodeInit() {
+
+        QRCodeDialog = new Dialog(this);
+        QRCodeDialog.setCancelable(true);
+        QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        QRCodeDialog.setContentView(R.layout.activity_qrcode_generator);
+        QRCodeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+        QRCommunityID=currentDatabase.GetLiveCommunityID();
+        currentDatabase.close();
+
+        InviteLinkButton= QRCodeDialog.findViewById(R.id.InviteLinkButton);
+        PhotographerID=QRCommunityID;
+
+        textView= QRCodeDialog.findViewById(R.id.textViewAlbumQR);
+        QRCodeImageView= QRCodeDialog.findViewById(R.id.QR_Display);
+
+        MultiFormatWriter multiFormatWriter=new MultiFormatWriter();
+        try {
+            BitMatrix bitMatrix=multiFormatWriter.encode(PhotographerID, BarcodeFormat.QR_CODE,200,200);
+            BarcodeEncoder barcodeEncoder=new BarcodeEncoder();
+            Bitmap bitmap=barcodeEncoder.createBitmap(bitMatrix);
+            QRCodeImageView.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e){
+            e.printStackTrace();
+            actionBar.setTitle("No current album");
+            QRCodeImageView.setVisibility(View.INVISIBLE);
+            textView.setText("You must be in an album to generate QR code");
+        }catch (NullPointerException e){
+            actionBar.setTitle("No current album");
+            QRCodeImageView.setVisibility(View.INVISIBLE);
+            textView.setText("You must be in an album to generate QR code");
+
+        }
+        InviteLinkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
+                SharingIntent.setType("text/plain");
+                String CommunityPostKey=QRCommunityID;
+
+                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
+                        "Long press Link to copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
+                startActivity(SharingIntent);
+
+            }
+        });
+    }
+
 
     private String GetUserName(String uid) {
 
@@ -413,7 +490,8 @@ public class CloudAlbum extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 0) {
-            startActivity(new Intent(CloudAlbum.this, QRCodeGenerator.class));
+            //startActivity(new Intent(CloudAlbum.this, QRCodeGenerator.class));
+            QRCodeDialog.show();
         }
         if(item.getItemId()==1){
             createNewSituation.show();

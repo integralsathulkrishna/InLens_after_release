@@ -54,7 +54,6 @@
                 />
 
             <ProgressBar
-                android:visibility="gone"
                 android:id="@+id/custom_profile_dialog_progressbar"
                 android:layout_width="30dp"
                 android:layout_height="30dp"

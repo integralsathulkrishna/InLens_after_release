@@ -25,22 +25,27 @@ public class QRCodeGenerator extends AppCompatActivity {
     ImageView QRCodeImageView;
     ActionBar actionBar;
     private String Default="No current community";
-    private String CommunityID="1122333311101";
+    private String QRCommunityID="1122333311101";
     private TextView textView;
     private Button InviteLinkButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode_generator);
         actionBar=getSupportActionBar();
+
         CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-        CommunityID=currentDatabase.GetLiveCommunityID();
+        QRCommunityID=currentDatabase.GetLiveCommunityID();
         currentDatabase.close();
-        InviteLinkButton=(Button)findViewById(R.id.InviteLinkButton);
-        PhotographerID=CommunityID;
+
+        InviteLinkButton= findViewById(R.id.InviteLinkButton);
+        PhotographerID=QRCommunityID;
+
         textView=(TextView)findViewById(R.id.textViewAlbumQR);
         QRCodeImageView=(ImageView)findViewById(R.id.QR_Display);
+
         MultiFormatWriter multiFormatWriter=new MultiFormatWriter();
         try {
             BitMatrix bitMatrix=multiFormatWriter.encode(PhotographerID, BarcodeFormat.QR_CODE,200,200);
@@ -65,10 +70,10 @@ public class QRCodeGenerator extends AppCompatActivity {
             public void onClick(View v) {
                 final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                 SharingIntent.setType("text/plain");
-                String CommunityPostKey=CommunityID;
+                String CommunityPostKey=QRCommunityID;
 
                 SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
-                        "\tLong press Link to copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
+                        "Long press Link to copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
                 startActivity(SharingIntent);
 
             }

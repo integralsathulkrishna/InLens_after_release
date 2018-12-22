@@ -93,7 +93,6 @@ public class ProfileDilaogHelper extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.custom_profile_dialog);
 
         mainActivity = new MainActivity();
@@ -119,7 +118,6 @@ public class ProfileDilaogHelper extends Dialog {
         if(!TextUtils.isEmpty(getUserImage()))
         {
             RequestOptions requestOptions=new RequestOptions()
-                    .placeholder(R.drawable.ic_account_200dp)
                     .fitCenter();
 
             Glide.with(view)
@@ -142,6 +140,7 @@ public class ProfileDilaogHelper extends Dialog {
         }
         else
         {
+            Glide.with(view).load(R.drawable.ic_account_200dp).into(CustomDialogUserImage);
             CustomDialogProgressbar.setVisibility(View.GONE);
         }
 
