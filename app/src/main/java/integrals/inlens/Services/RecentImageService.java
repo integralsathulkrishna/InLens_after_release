@@ -1,24 +1,18 @@
  package integrals.inlens.Services;
 
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.job.JobScheduler;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteReadOnlyDatabaseException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -67,6 +61,7 @@ import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
 
  public class RecentImageService extends Service {
+     private Bitmap LogoBitMap=null;
      private Handler     handler;
      private Runnable    runnable;
      final   String[][]  Projection = new String[1][1];
@@ -100,6 +95,8 @@ import integrals.inlens.R;
      private int COMPRESSION_WIDTH=400;
      private int COMPRESSION_HEIGHT=400;
      private String AlbumExpiry="";
+     private Cursor cursor;
+
      /*
      private String       sowner,stime,stitle,sKey,sTime;
      private DatabaseReference databaseReference;
@@ -122,13 +119,12 @@ import integrals.inlens.R;
      @Override
          public void onCreate() {
          super.onCreate();
-
-
-
          handler=new Handler();
+         Resources res = getApplicationContext().getResources();
+         int id = R.drawable.inlens_logo_m;
+         LogoBitMap= BitmapFactory.decodeResource(res, id);
          remoteViews=new RemoteViews(getPackageName(),R.layout.notification_layout);
-
-         if(FirebaseAuth.getInstance().getCurrentUser()!=null)
+         /*if(FirebaseAuth.getInstance().getCurrentUser()!=null)
          {
              MyUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
              ComNotyRef = FirebaseDatabase.getInstance().getReference().child("ComNoty").child(MyUserID);
@@ -143,6 +139,10 @@ import integrals.inlens.R;
          PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
          noty.setContentIntent(pendingIntent);
          noty.setSound(Uri.parse("android.resource://" + getPackageName() + "/raw/impulse"));
+         */
+
+
+
          //Added for perfect uploading;
          UploadDatabaseHelper uploadDatabaseHelper=new UploadDatabaseHelper(getApplicationContext(),"",null,1);
          CurrentDatabase      currentDatabase     =new CurrentDatabase(getApplicationContext(),"",null,1);
@@ -150,7 +150,6 @@ import integrals.inlens.R;
          uploadDatabaseHelper.UpdateUploadStatus(currentDatabase.GetUploadingTargetColumn(),"NOT_UPLOADED");
          currentDatabase.close();
          uploadDatabaseHelper.close();
-         //
          Toast.makeText(getApplicationContext(),"InLens  Service created.",Toast.LENGTH_SHORT).show();
     }
 
@@ -173,7 +172,7 @@ import integrals.inlens.R;
                          };
 
 
-                         Cursor cursor = getApplicationContext().getContentResolver().
+                          cursor = getApplicationContext().getContentResolver().
                                  query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                                          Projection[0], null, null,
                                          MediaStore.Images.ImageColumns.DATE_MODIFIED + " DESC");
@@ -214,17 +213,16 @@ import integrals.inlens.R;
                                                  "NULL",
                                                  "NULL"
                                          );
-                                         //try {
-                                         //  bitmap1[0] = new Compressor(getApplicationContext())
-                                         //        .setMaxHeight(100)
-                                         //      .setMaxWidth(125)
-                                         //    .setQuality(100)
-
-                                         //  .setCompressFormat(Bitmap.CompressFormat.WEBP)
-                                         //  .compressToBitmap(file1[0]);
-                                         // } catch (IOException e) {
-                                         //    e.printStackTrace();
-                                         //}
+                                         try {
+                                           bitmap1[0] = new Compressor(getApplicationContext())
+                                                   .setMaxHeight(640)
+                                                   .setMaxWidth(480)
+                                                   .setQuality(75)
+                                                   .setCompressFormat(Bitmap.CompressFormat.WEBP)
+                                           .compressToBitmap(file1[0]);
+                                          } catch (IOException e) {
+                                             e.printStackTrace();
+                                         }
                                          CreateNotification();
                                          SharedPreferences.Editor e = sharedPreferences1[0].edit();
                                          e.putString("CurrentImage::", ImageLocation[0]);
@@ -250,7 +248,7 @@ import integrals.inlens.R;
                          }
 
                          //Situation Operation
-                         SituationOperation();
+  //                       SituationOperation();
                          //Upload Operation
                          UploadOperation();
 
@@ -366,7 +364,7 @@ import integrals.inlens.R;
 
          return d1.compareTo(d2);
      }
-
+/*
      private void SituationOperation() {
 
          ComNotyRef.addValueEventListener(new ValueEventListener() {
@@ -395,7 +393,7 @@ import integrals.inlens.R;
              }
          });
      }
-
+*/
      private void UploadOperation() {
          CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
          CommunityID=currentDatabase.GetLiveCommunityID();
@@ -756,7 +754,7 @@ import integrals.inlens.R;
 
      private void CreateNotification() {
        RecentImage++;
-       //  remoteViews.setImageViewBitmap(R.id.UploadImageViewNotification, bitmap1[0]);
+           remoteViews.setImageViewBitmap(R.id.UploadImageViewNotification, bitmap1[0]);
            remoteViews.setTextViewText(R.id.recentImageTextView,RecentImage +" recent image(s) updated for album.\n Tap to upload each");
          NotificationManager notificationManager =
                          (NotificationManager)
@@ -769,11 +767,9 @@ import integrals.inlens.R;
          PendingIntent pendingIntent=PendingIntent.getActivity(getApplicationContext(),0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
 
          PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 9388,upload_intent , 0);
-         PendingIntent pendingIntent2 = PendingIntent.getBroadcast(getApplicationContext(), 8086,  attach_intent, 0);
          PendingIntent pendingIntent3 = PendingIntent.getBroadcast(getApplicationContext(), 1428,  upload_activity_intent, 0);
 
          remoteViews.setOnClickPendingIntent(R.id.AddForUpload,pendingIntent1);
-         remoteViews.setOnClickPendingIntent(R.id.GoToUploadTask, pendingIntent2);
          remoteViews.setOnClickPendingIntent(R.id.GotoUploadActivity, pendingIntent3);
 
 
@@ -782,10 +778,11 @@ import integrals.inlens.R;
                          new NotificationCompat.Builder(getApplicationContext())
                          .setDefaults(Notification.DEFAULT_ALL)
                          .setOnlyAlertOnce(true)
-                         .setContent(remoteViews)
+                         .setCustomBigContentView(remoteViews)
                          .setWhen(System.currentTimeMillis())
 
                  .setSmallIcon(R.drawable.inlens_logo_m)
+                                 .setLargeIcon(LogoBitMap)
                  .setPriority(Notification.PRIORITY_MAX)
                  ;
          builder.setContentIntent(pendingIntent);
