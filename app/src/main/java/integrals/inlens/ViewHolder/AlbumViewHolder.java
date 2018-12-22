@@ -5,6 +5,8 @@ package integrals.inlens.ViewHolder;
  */
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -16,9 +18,13 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import integrals.inlens.Activities.DisplayPhotographer;
+import integrals.inlens.Helper.ProfileDilaogHelper;
 import integrals.inlens.Models.Participants;
 import integrals.inlens.R;
 
@@ -32,6 +38,7 @@ import integrals.inlens.R;
     private View view;
     public Button ShareButton;
     public ImageButton AlbuymCoverEditBtn;
+    private int dbcount;
 
     public AlbumViewHolder(View ItemView) {
         super(ItemView);
@@ -81,7 +88,15 @@ import integrals.inlens.R;
          TextView textView=(TextView)view.findViewById(R.id.AlbumDescription);
          textView.setText(Desc);
      }
-     public void SetParticipants(final Context context, DatabaseReference  participantReference){
+     public void SetParticipants(final Context context, DatabaseReference participantReference, final DatabaseReference UserRef){
+
+
+         final ProfileDilaogHelper UserDialog = new ProfileDilaogHelper(context);
+         UserDialog.setCancelable(true);
+         if(UserDialog.getWindow()!=null)
+             UserDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+
          RecyclerView ParticipantsRecyclerView=(RecyclerView)view.findViewById(R.id.ParticipantsRecyclerView);
          ParticipantsRecyclerView.setHasFixedSize(true);
          LinearLayoutManager linearLayoutManager= new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false);
@@ -104,12 +119,35 @@ import integrals.inlens.R;
                      @Override
                      public void onClick(View v) {
 
-                         Intent i= new Intent(context,DisplayPhotographer.class);
-                         i.putExtra("EMAIL_ID", model.getEmail_ID());
-                         i.putExtra("PROFILE_PIC", model.getProfile_picture());
-                         i.putExtra("USERNAME", model.getName());
-                         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                         context.startActivity(i);
+                         dbcount = 0;
+                         UserRef.child(model.getPhotographer_UID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                             @Override
+                             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                 if(dataSnapshot.hasChild("Communities"))
+                                 {
+                                     for(DataSnapshot snapshot : dataSnapshot.getChildren())
+                                     {
+                                         dbcount++;
+                                     }
+                                 }
+
+                             }
+
+                             @Override
+                             public void onCancelled(DatabaseError databaseError) {
+
+                             }
+                         });
+
+                         UserDialog.setUserAlbumCount("Album Count : "+dbcount);
+                         UserDialog.setUserEmail("Email : "+model.getEmail_ID());
+                         UserDialog.setUserImage(model.getProfile_picture());
+                         UserDialog.setUserRating("3.5");
+                         UserDialog.setUserName(model.getName());
+                         UserDialog.setImageChangeBtnVisibility(false);
+                         UserDialog.show();
+
                      }
                  });
 

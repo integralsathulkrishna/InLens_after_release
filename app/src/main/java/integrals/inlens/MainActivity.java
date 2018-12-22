@@ -12,7 +12,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,16 +28,27 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.animation.LayoutAnimationController;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,7 +57,22 @@ import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import id.zelory.compressor.Compressor;
 import integrals.inlens.Activities.CloudAlbum;
 import integrals.inlens.Activities.CoverEditActivity;
 import integrals.inlens.Activities.CreateCloudAlbum;
@@ -48,6 +81,7 @@ import integrals.inlens.Activities.LoginActivity;
 import integrals.inlens.Activities.QRCodeReader;
 import integrals.inlens.Activities.SettingActivity;
 import integrals.inlens.Helper.CurrentDatabase;
+import integrals.inlens.Helper.ProfileDilaogHelper;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
@@ -80,6 +114,15 @@ public class MainActivity extends AppCompatActivity {
 
     private String PostKeyForEdit;
     private Activity activity;
+    private Dialog ProfileDialog;
+    private String dbname="", dbimage="", dbemail="";
+    private static final int GALLERY_PICK=1 ;
+    private StorageReference mStorageRef;
+    private ProgressBar progressBar ;
+    private CircleImageView UserImage ;
+    private ImageButton ChangeuserImage;
+    private TextView ProfileuserName , ProfileUserEmail;
+
     //
     //
     // Import from Elson.............................................................................
@@ -114,6 +157,30 @@ public class MainActivity extends AppCompatActivity {
         if (!isMyServiceRunning(recentImageService.getClass()) && firebaseUser != null) {
             startService(new Intent(getApplicationContext(), RecentImageService.class));
         }
+
+        //ProfileDialog
+        ProfileDialog = new Dialog(this);
+        ProfileDialog.setCancelable(true);
+        ProfileDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        ProfileDialog.setContentView(R.layout.custom_profile_dialog);
+        ProfileDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+
+        progressBar = ProfileDialog.findViewById(R.id.custom_profile_dialog_progressbar);
+        UserImage = ProfileDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
+        ChangeuserImage = ProfileDialog.findViewById(R.id.custom_profile_dialog_profilechangebtn);
+        ProfileUserEmail = ProfileDialog.findViewById(R.id.custom_profile_dialog_useremail);
+        ProfileuserName = ProfileDialog.findViewById(R.id.custom_profile_dialog_username);
+
+        ChangeuserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                GetStartedWithNewProfileImage();
+
+            }
+        });
 
 
         //User Authentication
@@ -221,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
                                 try {
                                     CommunityID = dataSnapshot.child(getRef(position).getKey().toString()).child("CommunityID").getValue().toString().trim();
                                     getParticipantDatabaseReference = participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
-                                    viewHolder.SetParticipants(getApplicationContext(), getParticipantDatabaseReference);
+                                    viewHolder.SetParticipants(MainActivity.this, getParticipantDatabaseReference,FirebaseDatabase.getInstance().getReference().child("Users"));
 
                                 } catch (IndexOutOfBoundsException e) {
                                     e.printStackTrace();
@@ -326,6 +393,8 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 0) {
@@ -358,7 +427,67 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
                             break;
                         case R.id.profile_pic:
-                            startActivity(new Intent(MainActivity.this, SettingActivity.class));
+                            //startActivity(new Intent(MainActivity.this, SettingActivity.class));
+                            DatabaseReference DbRef = FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            DbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                    if(dataSnapshot.hasChild("Name"))
+                                    {
+                                        dbname = dataSnapshot.child("Name").getValue().toString();
+                                    }
+                                    if(dataSnapshot.hasChild("Profile_picture"))
+                                    {
+                                        dbimage = dataSnapshot.child("Profile_picture").getValue().toString();
+                                    }
+                                    if(dataSnapshot.hasChild("Email"))
+                                    {
+                                        dbemail = dataSnapshot.child("Email").getValue().toString();
+                                    }
+                                    int count = 0;
+                                    if(dataSnapshot.hasChild("Communities"))
+                                    {
+                                        for(DataSnapshot snapshot : dataSnapshot.child("Communities").getChildren())
+                                        {
+                                            count++;
+                                        }
+                                    }
+
+                                    ProfileUserEmail.setText(String.format("Email : %s", dbemail));
+
+                                    RequestOptions requestOptions=new RequestOptions()
+                                            .placeholder(R.drawable.ic_account_200dp)
+                                            .fitCenter();
+
+                                    Glide.with(MainActivity.this)
+                                            .load(dbimage)
+                                            .apply(requestOptions)
+                                            .listener(new RequestListener<Drawable>() {
+                                                @Override
+                                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                                    progressBar.setVisibility(View.GONE);
+                                                    return false;
+                                                }
+
+                                                @Override
+                                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                                    progressBar.setVisibility(View.GONE);
+                                                    return false;
+                                                }
+                                            })
+                                            .into(UserImage);
+
+                                    ProfileuserName.setText(dbname);
+                                    ProfileDialog.show();
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
                             break;
                         case R.id.quit_cloud_album:
                             SharedPreferences sharedPreferences3 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
@@ -681,6 +810,149 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
+    }
+
+    public void GetStartedWithNewProfileImage()
+    {
+        CropImage.activity()
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .start(MainActivity.this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==GALLERY_PICK && resultCode == RESULT_OK){
+
+            Uri imageUri = data.getData();
+            CropImage.activity(imageUri)
+                    .setAspectRatio(1,1)
+                    .setMinCropWindowSize(500,500)
+                    .start(this);
+            finish();
+
+        }
+
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+
+            ProfileDialog.setCancelable(false);
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+
+
+                progressBar.setVisibility(View.VISIBLE);
+
+                Uri resultUri = result.getUri();
+                try {
+                    InputStream stream = getContentResolver().openInputStream(resultUri);
+                    Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                    UserImage.setImageBitmap(bitmap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+
+                File thumb_filePath =new File(resultUri.getPath());
+                final String current_u_i_d = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                Bitmap thumb_bitmap = null;
+                try {
+                    thumb_bitmap = new Compressor(this)
+                            .setMaxWidth(200)
+                            .setMaxHeight(200)
+                            .setQuality(100)
+                            .compressToBitmap(thumb_filePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                thumb_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                final byte[] thumb_byte = baos.toByteArray();
+
+
+                final StorageReference filepath = mStorageRef.child("profile_images").child(current_u_i_d + ".jpg");
+                final StorageReference thumb_filepath = mStorageRef.child("profile_images").child("thumbs").child(current_u_i_d + ".jpg");
+
+                filepath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+
+                        if(task.isSuccessful()){
+
+                            final String downloadUrl = task.getResult().getDownloadUrl().toString();
+
+                            com.google.firebase.storage.UploadTask uploadTask = thumb_filepath.putBytes(thumb_byte);
+                            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> thumb_task) {
+
+
+                                    String thumb_downloadurl = thumb_task.getResult().getDownloadUrl().toString();
+
+                                    if(thumb_task.isSuccessful()){
+
+
+                                        Map update_Hashmap = new HashMap();
+                                        update_Hashmap.put("Profile_picture",downloadUrl);
+                                        update_Hashmap.put("thumb_image",thumb_downloadurl);
+
+                                        FirebaseDatabase.getInstance().getReference().child("Users").child(current_u_i_d).updateChildren(update_Hashmap)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()){
+                                                            {
+                                                                Toast.makeText(MainActivity.this,"SUCCESSFULLY UPLOADED", Toast.LENGTH_LONG).show();
+                                                                progressBar.setVisibility(View.GONE);
+                                                                ProfileDialog.setCancelable(true);
+
+                                                            }
+                                                        }else {
+                                                            progressBar.setVisibility(View.GONE);
+                                                            ProfileDialog.setCancelable(true);
+                                                            Toast.makeText(MainActivity.this,"FAILED TO SAVE TO DATABASE.MAKE SURE YOUR INTERNET IS CONNECTED AND TRY AGAIN.",Toast.LENGTH_LONG).show();
+                                                        }
+
+                                                    }
+                                                });
+                                    }else{
+                                        progressBar.setVisibility(View.GONE);
+                                        ProfileDialog.setCancelable(true);
+                                        Toast.makeText(MainActivity.this,"FAILED TO UPLOAD THUMBNAIL",Toast.LENGTH_LONG).show();
+                                    }
+
+                                }
+
+                            });
+                        }else {
+                            progressBar.setVisibility(View.GONE);
+                            ProfileDialog.setCancelable(true);
+                            Toast.makeText(MainActivity.this,"FAILED TO UPLOAD", Toast.LENGTH_LONG).show();
+                        }}
+
+
+
+                });
+
+
+            }
+            else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
+            {
+                ProfileDialog.setCancelable(true);
+            }
+
+
+
+
+
+        }
+
+
+
 
 
     }
