@@ -2,34 +2,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="256dp"
     android:background="@android:color/white">
 
 
-    <Button
-        android:id="@+id/AddForUpload"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="17dp"
-        android:layout_marginRight="30dp"
-        android:background="@drawable/ic_cloud_upload"
-        android:elevation="24dp"
-        android:gravity="center_vertical" />
-
     <ImageView
         android:id="@+id/UploadImageViewNotification"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/recentImageTextView"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentBottom="false"
+        android:layout_centerHorizontal="true"
+        android:alpha="0.7"
         android:background="@android:color/black"
-        android:visibility="gone" />
+        android:scaleType="centerCrop"
+        android:visibility="visible" />
 
     <Button
         android:id="@+id/GotoUploadActivity"
@@ -43,40 +32,38 @@
         android:visibility="gone" />
 
     <Button
-        android:id="@+id/GoToUploadTask"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="17dp"
-        android:layout_marginEnd="140dp"
-        android:layout_marginRight="100dp"
-        android:background="@drawable/ic_attach_icon"
-        android:elevation="24dp"
-        android:rotation="45"
-        android:visibility="gone" />
-
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:layout_alignParentStart="true"
+        android:id="@+id/AddForUpload"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentRight="false"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="17dp"
-        android:background="@drawable/inlens_notification_" />
+        android:alpha="1"
+        android:background="@drawable/upload_icon_notification"
+        android:gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:text="       InLens"
+        android:textColor="@android:color/white"
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/recentImageTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="false"
-        android:layout_marginStart="45dp"
-        android:layout_marginTop="17sp"
-        android:layout_marginBottom="10dp"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/colorPrimary"
         android:text="Recent image updated"
-        android:textColor="@android:color/black"
-        android:textSize="12sp" />
+        android:textAlignment="center"
+        android:textColor="#FFFF"
+        android:textSize="13sp" />
 
 </RelativeLayout>
