@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
     private StorageReference mStorageRef;
     private ProgressBar progressBar ;
     private CircleImageView UserImage ;
-    private ImageButton ChangeuserImage;
+    private ImageButton ChangeuserImage , CloseProfileDialog;
     private TextView ProfileuserName , ProfileUserEmail;
 
     //
@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().setElevation(25);
+
         ComponentName componentName = new ComponentName(this, InLensJobScheduler.class);
         JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
         builder.setPeriodic(15 * 60 * 1000);
@@ -173,6 +174,17 @@ public class MainActivity extends AppCompatActivity {
         ChangeuserImage = ProfileDialog.findViewById(R.id.custom_profile_dialog_profilechangebtn);
         ProfileUserEmail = ProfileDialog.findViewById(R.id.custom_profile_dialog_useremail);
         ProfileuserName = ProfileDialog.findViewById(R.id.custom_profile_dialog_username);
+
+        CloseProfileDialog = ProfileDialog.findViewById(R.id.custom_profile_dialog_closebtn);
+
+        CloseProfileDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                ProfileDialog.dismiss();
+
+            }
+        });
 
         ChangeuserImage.setOnClickListener(new View.OnClickListener() {
             @Override

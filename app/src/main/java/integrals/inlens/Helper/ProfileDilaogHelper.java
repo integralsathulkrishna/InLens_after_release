@@ -39,7 +39,7 @@ public class ProfileDilaogHelper extends Dialog {
     private String UserAlbumCount;
     private String UserRating;
     private Boolean ImageChangeBtnVisibility;
-    private MainActivity mainActivity;
+
 
 
     public Boolean getImageChangeBtnVisibility() {
@@ -95,8 +95,8 @@ public class ProfileDilaogHelper extends Dialog {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.custom_profile_dialog);
 
-        mainActivity = new MainActivity();
-        View view =findViewById(android.R.id.content);
+
+        final View view =findViewById(android.R.id.content);
         CircleImageView CustomDialogUserImage = findViewById(R.id.custom_profile_dialog_userprofilepic);
         TextView CustomDialogUserName = findViewById(R.id.custom_profile_dialog_username);
         TextView CustomDialogUserEmail = findViewById(R.id.custom_profile_dialog_useremail);
@@ -105,13 +105,20 @@ public class ProfileDilaogHelper extends Dialog {
         final ProgressBar CustomDialogProgressbar = findViewById(R.id.custom_profile_dialog_progressbar);
         CustomDialogProgressbar.setVisibility(View.VISIBLE);
         ImageButton UserProfileImageChangeBtn = findViewById(R.id.custom_profile_dialog_profilechangebtn);
+        ImageButton CustomUserProfileCloseBtn = findViewById(R.id.custom_profile_dialog_closebtn);
 
         if(getImageChangeBtnVisibility())
             UserProfileImageChangeBtn.setVisibility(View.VISIBLE);
         else
             UserProfileImageChangeBtn.setVisibility(View.GONE);
 
+        CustomUserProfileCloseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+           dismiss();
 
+            }
+        });
 
 
 

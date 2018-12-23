@@ -3,14 +3,23 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:elevation="10dp"
-    app:cardCornerRadius="20dp">
+    android:elevation="10dp">
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
         >
+
+        <ImageButton
+            android:id="@+id/custom_profile_dialog_closebtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_closedialog"
+            android:background="@drawable/circle"
+            android:backgroundTint="#cdcdcd"
+            android:padding="5dp"
+            android:layout_alignEnd="@id/custom_profile_dialog_line"/>
 
         <TextView
             android:id="@+id/custom_profile_dialog_username"
@@ -21,7 +30,8 @@
             android:fontFamily="@font/acme"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/custom_profile_dialog_closebtn"/>
 
         <LinearLayout
             android:id="@+id/custom_profile_dialog_line"
