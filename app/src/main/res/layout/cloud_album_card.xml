@@ -73,7 +73,18 @@
                 android:layout_height="match_parent"
                 android:layout_below="@+id/ParticiapantsText"
                 android:layout_centerVertical="true"
-                android:background="@android:color/white" />
+                android:background="@android:color/white"
+                android:layout_toStartOf="@id/ParticipantsRecyclerView_more_btn"/>
+
+            <ImageButton
+                android:id="@+id/ParticipantsRecyclerView_more_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_expand_more"
+                android:background="@android:color/transparent"
+                android:layout_margin="5dp"/>
 
         </RelativeLayout>
 

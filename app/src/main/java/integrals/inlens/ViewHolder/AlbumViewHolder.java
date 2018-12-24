@@ -10,6 +10,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -39,12 +41,14 @@ import integrals.inlens.R;
     public Button ShareButton;
     public ImageButton AlbuymCoverEditBtn;
     private int dbcount;
+    public ImageButton ParticipantsMoreBtn;
 
     public AlbumViewHolder(View ItemView) {
         super(ItemView);
         view=ItemView;
         ShareButton=(Button)view.findViewById(R.id.ShareAlbum);
         AlbuymCoverEditBtn = view.findViewById(R.id.changecover);
+        ParticipantsMoreBtn = view.findViewById(R.id.ParticipantsRecyclerView_more_btn);
 
         }
 
@@ -94,7 +98,11 @@ import integrals.inlens.R;
          final ProfileDilaogHelper UserDialog = new ProfileDilaogHelper(context);
          UserDialog.setCancelable(true);
          if(UserDialog.getWindow()!=null)
+         {
              UserDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+             UserDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+         }
+
 
 
          RecyclerView ParticipantsRecyclerView=(RecyclerView)view.findViewById(R.id.ParticipantsRecyclerView);
@@ -146,6 +154,7 @@ import integrals.inlens.R;
                          UserDialog.setUserRating("3.5");
                          UserDialog.setUserName(model.getName());
                          UserDialog.setImageChangeBtnVisibility(false);
+                         UserDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
                          UserDialog.show();
 
                      }

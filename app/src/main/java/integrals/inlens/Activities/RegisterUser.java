@@ -1,5 +1,6 @@
 package integrals.inlens.Activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -20,7 +22,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.vistrav.ask.Ask;
+
 import java.util.HashMap;
+
 import integrals.inlens.R;
 
 public class RegisterUser extends AppCompatActivity {
@@ -34,6 +39,7 @@ public class RegisterUser extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
     private ProgressDialog progressDialog;
+    private int INTID = 8798;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,126 +47,132 @@ public class RegisterUser extends AppCompatActivity {
         setContentView(R.layout.activity_register_user);
         getSupportActionBar().setTitle(" Register User");
         getSupportActionBar().setElevation(0);
-            mAuth = FirebaseAuth.getInstance();
-            mDisplayName = (EditText) findViewById(R.id.NameField);
-            VerifiedButton=(Button)findViewById(R.id.VerifiedButton);
-            mEmail = (EditText) findViewById(R.id.EmailField);
-            mPassword = (EditText) findViewById(R.id.Password);
-            ReTypePassword = findViewById(R.id.RePassword);
-            mCreateBtn = (Button) findViewById(R.id.ProceedButton);
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setCancelable(false);
-            getSupportActionBar().setTitle("User Registration");
-            VerifiedButton.setEnabled(false);
+        mAuth = FirebaseAuth.getInstance();
+        mDisplayName = (EditText) findViewById(R.id.NameField);
+        VerifiedButton = (Button) findViewById(R.id.VerifiedButton);
+        mEmail = (EditText) findViewById(R.id.EmailField);
+        mPassword = (EditText) findViewById(R.id.Password);
+        ReTypePassword = findViewById(R.id.RePassword);
+        mCreateBtn = (Button) findViewById(R.id.ProceedButton);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        getSupportActionBar().setTitle("User Registration");
+        VerifiedButton.setEnabled(false);
 
-            mCreateBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String display_name =mDisplayName.getText().toString();
-                    String email =mEmail.getText().toString();
-                    String password =mPassword.getText().toString();
-                    String repassword = ReTypePassword.getText().toString();
-                    if(!password.equals(repassword))
-                    {
-                        Toast.makeText(RegisterUser.this, "Passwords do not match", Toast.LENGTH_LONG).show();
+        Ask.on(this)
+                .id(INTID) // in case you are invoking multiple time Ask from same activity or fragment
+                .forPermissions(
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        , Manifest.permission.INTERNET
+                        , Manifest.permission.CAMERA
+                        , Manifest.permission.ACCESS_FINE_LOCATION
+                        , Manifest.permission.RECORD_AUDIO
+                        , Manifest.permission.VIBRATE
+                        , Manifest.permission.SYSTEM_ALERT_WINDOW
+                )
+                .go();
 
-                    }
-                    else
-                    {
-                        if (TextUtils.isEmpty(display_name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+        mCreateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String display_name = mDisplayName.getText().toString();
+                String email = mEmail.getText().toString();
+                String password = mPassword.getText().toString();
+                String repassword = ReTypePassword.getText().toString();
+                if (!password.equals(repassword)) {
+                    Toast.makeText(RegisterUser.this, "Passwords do not match", Toast.LENGTH_LONG).show();
+
+                } else {
+                    if (TextUtils.isEmpty(display_name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
 
 
-                            Toast.makeText(RegisterUser.this, "Check the details you entered", Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterUser.this, "Check the details you entered", Toast.LENGTH_LONG).show();
+                    } else {
+                        if (password.length() <= 7) {
+                            Toast.makeText(getApplicationContext(), "Retype Password it  must contain minimum 8 charachters", Toast.LENGTH_SHORT).show();
                         } else {
-                            if (password.length() <= 7) {
-                                Toast.makeText(getApplicationContext(), "Retype Password it  must contain minimum 8 charachters", Toast.LENGTH_SHORT).show();
-                            } else {
-                                progressDialog.setMessage("Registering user. Please wait...");
-                                progressDialog.show();
-                                register_user(display_name, email, password);
-                            }
-
-
+                            progressDialog.setMessage("Registering user. Please wait...");
+                            progressDialog.show();
+                            register_user(display_name, email, password);
                         }
+
+
                     }
                 }
-            });
+            }
+        });
 
 
-            VerifiedButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+        VerifiedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-                    FirebaseAuth.getInstance().getCurrentUser().reload();
-                    checkEmailVerification();
-                }
-            });
+                FirebaseAuth.getInstance().getCurrentUser().reload();
+                checkEmailVerification();
+            }
+        });
 
-        }
-
+    }
 
 
     private void register_user(final String display_name, final String email, String password) {
 
-            mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
+        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
 
-                    if (task.isSuccessful()){
-
-
-
-                        FirebaseUser current_user = FirebaseAuth.getInstance().getCurrentUser();
-                        String uid = current_user.getUid();
-
-                        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
-
-                        String device_token = FirebaseInstanceId.getInstance().getToken();
-                        HashMap<String,String> usermap = new HashMap<>();
-                        usermap.put("Name",display_name);
-                        usermap.put("Name",display_name);
-                        usermap.put("Email",email);
-                        usermap.put("bio","New to inLense");
-                        usermap.put("Profile_picture","default");
-                        usermap.put("thumb_image","default");
-                        usermap.put("device_token", "");
-                        mDatabase.setValue(usermap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
 
 
-                                if(task.isSuccessful()){
-                                    progressDialog.setMessage("Sending E-mail verfification. Please wait");
-                                    sendEmailVerification();
+                    FirebaseUser current_user = FirebaseAuth.getInstance().getCurrentUser();
+                    String uid = current_user.getUid();
 
-                                }
-                                else {
+                    mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
 
-                                    progressDialog.dismiss();
-                                    Toast.makeText(RegisterUser.this,task.getResult().toString(),Toast.LENGTH_LONG).show();
-                                }
+                    String device_token = FirebaseInstanceId.getInstance().getToken();
+                    HashMap<String, String> usermap = new HashMap<>();
+                    usermap.put("Name", display_name);
+                    usermap.put("Name", display_name);
+                    usermap.put("Email", email);
+                    usermap.put("bio", "New to inLense");
+                    usermap.put("Profile_picture", "default");
+                    usermap.put("thumb_image", "default");
+                    usermap.put("device_token", "");
+                    mDatabase.setValue(usermap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
 
 
+                            if (task.isSuccessful()) {
+                                progressDialog.setMessage("Sending E-mail verfification. Please wait");
+                                sendEmailVerification();
+
+                            } else {
+
+                                progressDialog.dismiss();
+                                Toast.makeText(RegisterUser.this, task.getResult().toString(), Toast.LENGTH_LONG).show();
                             }
-                        });
 
 
-                    }
+                        }
+                    });
 
-                    else {
 
-                        progressDialog.dismiss();
-                        Toast.makeText(RegisterUser.this,"Cannot register,Please try again.. ",Toast.LENGTH_LONG).show();
-                    }
+                } else {
+
+                    progressDialog.dismiss();
+                    Toast.makeText(RegisterUser.this, "Cannot register,Please try again.. ", Toast.LENGTH_LONG).show();
                 }
-            });
+            }
+        });
 
-        }
+    }
 
-        private void  sendEmailVerification(){
+    private void sendEmailVerification() {
 
-        final FirebaseUser firebaseUser=mAuth.getCurrentUser();
-        if(firebaseUser!=null){
+        final FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser != null) {
             firebaseUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
@@ -183,18 +195,15 @@ public class RegisterUser extends AppCompatActivity {
 
     }
 
-        private void checkEmailVerification(){
+    private void checkEmailVerification() {
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         user.reload();
-        if(user.isEmailVerified())
-        {
-            startActivity(new Intent(RegisterUser.this,SettingActivity.class));
+        if (user.isEmailVerified()) {
+            startActivity(new Intent(RegisterUser.this, SettingActivity.class));
             finish();
-        }
-        else
-        {
-            Toast.makeText(getApplicationContext(),"E-mail verification send. Please check your mail and click the link to verify.",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "E-mail verification send. Please check your mail and click the link to verify.", Toast.LENGTH_LONG).show();
 
         }
 

@@ -12,6 +12,8 @@ public class AlbumModel {
     private String Time;
     private String UserName;
     private String User_ID;
+    private String TimeStamp;
+
 
     public AlbumModel(String albumCoverImage, String albumDescription,
                       String albumTitle,
@@ -26,6 +28,8 @@ public class AlbumModel {
         UserName = userName;
         User_ID = user_ID;
     }
+
+
 
     public AlbumModel() {
     }

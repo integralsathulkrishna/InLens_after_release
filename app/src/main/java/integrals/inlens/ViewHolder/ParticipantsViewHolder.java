@@ -36,7 +36,7 @@ public  class ParticipantsViewHolder extends RecyclerView.ViewHolder{
                 .apply(requestOptions)
                 .into(PostImage);
     }
-     void setUserName(String UserName){
+     public void setUserName(String UserName){
         TextView textView=(TextView)InView.findViewById(R.id.participants_username);
         textView.setText(UserName);
     }

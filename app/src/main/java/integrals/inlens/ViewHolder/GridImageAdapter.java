@@ -88,6 +88,7 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
                 .apply(requestOptions).listener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                holder.CardLoadingPBar.setVisibility(View.INVISIBLE);
                 return false;
             }
 

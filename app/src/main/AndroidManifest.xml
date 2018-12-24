@@ -122,7 +122,6 @@
 
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.PhotoView" />
-        <activity android:name=".Activities.CoverEditActivity" />
         <activity android:name=".Activities.Uploading_view" />
         <activity android:name=".Activities.IntroActivity"
             android:theme="@style/NoActionBarTheme"></activity>

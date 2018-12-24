@@ -191,6 +191,8 @@ public class CloudAlbum extends AppCompatActivity {
         createNewSituation.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         createNewSituation.setContentView(R.layout.create_new_situation_layout);
         createNewSituation.setCancelable(false);
+        createNewSituation.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+
         SitEditName = createNewSituation.findViewById(R.id.situation_name);
         SitEditName.requestFocus();
         Button Done ,Cancel;
@@ -388,6 +390,7 @@ public class CloudAlbum extends AppCompatActivity {
         QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         QRCodeDialog.setContentView(R.layout.activity_qrcode_generator);
         QRCodeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        QRCodeDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
 
         CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
         QRCommunityID=currentDatabase.GetLiveCommunityID();
@@ -396,6 +399,15 @@ public class CloudAlbum extends AppCompatActivity {
         InviteLinkButton= QRCodeDialog.findViewById(R.id.InviteLinkButton);
         PhotographerID=QRCommunityID;
 
+        ImageButton QRCodeCloseBtn = QRCodeDialog.findViewById(R.id.QR_dialog_closebtn);
+        QRCodeCloseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                QRCodeDialog.dismiss();
+
+            }
+        });
         textView= QRCodeDialog.findViewById(R.id.textViewAlbumQR);
         QRCodeImageView= QRCodeDialog.findViewById(R.id.QR_Display);
 
