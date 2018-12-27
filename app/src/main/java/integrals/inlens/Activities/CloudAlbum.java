@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -181,13 +182,15 @@ public class CloudAlbum extends AppCompatActivity {
         createNewSituation.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         createNewSituation.setContentView(R.layout.create_new_situation_layout);
         createNewSituation.setCancelable(false);
-        createNewSituation.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+        createNewSituation.setCanceledOnTouchOutside(true);
+        createNewSituation.getWindow().getAttributes().windowAnimations = R.style.UpBottomSlideDialogAnimation;
 
         Window createNewSituationWindow = createNewSituation.getWindow();
-        createNewSituationWindow.setGravity(Gravity.BOTTOM);
+        createNewSituationWindow.setGravity(Gravity.TOP);
         createNewSituationWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
         createNewSituationWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         createNewSituationWindow.setDimAmount(0.75f);
+        createNewSituationWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
         SitEditName = createNewSituation.findViewById(R.id.situation_name);
         SitEditName.requestFocus();
@@ -341,6 +344,7 @@ public class CloudAlbum extends AppCompatActivity {
 
         QRCodeDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
         QRCodeDialog.setCancelable(true);
+        QRCodeDialog.setCanceledOnTouchOutside(true);
         QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         QRCodeDialog.setContentView(R.layout.activity_qrcode_generator);
         QRCodeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -352,6 +356,7 @@ public class CloudAlbum extends AppCompatActivity {
         QRCodewindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
         QRCodewindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         QRCodewindow.setDimAmount(0.75f);
+        QRCodewindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
         QRCommunityID=currentDatabase.GetLiveCommunityID();
@@ -408,7 +413,6 @@ public class CloudAlbum extends AppCompatActivity {
 
 
     private String GetUserName(String uid) {
-
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
         ref.addValueEventListener(new ValueEventListener() {
