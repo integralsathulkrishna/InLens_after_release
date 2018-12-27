@@ -17,9 +17,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -42,6 +45,7 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -149,6 +153,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView ParticpantsBottomSheetDialogTitle;
     private ProgressBar ParticpantsBottomSheetDialogProgressbar;
 
+    //For snackbar about Connectivity Info;
+    private RelativeLayout RootForMainActivity;
+
     //
     //
     // Import from Elson.............................................................................
@@ -185,13 +192,23 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(getApplicationContext(), RecentImageService.class));
         }
 
+        //Snackbar
+        RootForMainActivity = findViewById(R.id.root_for_main_activity);
+
         //ProfileDialog
-        ProfileDialog = new Dialog(this);
+        ProfileDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
         ProfileDialog.setCancelable(true);
+        ProfileDialog.setCanceledOnTouchOutside(true);
         ProfileDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         ProfileDialog.setContentView(R.layout.custom_profile_dialog);
         ProfileDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        ProfileDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        ProfileDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window ProfileDialogwindow = ProfileDialog.getWindow();
+        ProfileDialogwindow.setGravity(Gravity.BOTTOM);
+        ProfileDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        ProfileDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        ProfileDialogwindow.setDimAmount(0.75f);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
@@ -216,18 +233,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                COVER_CHANGE = false;
-                PROFILE_CHANGE = true;
-                GetStartedWithNewProfileImage();
+                if(IsConnectedToNet())
+                {
+                    COVER_CHANGE = false;
+                    PROFILE_CHANGE = true;
+                    GetStartedWithNewProfileImage();
+                }
 
+                else
+                {
+                    Snackbar.make(RootForMainActivity,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
+
+                }
             }
         });
 
         //AlbumCoverEditDialog
-        AlbumCoverEditDialog = new Dialog(this);
+        AlbumCoverEditDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
         AlbumCoverEditDialog.setCancelable(true);
+        AlbumCoverEditDialog.setCanceledOnTouchOutside(true);
         AlbumCoverEditDialog.setContentView(R.layout.custom_profile_dialog);
-        AlbumCoverEditDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        AlbumCoverEditDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window AlbumCoverEditwindow = AlbumCoverEditDialog.getWindow();
+        AlbumCoverEditwindow.setGravity(Gravity.BOTTOM);
+        AlbumCoverEditwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        AlbumCoverEditwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        AlbumCoverEditwindow.setDimAmount(0.75f);
 
         AlbumCoverEditprogressBar = AlbumCoverEditDialog.findViewById(R.id.custom_profile_dialog_progressbar);
         AlbumCoverEditUserImage = AlbumCoverEditDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
@@ -249,15 +281,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                COVER_CHANGE = true;
-                PROFILE_CHANGE = false;
+                if(IsConnectedToNet()) {
 
-                CropImage.activity()
-                        .setGuidelines(CropImageView.Guidelines.ON)
-                        .setAspectRatio((int) 390, 285)
-                        .setFixAspectRatio(true)
-                        .start(MainActivity.this);
+                    COVER_CHANGE = true;
+                    PROFILE_CHANGE = false;
 
+                    CropImage.activity()
+                            .setGuidelines(CropImageView.Guidelines.ON)
+                            .setAspectRatio((int) 390, 285)
+                            .setFixAspectRatio(true)
+                            .start(MainActivity.this);
+
+                }
+                else
+                {
+                    Snackbar.make(RootForMainActivity,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
+
+                }
             }
         });
 
@@ -268,11 +308,11 @@ public class MainActivity extends AppCompatActivity {
         ParticpantsBottomSheetDialog.setContentView(R.layout.participants_bottomsheet_layout);
         ParticpantsBottomSheetDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
 
-        Window window = ParticpantsBottomSheetDialog.getWindow();
-        window.setGravity(Gravity.BOTTOM);
-        window.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        window.setDimAmount(0.75f);
+        Window ParticpantsBottomSheetDialogwindow = ParticpantsBottomSheetDialog.getWindow();
+        ParticpantsBottomSheetDialogwindow.setGravity(Gravity.BOTTOM);
+        ParticpantsBottomSheetDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        ParticpantsBottomSheetDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        ParticpantsBottomSheetDialogwindow.setDimAmount(0.75f);
 
         ParticpantsBottomSheetDialogRecyclerView = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_recyclerview);
         ParticpantsBottomSheetDialogRecyclerView.setHasFixedSize(true);
@@ -549,9 +589,7 @@ public class MainActivity extends AppCompatActivity {
                     MainLoadingProgressBar.setVisibility(View.INVISIBLE);
 
 
-
                 }
-
 
 
             };
@@ -578,12 +616,36 @@ public class MainActivity extends AppCompatActivity {
 
         ParticpantsBottomSheetDialog.show();
 
-        final ProfileDilaogHelper BottomSheetUserDialog = new ProfileDilaogHelper(MainActivity.this);
+        final Dialog BottomSheetUserDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
         BottomSheetUserDialog.setCancelable(true);
-        if (BottomSheetUserDialog.getWindow() != null) {
-            BottomSheetUserDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            BottomSheetUserDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-        }
+        BottomSheetUserDialog.setCanceledOnTouchOutside(true);
+        BottomSheetUserDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        BottomSheetUserDialog.setContentView(R.layout.custom_profile_dialog);
+        BottomSheetUserDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        BottomSheetUserDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window BottomSheetUserDialogWindow = BottomSheetUserDialog.getWindow();
+        BottomSheetUserDialogWindow.setGravity(Gravity.BOTTOM);
+        BottomSheetUserDialogWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        BottomSheetUserDialogWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        BottomSheetUserDialogWindow.setDimAmount(0.75f);
+
+        final ProgressBar progressBar = BottomSheetUserDialog.findViewById(R.id.custom_profile_dialog_progressbar);
+        final CircleImageView UserImage = BottomSheetUserDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
+        ImageButton ChangeuserImage = BottomSheetUserDialog.findViewById(R.id.custom_profile_dialog_profilechangebtn);
+        ChangeuserImage.setVisibility(View.GONE);
+        final TextView ProfileUserEmail = BottomSheetUserDialog.findViewById(R.id.custom_profile_dialog_useremail);
+        final TextView ProfileuserName = BottomSheetUserDialog.findViewById(R.id.custom_profile_dialog_username);
+        ImageButton CloseProfileDialog = BottomSheetUserDialog.findViewById(R.id.custom_profile_dialog_closebtn);
+
+        CloseProfileDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                BottomSheetUserDialog.dismiss();
+            }
+        });
+
 
         final FirebaseRecyclerAdapter<Participants, ParticipantsViewHolder> BottomSheetRecyclerAdapter =
                 new FirebaseRecyclerAdapter<Participants, ParticipantsViewHolder>(
@@ -611,14 +673,41 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
 
+                                BottomSheetUserDialog.dismiss();
 
-                                BottomSheetUserDialog.setUserEmail("Email : " + model.getEmail_ID());
-                                BottomSheetUserDialog.setUserImage(model.getProfile_picture());
-                                BottomSheetUserDialog.setUserRating("3.5");
-                                BottomSheetUserDialog.setUserName(model.getName());
-                                BottomSheetUserDialog.setImageChangeBtnVisibility(false);
-                                BottomSheetUserDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                ProfileUserEmail.setText(String.format("Email : %s", model.getEmail_ID()));
+
+                                if(!TextUtils.isEmpty(model.getProfile_picture()))
+                                {
+                                    RequestOptions requestOptions=new RequestOptions()
+                                            .fitCenter();
+
+                                    Glide.with(MainActivity.this)
+                                            .load(model.getProfile_picture())
+                                            .apply(requestOptions)
+                                            .listener(new RequestListener<Drawable>() {
+                                                @Override
+                                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                                    progressBar.setVisibility(View.GONE);
+                                                    return false;
+                                                }
+
+                                                @Override
+                                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                                    progressBar.setVisibility(View.GONE);
+                                                    return false;
+                                                }
+                                            })
+                                            .into(UserImage);
+                                }
+                                else
+                                {
+                                    Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
+                                    progressBar.setVisibility(View.GONE);
+                                }
+                                ProfileuserName.setText(model.getName());
                                 BottomSheetUserDialog.show();
+
 
                             }
                         });
@@ -645,170 +734,178 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 0) {
-            new BottomSheet.Builder(this).title(" Options").sheet(R.menu.main_menu).listener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case R.id.new_album:
-                            SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                            if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
-                                Toast.makeText(getApplicationContext(), "Sorry.You can't create a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
-                            } else {
-                                startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
-                            }
 
-
-                            break;
-                        case R.id.scan_qr:
-                            SharedPreferences sharedPreferences1 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                            if (sharedPreferences1.getBoolean("UsingCommunity::", false) == true) {
-                                Toast.makeText(getApplicationContext(), "Sorry,You can't scan a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
-                            } else
-
-                            {
-                                startActivity(new Intent(MainActivity.this, QRCodeReader.class));
-
-                            }
-                            break;
-                        case R.id.upload_activity:
-                            startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
-                            break;
-                        case R.id.profile_pic:
-                            //startActivity(new Intent(MainActivity.this, SettingActivity.class));
-                            DatabaseReference DbRef = FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                            DbRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                    if (dataSnapshot.hasChild("Name")) {
-                                        dbname = dataSnapshot.child("Name").getValue().toString();
-                                    }
-                                    if (dataSnapshot.hasChild("Profile_picture")) {
-                                        dbimage = dataSnapshot.child("Profile_picture").getValue().toString();
-                                    }
-                                    if (dataSnapshot.hasChild("Email")) {
-                                        dbemail = dataSnapshot.child("Email").getValue().toString();
-                                    }
-                                    int count = 0;
-                                    if (dataSnapshot.hasChild("Communities")) {
-                                        for (DataSnapshot snapshot : dataSnapshot.child("Communities").getChildren()) {
-                                            count++;
-                                        }
-                                    }
-
-                                    ProfileUserEmail.setText(String.format("Email : %s", dbemail));
-
-                                    if (!TextUtils.isEmpty(dbimage)) {
-                                        RequestOptions requestOptions = new RequestOptions()
-                                                .fitCenter();
-
-                                        Glide.with(MainActivity.this)
-                                                .load(dbimage)
-                                                .apply(requestOptions)
-                                                .listener(new RequestListener<Drawable>() {
-                                                    @Override
-                                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                                        progressBar.setVisibility(View.GONE);
-                                                        return false;
-                                                    }
-
-                                                    @Override
-                                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                                        progressBar.setVisibility(View.GONE);
-                                                        return false;
-                                                    }
-                                                })
-                                                .into(UserImage);
-                                    } else {
-                                        Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
-                                    }
-
-                                    ProfileuserName.setText(dbname);
-                                    ProfileDialog.show();
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-
-                            break;
-                        case R.id.quit_cloud_album:
-                            SharedPreferences sharedPreferences3 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                            if (sharedPreferences3.getBoolean("UsingCommunity::", false) == true) {
-                                CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                if (currentDatabase1.GetUploadingTargetColumn() >= currentDatabase1.GetUploadingTotal()) {
-                                    QuitCloudAlbum(0);
+            if (IsConnectedToNet()) {
+                new BottomSheet.Builder(this).title(" Options").sheet(R.menu.main_menu).listener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case R.id.new_album:
+                                SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
+                                    Toast.makeText(getApplicationContext(), "Sorry.You can't create a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
                                 } else {
-                                    QuitCloudAlbum(1);
+                                    startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
                                 }
 
-                            } else {
-                                Toast.makeText(getApplicationContext(), "No Active Cloud-Album to quit.", Toast.LENGTH_SHORT).show();
-                            }
 
-                            break;
-
-
-                        case R.id.paste_album_link:
-                            SharedPreferences sharedPreferences2 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                            if (sharedPreferences2.getBoolean("UsingCommunity::", false) == true) {
-                                Toast.makeText(getApplicationContext(), "Sorry,You can't participate in a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
-                            } else
-
-                            {   // To paste invite link
-                                PasteCloudAlbumLink = new Dialog(MainActivity.this);
-                                PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
-                                PasteCloudAlbumLink.setCancelable(true);
-                                final EditText Link = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_edittext);
-
-                                Link.requestFocus();
-                                Button Done, Cancel;
-                                final ProgressBar progressBar;
-                                Done = PasteCloudAlbumLink.findViewById(R.id.done_btn_paste_link_layout);
-                                Cancel = PasteCloudAlbumLink.findViewById(R.id.cancel_btn_paste_link_layout);
-                                progressBar = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_progress_bar);
-                                Done.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        try {
-                                            String Data = Link.getText().toString();
-                                            String str = Data.substring(18, 23);
-                                            if (str.contentEquals("joins")) {
-                                                Toast.makeText(getApplicationContext(), "Join " + Data.substring(24), Toast.LENGTH_SHORT).show();
-                                                SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                                                if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
-                                                    Toast.makeText(getApplicationContext(), "Sorry.You can't join to a new Cloud-Album, " +
-                                                            "before you quit the current one.", Toast.LENGTH_SHORT)
-                                                            .show();
-                                                } else {
-                                                    AddToCloud(Data.substring(24), progressBar, PasteCloudAlbumLink);
-                                                }
-                                            } else {
-                                                Toast.makeText(getApplicationContext(), "Invalid Link", Toast.LENGTH_LONG).show();
-                                            }
-
-                                        } catch (StringIndexOutOfBoundsException e) {
-                                            Toast.makeText(getApplicationContext(), "Invalid Link", Toast.LENGTH_LONG).show();
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                });
-                                Cancel.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        PasteCloudAlbumLink.hide();
-                                    }
-                                });
-                                PasteCloudAlbumLink.show();
                                 break;
-                            }
+                            case R.id.scan_qr:
+                                SharedPreferences sharedPreferences1 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                if (sharedPreferences1.getBoolean("UsingCommunity::", false) == true) {
+                                    Toast.makeText(getApplicationContext(), "Sorry,You can't scan a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+                                } else
+
+                                {
+                                    startActivity(new Intent(MainActivity.this, QRCodeReader.class));
+
+                                }
+                                break;
+                            case R.id.upload_activity:
+                                startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
+                                break;
+                            case R.id.profile_pic:
+                                //startActivity(new Intent(MainActivity.this, SettingActivity.class));
+                                DatabaseReference DbRef = FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                DbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                        if (dataSnapshot.hasChild("Name")) {
+                                            dbname = dataSnapshot.child("Name").getValue().toString();
+                                        }
+                                        if (dataSnapshot.hasChild("Profile_picture")) {
+                                            dbimage = dataSnapshot.child("Profile_picture").getValue().toString();
+                                        }
+                                        if (dataSnapshot.hasChild("Email")) {
+                                            dbemail = dataSnapshot.child("Email").getValue().toString();
+                                        }
+                                        int count = 0;
+                                        if (dataSnapshot.hasChild("Communities")) {
+                                            for (DataSnapshot snapshot : dataSnapshot.child("Communities").getChildren()) {
+                                                count++;
+                                            }
+                                        }
+
+                                        ProfileUserEmail.setText(String.format("Email : %s", dbemail));
+
+                                        if (!TextUtils.isEmpty(dbimage)) {
+                                            RequestOptions requestOptions = new RequestOptions()
+                                                    .fitCenter();
+
+                                            Glide.with(MainActivity.this)
+                                                    .load(dbimage)
+                                                    .apply(requestOptions)
+                                                    .listener(new RequestListener<Drawable>() {
+                                                        @Override
+                                                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                                            progressBar.setVisibility(View.GONE);
+                                                            return false;
+                                                        }
+
+                                                        @Override
+                                                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                                            progressBar.setVisibility(View.GONE);
+                                                            return false;
+                                                        }
+                                                    })
+                                                    .into(UserImage);
+                                        } else {
+                                            Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
+                                        }
+
+                                        ProfileuserName.setText(dbname);
+                                        ProfileDialog.show();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                                break;
+                            case R.id.quit_cloud_album:
+                                SharedPreferences sharedPreferences3 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                if (sharedPreferences3.getBoolean("UsingCommunity::", false) == true) {
+                                    CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                    if (currentDatabase1.GetUploadingTargetColumn() >= currentDatabase1.GetUploadingTotal()) {
+                                        QuitCloudAlbum(0);
+                                    } else {
+                                        QuitCloudAlbum(1);
+                                    }
+
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "No Active Cloud-Album to quit.", Toast.LENGTH_SHORT).show();
+                                }
+
+                                break;
 
 
+                            case R.id.paste_album_link:
+                                SharedPreferences sharedPreferences2 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                if (sharedPreferences2.getBoolean("UsingCommunity::", false) == true) {
+                                    Toast.makeText(getApplicationContext(), "Sorry,You can't participate in a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+                                } else
+
+                                {   // To paste invite link
+                                    PasteCloudAlbumLink = new Dialog(MainActivity.this);
+                                    PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
+                                    PasteCloudAlbumLink.setCancelable(true);
+                                    final EditText Link = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_edittext);
+
+                                    Link.requestFocus();
+                                    Button Done, Cancel;
+                                    final ProgressBar progressBar;
+                                    Done = PasteCloudAlbumLink.findViewById(R.id.done_btn_paste_link_layout);
+                                    Cancel = PasteCloudAlbumLink.findViewById(R.id.cancel_btn_paste_link_layout);
+                                    progressBar = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_progress_bar);
+                                    Done.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            try {
+                                                String Data = Link.getText().toString();
+                                                String str = Data.substring(18, 23);
+                                                if (str.contentEquals("joins")) {
+                                                    Toast.makeText(getApplicationContext(), "Join " + Data.substring(24), Toast.LENGTH_SHORT).show();
+                                                    SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                                    if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
+                                                        Toast.makeText(getApplicationContext(), "Sorry.You can't join to a new Cloud-Album, " +
+                                                                "before you quit the current one.", Toast.LENGTH_SHORT)
+                                                                .show();
+                                                    } else {
+                                                        AddToCloud(Data.substring(24), progressBar, PasteCloudAlbumLink);
+                                                    }
+                                                } else {
+                                                    Toast.makeText(getApplicationContext(), "Invalid Link", Toast.LENGTH_LONG).show();
+                                                }
+
+                                            } catch (StringIndexOutOfBoundsException e) {
+                                                Toast.makeText(getApplicationContext(), "Invalid Link", Toast.LENGTH_LONG).show();
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                    Cancel.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            PasteCloudAlbumLink.hide();
+                                        }
+                                    });
+                                    PasteCloudAlbumLink.show();
+                                    break;
+                                }
+
+
+                        }
                     }
-                }
-            }).show();
+                }).show();
+            }
+            else
+            {
+                Snackbar.make(RootForMainActivity,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
+            }
+
         }
 
 
@@ -1268,6 +1365,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private boolean IsConnectedToNet() {
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
+
+    }
 
 }
 

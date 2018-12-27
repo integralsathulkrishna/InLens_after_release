@@ -9,8 +9,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -31,6 +34,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import integrals.inlens.Activities.SettingActivity;
 import integrals.inlens.MainActivity;
 import integrals.inlens.R;
+import integrals.inlens.Weather.Model.Wind;
 
 public class ProfileDilaogHelper extends Dialog {
 
@@ -96,6 +100,11 @@ public class ProfileDilaogHelper extends Dialog {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.custom_profile_dialog);
 
+        Window DialogHelper = getWindow();
+        DialogHelper.setGravity(Gravity.BOTTOM);
+        DialogHelper.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        DialogHelper.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        DialogHelper.setDimAmount(0.75f);
 
         final View view =findViewById(android.R.id.content);
         view.setBackgroundColor(Color.WHITE);

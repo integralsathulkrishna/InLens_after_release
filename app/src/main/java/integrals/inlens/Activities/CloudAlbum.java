@@ -1,13 +1,17 @@
 package integrals.inlens.Activities;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +31,7 @@ import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.cocosw.bottomsheet.BottomSheet;
@@ -104,6 +109,9 @@ public class CloudAlbum extends AppCompatActivity {
     private TextView mBottomSheetDialogTitle;
     private ProgressBar mBottomSheetDialogProgressbar;
 
+    //For Snackbar
+    private RelativeLayout RootForCloudAlbum;
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////|
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +119,9 @@ public class CloudAlbum extends AppCompatActivity {
         setContentView(R.layout.ac_cloud_album);
         actionBar=getSupportActionBar();
         QRCodeInit();
+
+        RootForCloudAlbum = findViewById(R.id.root_for_cloud_album);
+
         cloudalbumcontext = this;
         activity=this;
         CommunityIDLocal=getIntent().getStringExtra("PostKeyLocal::");
@@ -166,11 +177,17 @@ public class CloudAlbum extends AppCompatActivity {
 
 
         ///////////Create New Situation////////////////////////////////////////////////////////////
-        createNewSituation = new Dialog(CloudAlbum.this);
+        createNewSituation = new Dialog(CloudAlbum.this,android.R.style.Theme_Light_NoTitleBar);
         createNewSituation.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         createNewSituation.setContentView(R.layout.create_new_situation_layout);
         createNewSituation.setCancelable(false);
-        createNewSituation.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        createNewSituation.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window createNewSituationWindow = createNewSituation.getWindow();
+        createNewSituationWindow.setGravity(Gravity.BOTTOM);
+        createNewSituationWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        createNewSituationWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        createNewSituationWindow.setDimAmount(0.75f);
 
         SitEditName = createNewSituation.findViewById(R.id.situation_name);
         SitEditName.requestFocus();
@@ -322,12 +339,19 @@ public class CloudAlbum extends AppCompatActivity {
 
     private void QRCodeInit() {
 
-        QRCodeDialog = new Dialog(this);
+        QRCodeDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
         QRCodeDialog.setCancelable(true);
         QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         QRCodeDialog.setContentView(R.layout.activity_qrcode_generator);
         QRCodeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        QRCodeDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+
+        QRCodeDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window QRCodewindow = QRCodeDialog.getWindow();
+        QRCodewindow.setGravity(Gravity.BOTTOM);
+        QRCodewindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        QRCodewindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        QRCodewindow.setDimAmount(0.75f);
 
         CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
         QRCommunityID=currentDatabase.GetLiveCommunityID();
@@ -375,7 +399,7 @@ public class CloudAlbum extends AppCompatActivity {
                 String CommunityPostKey=QRCommunityID;
 
                 SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
-                        "Long press Link to copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
+                        "Copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
                 startActivity(SharingIntent);
 
             }
@@ -438,26 +462,36 @@ public class CloudAlbum extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 0) {
-            //startActivity(new Intent(CloudAlbum.this, QRCodeGenerator.class));
-            QRCodeDialog.show();
-        }
-        if(item.getItemId()==1){
-            createNewSituation.show();
-            int countdef = SituationIDList.size()+1;
-            SitEditName.setText(String.format("New Situation %s", String.valueOf(countdef)));
-        }
-        if(item.getItemId()==2){
-            new BottomSheet.Builder(this).title("Cloud-Album Options").sheet(R.menu.cloud_album_menu).listener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case R.id.delete_cloud_album:
-                            DeleteCurrentAlbum();
-                            break;
+
+        if(IsConnectedToNet()) {
+
+            if (item.getItemId() == 0) {
+                //startActivity(new Intent(CloudAlbum.this, QRCodeGenerator.class));
+                QRCodeDialog.show();
+            }
+            if (item.getItemId() == 1) {
+                createNewSituation.show();
+                int countdef = SituationIDList.size() + 1;
+                SitEditName.setText(String.format("New Situation %s", String.valueOf(countdef)));
+            }
+            if (item.getItemId() == 2) {
+                new BottomSheet.Builder(this).title("Cloud-Album Options").sheet(R.menu.cloud_album_menu).listener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case R.id.delete_cloud_album:
+                                DeleteCurrentAlbum();
+                                break;
+                        }
                     }
-                }
-            }).show();
+                }).show();
+
+            }
+
+        }
+        else
+        {
+            Snackbar.make(RootForCloudAlbum,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
 
         }
 
@@ -466,6 +500,13 @@ public class CloudAlbum extends AppCompatActivity {
 
 
 
+    private boolean IsConnectedToNet() {
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
+
+    }
 
 
 

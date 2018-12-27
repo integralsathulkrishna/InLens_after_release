@@ -124,11 +124,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
                 DatePickerDialog dialog = new DatePickerDialog(
                         CreateCloudAlbum.this,
-                        android.R.style.Theme_Holo_Light_Dialog_MinWidth,
                         dateSetListener,
                         year,month,day
                 );
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.show();
             }
         });

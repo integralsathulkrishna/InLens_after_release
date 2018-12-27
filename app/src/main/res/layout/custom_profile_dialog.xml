@@ -4,14 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
-    android:elevation="10dp"
     app:cardBackgroundColor="@android:color/white">
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:layout_margin="3dp"
+        android:layout_margin="10dp"
         android:background="@android:color/white">
 
         <ImageButton
@@ -19,7 +18,6 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignParentEnd="true"
-            android:layout_margin="6dp"
             android:background="@drawable/ic_close_album"
             android:padding="5dp" />
 

@@ -3,28 +3,42 @@ package integrals.inlens.ViewHolder;
 /**
  * Created by Athul Krishna on 08/02/2018.
  */
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import integrals.inlens.Activities.DisplayPhotographer;
 import integrals.inlens.Helper.ProfileDilaogHelper;
 import integrals.inlens.Models.Participants;
@@ -42,6 +56,7 @@ import integrals.inlens.R;
     public ImageButton AlbuymCoverEditBtn;
     private int dbcount;
     public ImageButton ParticipantsMoreBtn;
+    public Dialog UserDialog;
 
     public AlbumViewHolder(View ItemView) {
         super(ItemView);
@@ -95,12 +110,38 @@ import integrals.inlens.R;
      public void SetParticipants(final Context context, DatabaseReference participantReference, final DatabaseReference UserRef){
 
 
-         final ProfileDilaogHelper UserDialog = new ProfileDilaogHelper(context);
+         UserDialog = new Dialog(context,android.R.style.Theme_Light_NoTitleBar);
          UserDialog.setCancelable(true);
+         UserDialog.setCanceledOnTouchOutside(true);
+         UserDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+         UserDialog.setContentView(R.layout.custom_profile_dialog);
+
+         final ProgressBar progressBar = UserDialog.findViewById(R.id.custom_profile_dialog_progressbar);
+         final CircleImageView UserImage = UserDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
+         ImageButton ChangeuserImage = UserDialog.findViewById(R.id.custom_profile_dialog_profilechangebtn);
+         ChangeuserImage.setVisibility(View.GONE);
+         final TextView ProfileUserEmail = UserDialog.findViewById(R.id.custom_profile_dialog_useremail);
+         final TextView ProfileuserName = UserDialog.findViewById(R.id.custom_profile_dialog_username);
+         ImageButton CloseProfileDialog = UserDialog.findViewById(R.id.custom_profile_dialog_closebtn);
+
+         CloseProfileDialog.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View view) {
+
+                 UserDialog.dismiss();
+             }
+         });
+
          if(UserDialog.getWindow()!=null)
          {
-             UserDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-             UserDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+             UserDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+             Window UserDialogWindow = UserDialog.getWindow();
+             UserDialogWindow.setGravity(Gravity.BOTTOM);
+             UserDialogWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+             UserDialogWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+             UserDialogWindow.setDimAmount(0.75f);
+
          }
 
 
@@ -148,13 +189,37 @@ import integrals.inlens.R;
                              }
                          });
 
-                         UserDialog.setUserAlbumCount("Album Count : "+dbcount);
-                         UserDialog.setUserEmail("Email : "+model.getEmail_ID());
-                         UserDialog.setUserImage(model.getProfile_picture());
-                         UserDialog.setUserRating("3.5");
-                         UserDialog.setUserName(model.getName());
-                         UserDialog.setImageChangeBtnVisibility(false);
-                         UserDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                         ProfileUserEmail.setText("Email : "+model.getEmail_ID());
+
+                         if(!TextUtils.isEmpty(model.getProfile_picture()))
+                         {
+                             RequestOptions requestOptions=new RequestOptions()
+                                     .fitCenter();
+
+                             Glide.with(view)
+                                     .load(model.getProfile_picture())
+                                     .apply(requestOptions)
+                                     .listener(new RequestListener<Drawable>() {
+                                         @Override
+                                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                             progressBar.setVisibility(View.GONE);
+                                             return false;
+                                         }
+
+                                         @Override
+                                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                             progressBar.setVisibility(View.GONE);
+                                             return false;
+                                         }
+                                     })
+                                     .into(UserImage);
+                         }
+                         else
+                         {
+                             Glide.with(view).load(R.drawable.ic_account_200dp).into(UserImage);
+                             progressBar.setVisibility(View.GONE);
+                         }
+                         ProfileuserName.setText(model.getName());
                          UserDialog.show();
 
                      }
