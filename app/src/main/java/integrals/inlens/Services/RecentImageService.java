@@ -654,11 +654,12 @@ public class RecentImageService extends Service {
         NotificationCompat.Builder builder =
                 (NotificationCompat.Builder)
                         new NotificationCompat.Builder(getApplicationContext())
+                                .setContentTitle("New image detected")
+                                .setContentText("Inlens has detected a new image. Expand to get more info.")
                                 .setDefaults(Notification.DEFAULT_ALL)
                                 .setOnlyAlertOnce(true)
                                 .setCustomBigContentView(remoteViews)
                                 .setWhen(System.currentTimeMillis())
-
                                 .setSmallIcon(R.drawable.inlens_logo_m)
                                 .setLargeIcon(LogoBitMap)
                                 .setPriority(Notification.PRIORITY_MAX)

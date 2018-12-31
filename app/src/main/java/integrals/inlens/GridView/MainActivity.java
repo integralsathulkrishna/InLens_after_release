@@ -178,7 +178,6 @@ public class MainActivity extends AppCompatActivity
                         ResetText(SelectedNumber);
                         FirstImageClicked = true;
                         SelectIndex=true;
-                        cardView.setVisibility(View.VISIBLE);
                     } else if (FirstImageClicked == true) {
                         SelectedNumber -= 1;
                         PositionArray[position] = 0;
@@ -201,7 +200,7 @@ public class MainActivity extends AppCompatActivity
                         PositionArray[position] = position;
                         ResetText(SelectedNumber);
                         SelectIndex=true;
-                        cardView.setVisibility(View.VISIBLE);
+
 
                     }
 
@@ -315,7 +314,8 @@ public class MainActivity extends AppCompatActivity
         if (selectedNumber == 0) {
             SelectedText.setText("Tap item to select , long Tap to attach");
             SelectIndex=false;
-            cardView.setVisibility(View.INVISIBLE);
+
+
 
         }
         else
