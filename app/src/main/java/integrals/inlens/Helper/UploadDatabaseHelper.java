@@ -146,7 +146,7 @@ public  class UploadDatabaseHelper extends SQLiteOpenHelper {
 
 
     public void DeleteRow(int RowID){
-        this.getWritableDatabase().rawQuery("DELETE FROM TABLE2 WHERE ID = 1 ",null);
+        this.getWritableDatabase().rawQuery("DELETE FROM TABLE2 WHERE ID = "+ RowID,null);
     }
 
 

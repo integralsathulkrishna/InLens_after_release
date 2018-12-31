@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity
         });
         ImageDialog.setNegativeButton("Attach", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                Toast.makeText(getApplicationContext(), "Feature added in comming update", Toast.LENGTH_SHORT);
+                Toast.makeText(getApplicationContext(), "Feature added in comming update", Toast.LENGTH_SHORT).show();
 
 
             }

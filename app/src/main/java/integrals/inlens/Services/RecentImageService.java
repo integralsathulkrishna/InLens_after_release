@@ -387,7 +387,6 @@ public class RecentImageService extends Service {
         OriginalImageFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
         ThumbnailFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
 
-
         try {
             bitmap = new Compressor(getApplicationContext())
                     .setMaxHeight(130)
@@ -595,6 +594,7 @@ public class RecentImageService extends Service {
     }
 
     /** Create a File for saving an image or video */
+
     private  File getOutputMediaFile(){
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.

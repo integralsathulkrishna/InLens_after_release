@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,14 +46,26 @@ public class GalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+
         RequestOptions requestOptions=new RequestOptions()
                 .override(360,240)
-                .diskCacheStrategy(DiskCacheStrategy.ALL);
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.ic_deleted);
 
-        Glide.with(context).load(data.get(position).getUrl())
+        File file = new File(data.get(position).getUrl());
+        if(file.exists())
+        {
+            Glide.with(context).load(data.get(position).getUrl())
                     .thumbnail(0.5f)
                     .apply(requestOptions)
                     .into(((MyItemHolder) holder).mImg);
+
+        }
+        else
+        {
+            holder.itemView.setVisibility(View.GONE);
+        }
+
 
     }
 

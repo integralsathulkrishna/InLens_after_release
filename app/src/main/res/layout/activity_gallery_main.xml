@@ -33,7 +33,7 @@
                 android:layout_alignParentRight="false"
                 android:layout_centerHorizontal="false"
                 android:layout_centerInParent="true"
-                android:visibility="invisible"
+                android:visibility="gone"
                 android:background="@drawable/ic_cloud_upload" />
 
         </RelativeLayout>
