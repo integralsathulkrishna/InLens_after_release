@@ -3,6 +3,7 @@ package integrals.inlens.Helper;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -97,6 +98,7 @@ public class ProfileDilaogHelper extends Dialog {
 
 
         final View view =findViewById(android.R.id.content);
+        view.setBackgroundColor(Color.WHITE);
         CircleImageView CustomDialogUserImage = findViewById(R.id.custom_profile_dialog_userprofilepic);
         TextView CustomDialogUserName = findViewById(R.id.custom_profile_dialog_username);
         TextView CustomDialogUserEmail = findViewById(R.id.custom_profile_dialog_useremail);

@@ -2,48 +2,49 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:maxHeight="350dp">
-
-
+    android:maxHeight="400dp">
 
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp">
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
+        android:background="@android:color/white">
 
         <ImageButton
             android:id="@+id/particpants_bottomsheet_closebtn"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_closedialog"
-            android:background="@drawable/circle"
-            android:backgroundTint="#cdcdcd"
-            android:padding="5dp"
-            android:layout_alignParentEnd="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentTop="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            />
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/ic_close_album" />
 
         <TextView
             android:id="@+id/particpants_bottomsheet_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Particpants"
-            android:maxLength="17"
-            android:textSize="15sp"
+            android:layout_alignTop="@id/particpants_bottomsheet_closebtn"
             android:layout_centerHorizontal="true"
-            android:layout_alignTop="@id/particpants_bottomsheet_closebtn"/>
+            android:maxLength="17"
+            android:text="Participants"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/particpants_bottomsheet_recyclerview"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/particpants_bottomsheet_title"
-            android:layout_marginStart="5dp"
+            android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="5dp">
+            android:background="@android:color/white">
 
         </android.support.v7.widget.RecyclerView>
 
@@ -54,6 +55,6 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_centerInParent="true"
-        android:indeterminate="true"/>
+        android:indeterminate="true" />
 
 </RelativeLayout>

@@ -15,7 +15,7 @@
         android:layout_alignParentLeft="false"
         android:layout_alignParentBottom="false"
         android:layout_centerHorizontal="true"
-        android:alpha="0.7"
+        android:alpha="0.6"
         android:background="@android:color/black"
         android:scaleType="centerCrop"
         android:visibility="visible" />
@@ -33,15 +33,14 @@
 
     <Button
         android:id="@+id/AddForUpload"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_alignParentTop="false"
         android:layout_alignParentRight="false"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:alpha="1"
         android:background="@drawable/upload_icon_notification"
-        android:gravity="center_vertical" />
+        android:gravity="right" />
 
     <TextView
         android:id="@+id/textView2"
@@ -50,7 +49,7 @@
         android:background="@color/colorPrimary"
         android:text="       InLens"
         android:textColor="@android:color/white"
-        android:textSize="15sp" />
+        android:textSize="13sp" />
 
     <TextView
         android:id="@+id/recentImageTextView"

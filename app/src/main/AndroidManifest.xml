@@ -48,8 +48,7 @@
         <!-- optional (needed if default theme has no action bar) -->
         <activity
             android:name=".Activities.LoginActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.AttachSituation"
             android:excludeFromRecents="true"
@@ -123,8 +122,9 @@
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.PhotoView" />
         <activity android:name=".Activities.Uploading_view" />
-        <activity android:name=".Activities.IntroActivity"
-            android:theme="@style/NoActionBarTheme"></activity>
+        <activity
+            android:name=".Activities.IntroActivity"
+            android:theme="@style/NoActionBarTheme" />
     </application>
 
 </manifest>

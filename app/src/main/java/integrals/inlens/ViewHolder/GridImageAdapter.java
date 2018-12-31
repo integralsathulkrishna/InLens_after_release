@@ -9,15 +9,14 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -33,6 +32,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +84,7 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
                 .thumbnail(0.1f)
                 .apply(requestOptions)
                 .into(holder.imageView);
-
+        holder.textView.setText(BlogList.get(position).getUserName());
         Glide.with(context).load(BlogList.get(position).getImage()).thumbnail(0.1f)
                 .apply(requestOptions).listener(new RequestListener<Drawable>() {
             @Override
@@ -171,16 +172,19 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
 
     public class GridImageViewHolder extends RecyclerView.ViewHolder{
         public ImageView imageView;
+        public TextView  textView;
         public Button    OptionButton;
         public ProgressBar CardLoadingPBar;
         public GridImageViewHolder(View itemView) {
             super(itemView);
+            textView=(TextView)itemView.findViewById(R.id.UploadedByUserName);
             imageView=(ImageView)itemView.findViewById(R.id.PhotoViewPhotoViewCard);
             OptionButton=(Button)itemView.findViewById(R.id.OptionsButton);
             CardLoadingPBar = itemView.findViewById(R.id.cardloadingpbar);
 
         }
     }
+
     private void DeleteImage(final int position){
         Toast.makeText(context,"Deleting Image ..Please wait",Toast.LENGTH_SHORT).show();
         StorageReference photoRef = mFirebaseStorage.getReferenceFromUrl(BlogList.get(position).getImageThumb().toString());

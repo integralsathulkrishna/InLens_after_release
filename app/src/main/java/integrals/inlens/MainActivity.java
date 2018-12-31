@@ -547,7 +547,11 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                     MainLoadingProgressBar.setVisibility(View.INVISIBLE);
+
+
+
                 }
+
 
 
             };

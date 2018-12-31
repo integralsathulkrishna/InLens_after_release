@@ -28,6 +28,7 @@ import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.R;
+import integrals.inlens.Services.RecentImageService;
 
 public class MainActivity extends AppCompatActivity
         implements RecyclerItemClickListener.OnItemClickListener {
@@ -211,12 +212,7 @@ public class MainActivity extends AppCompatActivity
         });
         ImageDialog.setNegativeButton("Attach", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                SharedPreferences sharedPreferences=getSharedPreferences("PhotoUpdate.pref",MODE_PRIVATE);
-                SharedPreferences.Editor editor=sharedPreferences.edit();
-                editor.putString("CurrentImage::",IMGS[position]);
-                editor.commit();
-                startActivity(new Intent(MainActivity.this, AttachSituation.class));
-                Toast.makeText(getApplicationContext(), "Added to Attach", Toast.LENGTH_SHORT);
+                Toast.makeText(getApplicationContext(), "Feature added in comming update", Toast.LENGTH_SHORT);
 
 
             }
@@ -256,8 +252,19 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String result) {
-            finish();
-        }
+
+
+            Boolean Default = false;
+            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+            if (sharedPreferences.getBoolean("UsingCommunity::", Default) == true) {
+                getApplicationContext().
+                        startService(new Intent(getApplicationContext(), RecentImageService.class));
+                    finish();
+
+                    }
+
+
+         }
 
         @Override
         protected void onPreExecute() {}

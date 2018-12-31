@@ -37,14 +37,12 @@ public class IntroActivity extends AppCompatActivity {
         SignIn = findViewById(R.id.introsignin);
         SignUp = findViewById(R.id.introsignup);
 
-        AppTagLine.setText("\" Take your memories where ever you go \"");
+        AppTagLine.setText("\" Event memories with your loved ones in a single Cloud-Album \"");
 
         Animation FadeIn  = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fade_in);
-        Animation Rotate  = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate);
 
         AppName.setAnimation(FadeIn);
         AppWelcome.setAnimation(FadeIn);
-        AppIcon.setAnimation(Rotate);
         AppTagLine.setAnimation(FadeIn);
         SignUp.setAnimation(FadeIn);
         SignIn.setAnimation(FadeIn);
