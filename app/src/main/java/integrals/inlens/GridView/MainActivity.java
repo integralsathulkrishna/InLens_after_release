@@ -82,9 +82,9 @@ public class MainActivity extends AppCompatActivity
         SelectedText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-        //startActivity(new Intent(MainActivity.this,Uploading_view.class));
+                //startActivity(new Intent(MainActivity.this,Uploading_view.class));
 
-           }
+            }
         });
 
 
@@ -150,27 +150,27 @@ public class MainActivity extends AppCompatActivity
 
 
         if(position==0){
-          if(FirstImageClicked==true){
-              DefaultDialogue="Remove";
-          }else{
-              DefaultDialogue="Upload";
-          }
-         }
-         else {
-          if (isImageSelected(PositionArray, position) == true) {
-              DefaultDialogue="Remove";
-          }else{
-              DefaultDialogue="Upload";
-          }
+            if(FirstImageClicked==true){
+                DefaultDialogue="Remove";
+            }else{
+                DefaultDialogue="Upload";
+            }
+        }
+        else {
+            if (isImageSelected(PositionArray, position) == true) {
+                DefaultDialogue="Remove";
+            }else{
+                DefaultDialogue="Upload";
+            }
 
-      }
-
-
+        }
 
 
-              ImageDialog.setPositiveButton(DefaultDialogue, new DialogInterface.OnClickListener() {
-                @Override
-               public void onClick(DialogInterface dialogInterface, int i) {
+
+
+        ImageDialog.setPositiveButton(DefaultDialogue, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
                 if (position == 0) {
                     if (FirstImageClicked == false) {
                         SelectedNumber += 1;
@@ -260,12 +260,12 @@ public class MainActivity extends AppCompatActivity
             if (sharedPreferences.getBoolean("UsingCommunity::", Default) == true) {
                 getApplicationContext().
                         startService(new Intent(getApplicationContext(), RecentImageService.class));
-                    finish();
+                finish();
 
-                    }
+            }
 
 
-         }
+        }
 
         @Override
         protected void onPreExecute() {}
@@ -319,9 +319,9 @@ public class MainActivity extends AppCompatActivity
 
         }
         else
-            {
+        {
             SelectedText.setText("Selected( " + selectedNumber + " ).");
-            }
+        }
 
 
     }
@@ -386,24 +386,13 @@ public class MainActivity extends AppCompatActivity
                     1.There should be  refresh button to refresh the uploading of the selected image
                     2.if  the uploading is completed the image should be Uploaded Recycler view
                     3.if the image is clicked it should be viewed
-
       2.A recycler view to show the image that is to be uploaded
                     1. It should have the data List of images that is to be uploaded
                     2. It Should have a button that enables that delete the image
                     3. If the image is clicked it should be viewed in Photo View
-
       3.A Recycler view to show the images that  uploaded
                     1. If the image is clicked it should be shown in dialgue box
                        // Cannot delete the uploaded image
-
-
-
-
-
-
-
-
-
      */
 
 }

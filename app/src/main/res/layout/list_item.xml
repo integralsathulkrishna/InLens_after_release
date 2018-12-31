@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="1dp"
     android:adjustViewBounds="true"
+    android:background="@drawable/ic_deleted"
     android:scaleType="center" />
 
 

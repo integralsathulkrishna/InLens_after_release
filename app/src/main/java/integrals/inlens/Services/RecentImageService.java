@@ -36,6 +36,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -91,6 +92,8 @@ public class RecentImageService extends Service {
     private int COMPRESSION_HEIGHT=400;
     private String AlbumExpiry="";
     private Cursor cursor;
+    private NotificationManager UploadnotificationManager;
+    private NotificationCompat.Builder Uploadbuilder;
 
     public RecentImageService(Context applicationContext) {
         super();
@@ -119,7 +122,8 @@ public class RecentImageService extends Service {
         uploadDatabaseHelper.UpdateUploadStatus(currentDatabase.GetUploadingTargetColumn(),"NOT_UPLOADED");
         currentDatabase.close();
         uploadDatabaseHelper.close();
-        Toast.makeText(getApplicationContext(),"InLens  Service created.",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(),"InLens Service created.",Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
@@ -361,14 +365,28 @@ public class RecentImageService extends Service {
 
 
 
-
-
-
     }
 
 
     private void StartUpload(final int uploadID,final int Record) {
-        Toast.makeText(getApplicationContext(), "Uploading :: " + uploadID + "/" + Record, Toast.LENGTH_SHORT).show();
+
+
+            UploadnotificationManager =(NotificationManager)getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            Uploadbuilder = (NotificationCompat.Builder)new NotificationCompat.Builder(getApplicationContext())
+                    .setContentTitle("Upload Started")
+                    .setContentText("Uploading " + uploadID + "/" + Record)
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.drawable.inlens_logo_m)
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setOngoing(true)
+                    .setProgress(100,0,true);
+
+            UploadnotificationManager.notify(672, Uploadbuilder.build());
+
+
+
+
+        //Toast.makeText(getApplicationContext(), "Uploading :: " + uploadID + "/" + Record, Toast.LENGTH_SHORT).show();
         final DatabaseReference
                 InUserReference,
                 PostDatabaseReference;
@@ -445,15 +463,21 @@ public class RecentImageService extends Service {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()) {
+
                     FilePath.putFile(ImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
                             DownloadUri = taskSnapshot.getDownloadUrl();
+
                         }
                     }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             if (task.isSuccessful()) {
+
+                                UploadnotificationManager.cancel(672);
+
                                 final DatabaseReference NewPost = PostDatabaseReference.push();
                                 InUserReference.addValueEventListener(new ValueEventListener() {
                                     @Override
@@ -526,29 +550,8 @@ public class RecentImageService extends Service {
             }
         });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
+
     private void storeImage(Bitmap image) {
         pictureFile = getOutputMediaFile();
 
@@ -617,18 +620,6 @@ public class RecentImageService extends Service {
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
         return mediaFile;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     private void CreateNotification() {
         RecentImage++;
