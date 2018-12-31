@@ -928,7 +928,15 @@ public class MainActivity extends AppCompatActivity {
         builder.setCancelable(true);
         builder.setTitle("Quit Cloud-Album");
         builder.setMessage("Are you sure you want to quit the current community ." + Txt);
-        builder.setPositiveButton(" OK ", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                dialogInterface.dismiss();
+
+            }
+        });
+        builder.setPositiveButton(" Yes ", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 

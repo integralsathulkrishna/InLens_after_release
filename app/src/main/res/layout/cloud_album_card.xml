@@ -29,7 +29,8 @@
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
             android:scaleType="fitXY"
-            app:srcCompat="@color/colorPrimary" />
+            app:srcCompat="@color/colorPrimary"
+            android:background="@drawable/rounded_corners"/>
 
         <RelativeLayout
             android:layout_width="match_parent"

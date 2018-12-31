@@ -243,6 +243,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                     CommunityPost.child("Time").setValue(DatabaseTimeTaken);
                                     CommunityPost.child("ActiveIndex").setValue("T");
                                     CommunityPost.child("AlbumExpiry").setValue(AlbumTime);
+                                    CommunityPost.child("TimeStamp").setValue(ServerValue.TIMESTAMP);
                                     PostKey = CommunityPost.getKey().trim();
                                     NewPost.child("AlbumTitle").setValue(TitleValue);
                                     NewPost.child("AlbumDescription").setValue(DescriptionValue);
@@ -252,6 +253,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                     NewPost.child("UserName").setValue(dataSnapshot.child("Name").getValue());
                                     NewPost.child("Time").setValue(DatabaseTimeTaken);
                                     NewPost.child("CommunityID").setValue(PostKey);
+                                    NewPost.child("TimeStamp").setValue(ServerValue.TIMESTAMP);
 
                                     InProgressDialog.setMessage("Saving new data....");
                                     CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);

@@ -45,6 +45,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -209,16 +210,11 @@ public class CloudAlbum extends AppCompatActivity {
                             +calendar.get(Calendar.HOUR_OF_DAY)+"-"
                             +calendar.get(Calendar.MINUTE)+"-"
                             +calendar.get(Calendar.SECOND);
-                    String SituationTime=calendar.get(Calendar.YEAR)+ "/"
-                            +calendar.get(Calendar.MONTH)+"/"
-                            +calendar.get(Calendar.DAY_OF_MONTH)+"  -   "
-                            +calendar.get(Calendar.HOUR_OF_DAY)+":"
-                            +calendar.get(Calendar.MINUTE)+":"
-                            +calendar.get(Calendar.SECOND);
+
 
                     Map situationmap = new HashMap();
                     situationmap.put("name",SitEditName.getText().toString().trim());
-                    situationmap.put("time", SituationTime);
+                    situationmap.put("time", ServerValue.TIMESTAMP);
                     situationmap.put("owner", FirebaseAuth.getInstance().getCurrentUser().getUid());
                     final String push_id =databaseReference.push().getKey();
 
