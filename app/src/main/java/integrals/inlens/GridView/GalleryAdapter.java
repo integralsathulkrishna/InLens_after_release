@@ -1,6 +1,7 @@
 package integrals.inlens.GridView;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -53,13 +54,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 .placeholder(R.drawable.ic_deleted);
 
         File file = new File(data.get(position).getUrl());
-        if(file.exists())
+        if(file.exists() && !TextUtils.isEmpty(data.get(position).getUrl()))
         {
             Glide.with(context).load(data.get(position).getUrl())
                     .thumbnail(0.5f)
                     .apply(requestOptions)
                     .into(((MyItemHolder) holder).mImg);
-
         }
         else
         {

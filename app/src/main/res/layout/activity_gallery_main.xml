@@ -16,9 +16,10 @@
         android:layout_alignParentRight="true"
         android:layout_marginBottom="50dp"
         android:layout_marginRight="20dp"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:cardCornerRadius="25dp"
-        app:cardElevation="5dp">
+        app:cardElevation="5dp"
+        >
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -33,7 +34,6 @@
                 android:layout_alignParentRight="false"
                 android:layout_centerHorizontal="false"
                 android:layout_centerInParent="true"
-                android:visibility="gone"
                 android:background="@drawable/ic_cloud_upload" />
 
         </RelativeLayout>

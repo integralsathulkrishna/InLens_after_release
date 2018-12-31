@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     public static String IMGS[];
     public static String TIME[];
     ArrayList<String> ImageList = new ArrayList<>();
+
     ArrayList<String> TimeList = new ArrayList<>();
     private Boolean FirstImageClicked = false;
     private Boolean SelectIndex=false;
@@ -328,14 +330,17 @@ public class MainActivity extends AppCompatActivity
         RecentImageDatabase recentImageDatabase = new RecentImageDatabase(MainActivity.this, "", null, 1);
         int Record = recentImageDatabase.GetNumberOfRows();
         for (int i = 1; i <= Record; i++) {
-            ImageList.add(recentImageDatabase.GetPhotoUri(i));
-            TimeList.add(recentImageDatabase.GetTimeTaken(i));
+            if(new File(recentImageDatabase.GetPhotoUri(i)).exists() && !ImageList.contains(recentImageDatabase.GetPhotoUri(i)))
+            {
+                ImageList.add(recentImageDatabase.GetPhotoUri(i));
+                TimeList.add(recentImageDatabase.GetTimeTaken(i));
+            }
         }
 
-        for (int j = 0; j < Record; j++) {
+        for (int j = 0; j < ImageList.size(); j++) {
 
-            IMGS[j] = ImageList.get(Record - (j + 1));
-            TIME[j] = TimeList.get(Record - (j + 1));
+            IMGS[j] = ImageList.get(ImageList.size() - (j + 1));
+            TIME[j] = TimeList.get(ImageList.size() - (j + 1));
 
 
         }
