@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -342,10 +343,14 @@ public class PhotoListHelper {
                             activity,databaseReferencePhotoList
 
                     );
+                    try {
+                        mBottomSheetDialogRecyclerView.setAdapter(gridImageAdapter);
+                        mBottomSheetDialogProgressbar.setVisibility(View.GONE);
+                        mBottomSheetDialog.show();
 
-                    mBottomSheetDialogRecyclerView.setAdapter(gridImageAdapter);
-                    mBottomSheetDialogProgressbar.setVisibility(View.GONE);
-                    mBottomSheetDialog.show();
+                    }catch (WindowManager.BadTokenException e){
+                        e.printStackTrace();
+                    }
 
 
 

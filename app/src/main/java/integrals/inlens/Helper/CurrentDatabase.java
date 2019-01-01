@@ -27,13 +27,13 @@ public class CurrentDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE CURRENT( ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "LIVECOMMUNITY TEXT,UPLOADING_TOTAL INTEGER,UPLOADING_TARGET_COLUMN INTEGER," +
-                "RECENT_TOTAL INTEGER, ALBUMEXPIRY TEXT,RECENT_IMAGE_INDEX INTEGER,UPLOADING_INDEX INTEGER);");
+                "RECENT_TOTAL INTEGER, ALBUMEXPIRY TEXT,RECENT_IMAGE_INDEX INTEGER,UPLOADING_INDEX INTEGER,CURRENT_IMAGE TEXT);");
 
 
     }
 
     public void InsertUploadValues(String LiveCommunityID,int UploadingTotal,int UploadingTargetColumn,
-                                   int RecentTotal, String AlbumExpiry,int RecentImageIndex,int UploadingIndex) {
+                                   int RecentTotal, String AlbumExpiry,int RecentImageIndex,int UploadingIndex,String CurrentImage) {
         ContentValues contentValues = new ContentValues();
         contentValues.put("LIVECOMMUNITY", LiveCommunityID);
         contentValues.put("UPLOADING_TOTAL",UploadingTotal);
@@ -42,8 +42,8 @@ public class CurrentDatabase extends SQLiteOpenHelper {
         contentValues.put("ALBUMEXPIRY",AlbumExpiry);
         contentValues.put("RECENT_IMAGE_INDEX",RecentImageIndex);
         contentValues.put("UPLOADING_INDEX",UploadingIndex);
-        //if(Uploading Index=0 Do not Upload
-        //if(Uploading Index=1 Upload
+        contentValues.put("CURRENT_IMAGE",CurrentImage);
+
         this.getWritableDatabase().insertOrThrow("CURRENT", "", contentValues);
 
         }
@@ -108,6 +108,16 @@ public class CurrentDatabase extends SQLiteOpenHelper {
         }
         return S;
     }
+    public String GetCurrentImage() {
+        String S=null;
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT * FROM CURRENT WHERE ID =" + 1, null);
+        while (cursor.moveToNext()) {
+            S= cursor.getString(8);
+        }
+        return S;
+    }
+
+
 
     public void DeleteDatabase(){
         context.deleteDatabase("CurrentDatabase.db");
@@ -137,7 +147,10 @@ public class CurrentDatabase extends SQLiteOpenHelper {
         this.getWritableDatabase().execSQL("UPDATE CURRENT" + " SET UPLOADING_INDEX='" + FinalValue + "' WHERE ID='" + 1 + "'");
 
     }
+    public void ResetCurrentImage(String ImageString){
+        this.getWritableDatabase().execSQL("UPDATE CURRENT" + " SET CURRENT_IMAGE='" + ImageString + "' WHERE ID='" + 1 + "'");
 
+    }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

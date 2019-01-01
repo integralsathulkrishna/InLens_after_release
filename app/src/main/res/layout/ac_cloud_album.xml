@@ -59,7 +59,7 @@
             android:elevation="0dp" />
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/SituationPhotosGrid"
+            android:id="@+id/AllPhotos"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentStart="false"

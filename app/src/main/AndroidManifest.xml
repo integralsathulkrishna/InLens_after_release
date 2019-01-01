@@ -62,11 +62,6 @@
             android:name=".Activities.CreateCloudAlbum"
             android:screenOrientation="portrait"/>
 
-        <service
-            android:name=".InLensJobScheduler.InLensJobScheduler"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service android:name=".Services.RecentImageService" />
 
         <activity
             android:name=".Activities.RegisterUser"
@@ -97,8 +92,6 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <activity android:name=".Activities.DisplayPhotographer" />
-
         <receiver android:name=".Broadcast_Receivers.NotificationWorks">
             <intent-filter>
                 <action android:name="ADD_FOR_UPLOAD_INLENS" />
@@ -122,7 +115,6 @@
 
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.PhotoView" />
-        <activity android:name=".Activities.Uploading_view" />
         <activity
             android:name=".Activities.IntroActivity"
             android:theme="@style/NoActionBarTheme" />

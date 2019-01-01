@@ -5,7 +5,6 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
-import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
@@ -92,10 +91,9 @@ import integrals.inlens.Activities.IntroActivity;
 import integrals.inlens.Activities.LoginActivity;
 import integrals.inlens.Activities.QRCodeReader;
 import integrals.inlens.Helper.CurrentDatabase;
-import integrals.inlens.Helper.ProfileDilaogHelper;
+
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
-import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
 import integrals.inlens.Models.AlbumModel;
 import integrals.inlens.Models.Participants;
 import integrals.inlens.Services.RecentImageService;
@@ -115,9 +113,6 @@ public class MainActivity extends AppCompatActivity {
             getParticipantDatabaseReference, ComRef;
     private String CommunityID;
     private Intent intent;
-    private static final int JOB_ID = 7907;
-    private JobScheduler jobScheduler;
-    private JobInfo jobInfo;
     private LayoutAnimationController animation;
     private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
@@ -177,13 +172,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getSupportActionBar().setElevation(25);
 
-        ComponentName componentName = new ComponentName(this, InLensJobScheduler.class);
-        JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
-        builder.setPeriodic(15 * 60 * 1000);
-        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-        builder.setPersisted(true);
-        jobInfo = builder.build();
-        jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
         activity = this;
         //1.Service Running Continuation
         RecentImageService recentImageService;
@@ -765,8 +753,7 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
                                 break;
                             case R.id.profile_pic:
-                                //startActivity(new Intent(MainActivity.this, SettingActivity.class));
-                                DatabaseReference DbRef = FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                               DatabaseReference DbRef = FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 DbRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -973,8 +960,6 @@ public class MainActivity extends AppCompatActivity {
                     editorC.putBoolean("UsingCommunity::", false);
                     editorC.commit();
                     stopService(new Intent(MainActivity.this, RecentImageService.class));
-                    JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                    jobScheduler.cancel(7907);
                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     notificationManager.cancelAll();
                     Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
@@ -985,30 +970,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /*
-    @Override
-    protected void onResume() {
-     super.onResume();
-     intent = getIntent();
 
-    if ((intent != null) && (intent.getData() != null)) {
-        String Data = intent.getDataString().toString();
-        String str = Data.substring(18,23);
-             if(str.contentEquals("joins")){
-                 Toast.makeText(getApplicationContext(),"Join "+Data.substring(24),Toast.LENGTH_SHORT).show();
-                  SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-            if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
-                Toast.makeText(getApplicationContext(),"Sorry.You can't join to a new Cloud-Album, " +
-                        "before you quit the current one.",Toast.LENGTH_SHORT)
-                        .show();
-            }else {
-                AddToCloud(Data.substring(24));
-                  }
-
-        }
-    }
-}
-*/
     private void AddToCloud(String substring, final ProgressBar progressBar, final Dialog dialog) {
         progressBar.setVisibility(View.VISIBLE);
         final DatabaseReference CommunityPhotographer;
@@ -1089,9 +1051,8 @@ public class MainActivity extends AppCompatActivity {
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             String ALBT = dataSnapshot.getValue().toString();
                                             CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                            currentDatabase.InsertUploadValues(CommunityID, 0, 1, 0, ALBT, 1, 1);
+                                            currentDatabase.InsertUploadValues(CommunityID, 0, 1, 0, ALBT, 1, 1,"NILL");
                                             currentDatabase.close();
-                                            Toast.makeText(getApplicationContext(), "Setting up database till " + ALBT, Toast.LENGTH_SHORT).show();
                                             StartServices();
                                         }
 
@@ -1129,7 +1090,6 @@ public class MainActivity extends AppCompatActivity {
                             editor1.commit();
 
                             startService(new Intent(MainActivity.this, RecentImageService.class));
-                            jobScheduler.schedule(jobInfo);
 
 
                         }

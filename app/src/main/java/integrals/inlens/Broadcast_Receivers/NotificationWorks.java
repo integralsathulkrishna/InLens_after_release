@@ -76,8 +76,11 @@ public  class NotificationWorks extends BroadcastReceiver {
 
 
             );
-
+            recentImageDatabase.close();
+            uploadDatabaseHelper.close();
         }
+
+
     }
 
     private void cancelNotification() {

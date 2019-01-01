@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -58,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.PhotoListHelper;
-import integrals.inlens.MainActivity;
 import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
 import integrals.inlens.ViewHolder.SituationAdapter;
@@ -79,8 +77,8 @@ public class CloudAlbum extends AppCompatActivity {
     private String                  ReturnName="Oops";
     private String                  TimeEnd,TimeStart,GlobalID;
     private Boolean                 LastPost;
-    private DatabaseReference   databaseReferencePhotoList=null;
-    private Dialog createNewSituation , Renamesituation;
+    private DatabaseReference      databaseReferencePhotoList=null;
+    private Dialog                 createNewSituation , Renamesituation;
 
     private String   Name;
     private Button SwipeControl;
@@ -352,7 +350,7 @@ public class CloudAlbum extends AppCompatActivity {
         QRCodeDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
 
         Window QRCodewindow = QRCodeDialog.getWindow();
-        QRCodewindow.setGravity(Gravity.BOTTOM);
+        QRCodewindow.setGravity(Gravity.CENTER_HORIZONTAL);
         QRCodewindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
         QRCodewindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         QRCodewindow.setDimAmount(0.75f);

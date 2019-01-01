@@ -2,13 +2,8 @@ package integrals.inlens.Activities;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -46,8 +41,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import integrals.inlens.Helper.CurrentDatabase;
-import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
-import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 import integrals.inlens.Services.RecentImageService;
 
@@ -76,9 +69,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private TextView                            UploadProgressTextView;
     private Boolean                             OngoingTask =      false;
     private static final int                    GALLERY_PICK=1 ;
-    private static final int                    JOB_ID=7907;
-    private JobScheduler                        jobScheduler;
-    private JobInfo                             jobInfo;
     private Boolean                             CloudAlbumDone=false;
     private TextView                            DateofCompletion;
     private String                              date;
@@ -92,15 +82,17 @@ public class CreateCloudAlbum extends AppCompatActivity {
         setContentView(R.layout.activity_create_cloud_album);
         Boolean Default = false;
         getSupportActionBar().hide();
+
         InAuthentication = FirebaseAuth.getInstance();
         InUser = InAuthentication.getCurrentUser();
         CommunityDatabaseReference = FirebaseDatabase.getInstance().getReference()
                 .child("Communities");
-
         InUserReference = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
                 .child(InUser.getUid());
         UserID = InUser.getUid();
+
+
         DisplayButton = (ImageButton) findViewById(R.id.DisplayImage);
         UploadProgressTextView = (TextView) findViewById(R.id.UploadProgressTextView);
         CommunityAlbumTitle = (EditText) findViewById(R.id.AlbumTitleEditText);
@@ -147,14 +139,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
 
 
-
-        ComponentName componentName= new ComponentName(this, InLensJobScheduler.class);
-        JobInfo.Builder builder= new JobInfo.Builder(JOB_ID,componentName);
-        builder.setPeriodic(15*60*1000);
-        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-        builder.setPersisted(true);
-        jobInfo=builder.build();
-        jobScheduler=(JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
 
 
 
@@ -255,7 +239,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
                                     InProgressDialog.setMessage("Saving new data....");
                                     CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
-                                    currentDatabase.InsertUploadValues(PostKey,0,1,0,AlbumTime,1,1);
+                                    currentDatabase.InsertUploadValues(PostKey,0,1,0,AlbumTime,1,1,"CUREE");
                                     currentDatabase.close();
                                     InProgressDialog.setMessage("Finishing....");
                                     if (PhotographerCreated == false) {
@@ -344,8 +328,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
         SharedPreferences.Editor editor1 = sharedPreferences1.edit();
         editor1.putBoolean("ThisOwner::", true);
         editor1.commit();
-
-        jobScheduler.schedule(jobInfo);
         startService(new Intent(CreateCloudAlbum.this, RecentImageService.class));
 
     }
@@ -462,7 +444,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
 
 
-
+       currentDatabase.close();
     }
 
 }

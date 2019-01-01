@@ -21,29 +21,12 @@ public class BootCompleteReceiver extends BroadcastReceiver {
         Boolean Default = false;
         SharedPreferences sharedPreferences = context.getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
         if (sharedPreferences.getBoolean("UsingCommunity::", Default) == true) {
-            RecentImageService recentImageService;
-            recentImageService = new RecentImageService(MyContext);
-            if (!isMyServiceRunning(recentImageService.getClass())) {
                 context.startService(new Intent(context, RecentImageService.class));
-                }
 
 
         }
 
 
-    }
-
-    //Created By Elson
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) MyContext.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-
-                return true;
-            }
-        }
-
-        return false;
     }
 
 

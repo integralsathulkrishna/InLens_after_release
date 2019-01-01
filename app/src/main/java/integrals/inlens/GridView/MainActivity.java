@@ -22,8 +22,6 @@ import com.bumptech.glide.request.RequestOptions;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import integrals.inlens.Activities.AttachSituation;
-import integrals.inlens.Activities.Uploading_view;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
@@ -80,7 +78,6 @@ public class MainActivity extends AppCompatActivity
         SelectedText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-        //startActivity(new Intent(MainActivity.this,Uploading_view.class));
 
            }
         });

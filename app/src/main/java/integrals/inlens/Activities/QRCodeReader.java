@@ -24,8 +24,6 @@ import java.util.List;
 import info.androidhive.barcode.BarcodeReader;
 import integrals.inlens.Helper.CurrentDatabase;
 
-import integrals.inlens.InLensJobScheduler.InLensJobScheduler;
-import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 import integrals.inlens.Services.RecentImageService;
 
@@ -42,10 +40,6 @@ public class QRCodeReader extends AppCompatActivity
     private String CommunityID = "1122333311101";
     private DatabaseReference databaseReference;
     private DatabaseReference databaseReference2,databaseReference3,databaseReference4;
-    private ComponentName componentName;
-    private static final int JOB_ID=7907;
-    private JobScheduler jobScheduler;
-    private JobInfo jobInfo;
     private Activity activity;
 
 
@@ -55,7 +49,6 @@ public class QRCodeReader extends AppCompatActivity
         setContentView(R.layout.activity_qrcode_reader);
         getSupportActionBar().hide();
         activity=this;
-        componentName= new ComponentName(this, InLensJobScheduler.class);
         barcodeReader = (BarcodeReader) getSupportFragmentManager().findFragmentById(R.id.barcode_fragment);
         NewCommunityStatus = (TextView) findViewById(R.id.NewCommunityStatus);
         CommunityPhotographerAuthentication = FirebaseAuth.getInstance();
@@ -178,10 +171,8 @@ public class QRCodeReader extends AppCompatActivity
                                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                                     String AlbumExpiry=dataSnapshot.getValue().toString();
                                                     CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                                    currentDatabase.InsertUploadValues(CommunityID, 0, 1, 0,AlbumExpiry,1,1);
+                                                    currentDatabase.InsertUploadValues(CommunityID, 0, 1, 0,AlbumExpiry,1,1,"NILL");
                                                     currentDatabase.close();
-                                                    Toast.makeText(getApplicationContext(),"Setting up database till " +AlbumExpiry,Toast.LENGTH_SHORT).show();
-
                                                     StartServices();
 
                                                 }
@@ -225,13 +216,6 @@ public class QRCodeReader extends AppCompatActivity
                                 editor1.putBoolean("ThisOwner::", false);
                                 editor1.commit();
                                 startService(new Intent(QRCodeReader.this, RecentImageService.class));
-                                JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, componentName);
-                                builder.setPeriodic(15 * 60 * 1000);
-                                builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
-                                builder.setPersisted(true);
-                                jobInfo = builder.build();
-                                jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                                jobScheduler.schedule(jobInfo);
                                 finish();
                             }
                         });
