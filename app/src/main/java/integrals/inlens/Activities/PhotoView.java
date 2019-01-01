@@ -157,11 +157,14 @@ public class PhotoView extends AppCompatActivity {
             CaptionText.setText(getBlogTitle);
 
         }
+       /*
         if (Weather.contentEquals("NULLX")) {
+
             WeatherLayout.setVisibility(View.GONE);
         } else {
             WeatherText.setText(Weather);
         }
+        */
         if (LocationT.contentEquals("NULLX")) {
             LocationLayout.setVisibility(View.GONE);
         } else {

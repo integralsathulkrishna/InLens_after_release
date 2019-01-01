@@ -433,8 +433,8 @@ public class MainActivity extends AppCompatActivity {
 
                                     String key = dataSnapshot.child(getRef(position).getKey()).getKey();
 
-                                    if (dataSnapshot.child(key).hasChild("TimeStamp")) {
-                                        String timestamp = dataSnapshot.child(key).child("TimeStamp").getValue().toString();
+                                    if (dataSnapshot.child(key).hasChild("CreatedTimestamp")) {
+                                        String timestamp = dataSnapshot.child(key).child("CreatedTimestamp").getValue().toString();
                                         long time = Long.parseLong(timestamp);
                                         CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
                                         String timesubstring = Time.toString().substring(Time.length() - 8);
@@ -915,7 +915,15 @@ public class MainActivity extends AppCompatActivity {
         builder.setCancelable(true);
         builder.setTitle("Quit Cloud-Album");
         builder.setMessage("Are you sure you want to quit the current community ." + Txt);
-        builder.setPositiveButton(" OK ", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                dialogInterface.dismiss();
+
+            }
+        });
+        builder.setPositiveButton(" Yes ", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 

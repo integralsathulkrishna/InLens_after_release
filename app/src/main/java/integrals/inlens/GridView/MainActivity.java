@@ -19,9 +19,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import integrals.inlens.Activities.AttachSituation;
+import integrals.inlens.Activities.Uploading_view;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     public static String IMGS[];
     public static String TIME[];
     ArrayList<String> ImageList = new ArrayList<>();
+
     ArrayList<String> TimeList = new ArrayList<>();
     private Boolean FirstImageClicked = false;
     private Boolean SelectIndex=false;
@@ -78,8 +82,9 @@ public class MainActivity extends AppCompatActivity
         SelectedText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //startActivity(new Intent(MainActivity.this,Uploading_view.class));
 
-           }
+            }
         });
 
 
@@ -145,27 +150,27 @@ public class MainActivity extends AppCompatActivity
 
 
         if(position==0){
-          if(FirstImageClicked==true){
-              DefaultDialogue="Remove";
-          }else{
-              DefaultDialogue="Upload";
-          }
-         }
-         else {
-          if (isImageSelected(PositionArray, position) == true) {
-              DefaultDialogue="Remove";
-          }else{
-              DefaultDialogue="Upload";
-          }
+            if(FirstImageClicked==true){
+                DefaultDialogue="Remove";
+            }else{
+                DefaultDialogue="Upload";
+            }
+        }
+        else {
+            if (isImageSelected(PositionArray, position) == true) {
+                DefaultDialogue="Remove";
+            }else{
+                DefaultDialogue="Upload";
+            }
 
-      }
-
-
+        }
 
 
-              ImageDialog.setPositiveButton(DefaultDialogue, new DialogInterface.OnClickListener() {
-                @Override
-               public void onClick(DialogInterface dialogInterface, int i) {
+
+
+        ImageDialog.setPositiveButton(DefaultDialogue, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
                 if (position == 0) {
                     if (FirstImageClicked == false) {
                         SelectedNumber += 1;
@@ -173,7 +178,6 @@ public class MainActivity extends AppCompatActivity
                         ResetText(SelectedNumber);
                         FirstImageClicked = true;
                         SelectIndex=true;
-                        cardView.setVisibility(View.VISIBLE);
                     } else if (FirstImageClicked == true) {
                         SelectedNumber -= 1;
                         PositionArray[position] = 0;
@@ -196,7 +200,7 @@ public class MainActivity extends AppCompatActivity
                         PositionArray[position] = position;
                         ResetText(SelectedNumber);
                         SelectIndex=true;
-                        cardView.setVisibility(View.VISIBLE);
+
 
                     }
 
@@ -209,7 +213,7 @@ public class MainActivity extends AppCompatActivity
         });
         ImageDialog.setNegativeButton("Attach", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface arg0, int arg1) {
-                Toast.makeText(getApplicationContext(), "Feature added in comming update", Toast.LENGTH_SHORT);
+                Toast.makeText(getApplicationContext(), "Feature added in comming update", Toast.LENGTH_SHORT).show();
 
 
             }
@@ -256,12 +260,12 @@ public class MainActivity extends AppCompatActivity
             if (sharedPreferences.getBoolean("UsingCommunity::", Default) == true) {
                 getApplicationContext().
                         startService(new Intent(getApplicationContext(), RecentImageService.class));
-                    finish();
+                finish();
 
-                    }
+            }
 
 
-         }
+        }
 
         @Override
         protected void onPreExecute() {}
@@ -310,13 +314,14 @@ public class MainActivity extends AppCompatActivity
         if (selectedNumber == 0) {
             SelectedText.setText("Tap item to select , long Tap to attach");
             SelectIndex=false;
-            cardView.setVisibility(View.INVISIBLE);
+
+
 
         }
         else
-            {
+        {
             SelectedText.setText("Selected( " + selectedNumber + " ).");
-            }
+        }
 
 
     }
@@ -325,14 +330,17 @@ public class MainActivity extends AppCompatActivity
         RecentImageDatabase recentImageDatabase = new RecentImageDatabase(MainActivity.this, "", null, 1);
         int Record = recentImageDatabase.GetNumberOfRows();
         for (int i = 1; i <= Record; i++) {
-            ImageList.add(recentImageDatabase.GetPhotoUri(i));
-            TimeList.add(recentImageDatabase.GetTimeTaken(i));
+            if(new File(recentImageDatabase.GetPhotoUri(i)).exists() && !ImageList.contains(recentImageDatabase.GetPhotoUri(i)))
+            {
+                ImageList.add(recentImageDatabase.GetPhotoUri(i));
+                TimeList.add(recentImageDatabase.GetTimeTaken(i));
+            }
         }
 
-        for (int j = 0; j < Record; j++) {
+        for (int j = 0; j < ImageList.size(); j++) {
 
-            IMGS[j] = ImageList.get(Record - (j + 1));
-            TIME[j] = TimeList.get(Record - (j + 1));
+            IMGS[j] = ImageList.get(ImageList.size() - (j + 1));
+            TIME[j] = TimeList.get(ImageList.size() - (j + 1));
 
 
         }
@@ -378,24 +386,13 @@ public class MainActivity extends AppCompatActivity
                     1.There should be  refresh button to refresh the uploading of the selected image
                     2.if  the uploading is completed the image should be Uploaded Recycler view
                     3.if the image is clicked it should be viewed
-
       2.A recycler view to show the image that is to be uploaded
                     1. It should have the data List of images that is to be uploaded
                     2. It Should have a button that enables that delete the image
                     3. If the image is clicked it should be viewed in Photo View
-
       3.A Recycler view to show the images that  uploaded
                     1. If the image is clicked it should be shown in dialgue box
                        // Cannot delete the uploaded image
-
-
-
-
-
-
-
-
-
      */
 
 }

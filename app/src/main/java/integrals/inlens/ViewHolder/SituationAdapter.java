@@ -8,11 +8,17 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,8 +31,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.ramotion.cardslider.CardSliderLayoutManager;
 import com.ramotion.cardslider.CardSnapHelper;
+
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+
 import integrals.inlens.Helper.PhotoListHelper;
 import integrals.inlens.R;
 import integrals.inlens.Models.SituationModel;
@@ -41,7 +50,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     String CommunityID;
     Activity CloudAlbum;
     List MembersList = new ArrayList();
-    Dialog  Renamesituation;
+    Dialog Renamesituation;
     PhotoListHelper photoListHelper;
     DatabaseReference databaseReferencePhotoList;
     private Dialog mBottomSheetDialog;
@@ -51,39 +60,38 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     private ProgressBar mBottomSheetDialogProgressbar;
 
 
-    public SituationAdapter(         Context context,
-                                     List<SituationModel> situation,
-                                     List<String> SIdList,
-                                     DatabaseReference databaseReference,
-                                     DatabaseReference db,
-                                     String communityID,
-                                     Activity cloudAlbum,
-                                     Dialog mBottomSheetDialog,
-                                     RecyclerView mBottomSheetDialogRecyclerView,
-                                     ImageButton mBottomSheetDialogCloseBtn,
-                                     TextView mBottomSheetDialogTitle,
-                                     ProgressBar mBottomSheetDialogProgressbar) {
+    public SituationAdapter(Context context,
+                            List<SituationModel> situation,
+                            List<String> SIdList,
+                            DatabaseReference databaseReference,
+                            DatabaseReference db,
+                            String communityID,
+                            Activity cloudAlbum,
+                            Dialog mBottomSheetDialog,
+                            RecyclerView mBottomSheetDialogRecyclerView,
+                            ImageButton mBottomSheetDialogCloseBtn,
+                            TextView mBottomSheetDialogTitle,
+                            ProgressBar mBottomSheetDialogProgressbar) {
         this.context = context;
         Situation = situation;
         this.SIdList = SIdList;
         this.databaseReference = databaseReference;
         CommunityID = communityID;
         CloudAlbum = cloudAlbum;
-        this.databaseReferencePhotoList=db;
-        this.mBottomSheetDialog=mBottomSheetDialog;
-        this.mBottomSheetDialogCloseBtn=mBottomSheetDialogCloseBtn;
-        this.mBottomSheetDialogRecyclerView=mBottomSheetDialogRecyclerView;
-        this.mBottomSheetDialogProgressbar=mBottomSheetDialogProgressbar;
-        this.mBottomSheetDialogTitle=mBottomSheetDialogTitle;
+        this.databaseReferencePhotoList = db;
+        this.mBottomSheetDialog = mBottomSheetDialog;
+        this.mBottomSheetDialogCloseBtn = mBottomSheetDialogCloseBtn;
+        this.mBottomSheetDialogRecyclerView = mBottomSheetDialogRecyclerView;
+        this.mBottomSheetDialogProgressbar = mBottomSheetDialogProgressbar;
+        this.mBottomSheetDialogTitle = mBottomSheetDialogTitle;
 
     }
-
 
 
     @NonNull
     @Override
     public SituationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.cloud_album_layout,parent,false);
+        View view = LayoutInflater.from(context).inflate(R.layout.cloud_album_layout, parent, false);
         return new SituationViewHolder(view);
     }
 
@@ -91,47 +99,62 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     public void onBindViewHolder(@NonNull final SituationViewHolder holder, final int position) {
 
 
-        holder.Time.setText(String.format("@ %s", Situation.get(position).getTime()));
+        if(Situation.get(position).getTime().contains("/") ||Situation.get(position).getTime().contains("-")  )
+        {
+            holder.Time.setText("created on : " + Situation.get(position).getTime());
+        }
+        else
+        {
+            long time = Long.parseLong(Situation.get(position).getTime());
+            CharSequence Time = DateUtils.getRelativeDateTimeString(context, time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+            String timesubstring = Time.toString().substring(Time.length() - 8);
+            Date date = new Date(time);
+            String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
+            holder.Time.setText("created on : " + dateformat + " @ " + timesubstring);
+        }
+
+
+
         holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
         holder.SituationLogo.setText(String.format("%s", Situation.get(position).getTitle().charAt(0)));
 
 
-       holder.ExpandButton.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               try{
-               photoListHelper=new PhotoListHelper(context,CloudAlbum,databaseReferencePhotoList);
-                   photoListHelper.DisplayBottomSheet(
-                           mBottomSheetDialog,
-                           mBottomSheetDialogRecyclerView,
-                           mBottomSheetDialogCloseBtn,
-                           mBottomSheetDialogTitle,
-                           mBottomSheetDialogProgressbar,
-                           Situation.get(position).getSituationTime(),
-                           Situation.get(position+1).getSituationTime(),
-                           CommunityID,
-                           Situation.get(position).getTitle(),
-                           false);
+        holder.ExpandButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position + 1).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            false);
 
-               }catch (IndexOutOfBoundsException e){
-               photoListHelper=new PhotoListHelper(context,CloudAlbum,databaseReferencePhotoList);
-                   photoListHelper.DisplayBottomSheet(
-                           mBottomSheetDialog,
-                           mBottomSheetDialogRecyclerView,
-                           mBottomSheetDialogCloseBtn,
-                           mBottomSheetDialogTitle,
-                           mBottomSheetDialogProgressbar,
-                           Situation.get(position).getSituationTime(),
-                           Situation.get(position).getSituationTime(),
-                           CommunityID,
-                           Situation.get(position).getTitle(),
-                           true);
-
-           }
-
+                } catch (IndexOutOfBoundsException e) {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            true);
 
                 }
-       });
+
+
+            }
+        });
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -149,37 +172,26 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
         });
 
 
+        try {
+            photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+            photoListHelper.SetRecyclerView(Situation.get(position).getSituationTime(),
+                    Situation.get(position + 1).getSituationTime(),
+                    CommunityID,
+                    false,
+                    Situation.get(position).getTitle(), true,
+                    holder.recyclerView);
 
-            try {
-                photoListHelper=new PhotoListHelper(context,CloudAlbum,databaseReferencePhotoList);
-                photoListHelper.SetRecyclerView(Situation.get(position).getSituationTime(),
-                        Situation.get(position + 1).getSituationTime(),
-                        CommunityID,
-                        false,
-                        Situation.get(position).getTitle(), true,
-                        holder.recyclerView);
-
-            }catch (IndexOutOfBoundsException e){
-                photoListHelper=new PhotoListHelper(context,CloudAlbum,databaseReferencePhotoList);
-                photoListHelper.SetRecyclerView(Situation.get(position).getSituationTime(),
-                        Situation.get(position).getSituationTime(),
-                        CommunityID,
-                        true,
-                        Situation.get(position).getTitle(), true,
-                        holder.recyclerView);
-
-
-            }
+        } catch (IndexOutOfBoundsException e) {
+            photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+            photoListHelper.SetRecyclerView(Situation.get(position).getSituationTime(),
+                    Situation.get(position).getSituationTime(),
+                    CommunityID,
+                    true,
+                    Situation.get(position).getTitle(), true,
+                    holder.recyclerView);
 
 
-
-
-
-
-
-
-
-
+        }
 
 
     }
@@ -191,33 +203,26 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     }
 
 
-
-
     private void ShowDialog(final int position) {
 
-        BottomSheet.Builder BottomS =  new BottomSheet.Builder(CloudAlbum);
-        BottomS.title("Edit Situation : "+Situation.get(position).getTitle())
+        BottomSheet.Builder BottomS = new BottomSheet.Builder(CloudAlbum);
+        BottomS.title("Edit Situation : " + Situation.get(position).getTitle())
                 .sheet(R.menu.situationmenu).listener(new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                switch (i)
-                {
-                    case R.id.renamesituation :
+                switch (i) {
+                    case R.id.renamesituation:
                         RenameSituation(SIdList.get(position));
                         Renamesituation.show();
                         break;
-                    case R.id.deletesituation:
-                    {
-                        if(SIdList.size()<=1)
-                        {
-                            Toast.makeText(context,"Unable to perform deletion. Album should have at least one situation.",Toast.LENGTH_LONG).show();
-                        }
-                        else
-                        {
+                    case R.id.deletesituation: {
+                        if (SIdList.size() <= 1) {
+                            Toast.makeText(context, "Unable to perform deletion. Album should have at least one situation.", Toast.LENGTH_LONG).show();
+                        } else {
 
                             final android.app.AlertDialog.Builder alertbuilder = new android.app.AlertDialog.Builder(CloudAlbum);
-                            alertbuilder.setTitle("Delete Situation "+Situation.get(position).getTitle())
+                            alertbuilder.setTitle("Delete Situation " + Situation.get(position).getTitle())
                                     .setMessage("You are about to delete the situation. Are you sure you want to continue ?")
                                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
                                         @Override
@@ -231,19 +236,18 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
                                         public void onClick(final DialogInterface dialogInterface, int i) {
 
 
-
                                             databaseReference.child(SIdList.get(position)).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
 
-                                                    Toast.makeText(context,"Successfully deleted the situation",Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(context, "Successfully deleted the situation", Toast.LENGTH_LONG).show();
                                                     dialogInterface.dismiss();
                                                 }
                                             }).addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
 
-                                                    Toast.makeText(context,"Failed to delete the situation",Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(context, "Failed to delete the situation", Toast.LENGTH_LONG).show();
                                                     dialogInterface.dismiss();
                                                 }
                                             });
@@ -267,34 +271,38 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     }
 
 
-
-
-
-
     private void RenameSituation(final String s) {
 
-        Renamesituation = new Dialog(CloudAlbum);
+        Renamesituation = new Dialog(CloudAlbum,android.R.style.Theme_Light_NoTitleBar);
         Renamesituation.setContentView(R.layout.create_new_situation_layout);
         Renamesituation.setCancelable(false);
+        Renamesituation.setCanceledOnTouchOutside(true);
+        Renamesituation.getWindow().getAttributes().windowAnimations = R.style.UpBottomSlideDialogAnimation;
+
+        Window Renamesituationwindow = Renamesituation.getWindow();
+        Renamesituationwindow.setGravity(Gravity.TOP);
+        Renamesituationwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        Renamesituationwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        Renamesituationwindow.setDimAmount(0.75f);
+        Renamesituationwindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
         final EditText SituationName = Renamesituation.findViewById(R.id.situation_name);
         SituationName.requestFocus();
-        Button Done ,Cancel;
-        Done =   Renamesituation.findViewById(R.id.done_btn);
+        Button Done, Cancel;
+        Done = Renamesituation.findViewById(R.id.done_btn);
         Cancel = Renamesituation.findViewById(R.id.cancel_btn);
         Done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if(!TextUtils.isEmpty(SituationName.getText().toString()))
-                {
+                if (!TextUtils.isEmpty(SituationName.getText().toString())) {
                     databaseReference.child(s).child("name").setValue(SituationName.getText().toString().trim()).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
-                            if(task.isSuccessful())
-                            {
+                            if (task.isSuccessful()) {
 
-                                Toast.makeText(context,"Situation renamed as : "+SituationName.getText().toString(),Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "Situation renamed as : " + SituationName.getText().toString(), Toast.LENGTH_SHORT).show();
                                 SituationName.setText("");
                             }
                         }
@@ -302,19 +310,17 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
                         @Override
                         public void onFailure(@NonNull Exception e) {
 
-                            if(e.toString().contains("FirebaseNetworkException"))
-                                Toast.makeText(context,"Not Connected to Internet.",Toast.LENGTH_SHORT).show();
+                            if (e.toString().contains("FirebaseNetworkException"))
+                                Toast.makeText(context, "Not Connected to Internet.", Toast.LENGTH_SHORT).show();
                             else
-                                Toast.makeText(context,"Unable to rename new Situation.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "Unable to rename new Situation.", Toast.LENGTH_SHORT).show();
 
                             SituationName.setText("");
                         }
                     });
                     Renamesituation.dismiss();
-                }
-                else
-                {
-                    Toast.makeText(context,"No name given",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context, "No name given", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -330,36 +336,26 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
     public class SituationViewHolder extends RecyclerView.ViewHolder {
 
-        TextView Name , Count , Time , Title,SituationLogo;
-        Button Join,View;
+        TextView Name, Count, Time, Title, SituationLogo;
+        Button Join, View;
         ImageButton SituationEditBtn;
         public Button EditButton;
         public Button ExpandButton;
 
         public RecyclerView recyclerView;
+
         public SituationViewHolder(View itemView) {
             super(itemView);
             Name = itemView.findViewById(R.id.createdby);
-            EditButton=(Button)itemView.findViewById(R.id.EditSituationCard);
+            EditButton = (Button) itemView.findViewById(R.id.EditSituationCard);
             Time = itemView.findViewById(R.id.SituationTimeCL);
-            Title = itemView.findViewById( R.id.SituationNametextViewCloud_Layout);
-            SituationLogo=itemView.findViewById(R.id.SituationLogoCL);
-            ExpandButton=itemView.findViewById(R.id.ExpandPhotoListCL);
-            recyclerView=itemView.findViewById(R.id.PhotoListRecyclerViewCL);
-            CardSliderLayoutManager cardSliderLayoutManager=new CardSliderLayoutManager(context);
+            Title = itemView.findViewById(R.id.SituationNametextViewCloud_Layout);
+            SituationLogo = itemView.findViewById(R.id.SituationLogoCL);
+            ExpandButton = itemView.findViewById(R.id.ExpandPhotoListCL);
+            recyclerView = itemView.findViewById(R.id.PhotoListRecyclerViewCL);
+            CardSliderLayoutManager cardSliderLayoutManager = new CardSliderLayoutManager(context);
             recyclerView.setLayoutManager(cardSliderLayoutManager);
         }
     }
