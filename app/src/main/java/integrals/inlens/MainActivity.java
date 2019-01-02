@@ -185,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
         jobInfo = builder.build();
         jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
         activity = this;
+
+
         //1.Service Running Continuation
         RecentImageService recentImageService;
         recentImageService = new RecentImageService(getApplicationContext());
