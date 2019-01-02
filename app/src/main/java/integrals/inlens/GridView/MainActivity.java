@@ -12,6 +12,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity
     private String DefaultDialogue="";
     private final int NOTIFICATION_ID = 237;
     private static int value = 0;
-    private FloatingActionButton StartUploadBtn;
+    private Button StartUploadBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
