@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,7 +45,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -59,40 +57,41 @@ import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.R;
 
 public class RecentImageService extends Service {
-    private Bitmap LogoBitMap = null;
-    private Handler handler;
-    private Runnable runnable;
-    final String[][] Projection = new String[1][1];
-    final String[] ImageLocation = {null};
-    final File[] file = {null};
-    private Boolean Index = false;
-    final String[] CurrentImage = {null};
-    final SharedPreferences[] sharedPreferences1 = {null};
-    final File[] file1 = {null};
-    final Bitmap[] bitmap1 = {null};
-    private File pictureFile, pictureFile1;
-    private Uri ImageUri;
-    private RemoteViews remoteViews;
-    private String CommunityID;
-    private int UploadingIntegerID;
-    private int Record;
-    private String UPLOAD_STATUS;
-    private File OriginalImageFile;
-    private File ImageFile, ThumbnailFile;
-    private String OriginalImageName;
-    private Uri DownloadUri, ThumbImageUri, DownloadThumbUri;
-    private Calendar calendar;
-    private DatabaseReference ComNotyRef;
-    private String MyUserID;
-    private NotificationCompat.Builder noty;
-    private static int notyid = 808679;
-    long[] pattern = {};
+    private Bitmap      LogoBitMap=null;
+    private Handler     handler;
+    private Runnable    runnable;
+    final   String[][]  Projection = new String[1][1];
+    final   String[]    ImageLocation = {null};
+    final   File[]      file = {null};
+    private Boolean     Index =     false;
+    final   String[]    CurrentImage = {null};
+    final   SharedPreferences[] sharedPreferences1 = {null};
+    final   File[]       file1 = {null};
+    final   Bitmap[]     bitmap1 ={null};
+    private File         pictureFile,pictureFile1;
+    private Uri          ImageUri;
+    private RemoteViews  remoteViews;
+    private String       CommunityID;
+    private int          UploadingIntegerID;
+    private int          Record;
+    private String       UPLOAD_STATUS;
+    private File         OriginalImageFile;
+    private File         ImageFile,ThumbnailFile;
+    private String       OriginalImageName;
+    private Uri          DownloadUri,ThumbImageUri,DownloadThumbUri;
+    private Calendar     calendar;
     String AlbumTime;
-    private int RecentImage = 0;
-    private int COMPRESSION_WIDTH = 400;
-    private int COMPRESSION_HEIGHT = 400;
-    private String AlbumExpiry = "";
+    private int RecentImage=0;
+    private String AlbumExpiry="";
     private Cursor cursor;
+    private DatabaseReference
+            InUserReference,
+            PostDatabaseReference;
+    private StorageReference PostStorageReference;
+    private FirebaseAuth InAuthentication;
+    private FirebaseUser InUser;
+    private Bitmap bitmap = null;
+    private Bitmap ThumbBitmap = null;
     private NotificationManager UploadnotificationManager;
     private NotificationCompat.Builder Uploadbuilder;
 
@@ -100,44 +99,51 @@ public class RecentImageService extends Service {
         super();
     }
 
-    public RecentImageService() {
+    public RecentImageService()
+    {
 
     }
+
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-        handler = new Handler();
+        handler=new Handler();
+
+        InAuthentication = FirebaseAuth.getInstance();
+        InUser = InAuthentication.getCurrentUser();
+        PostStorageReference = FirebaseStorage.getInstance().getReference();
+
+
+
+
         Resources res = getApplicationContext().getResources();
         int id = R.drawable.inlens_logo_m;
-        LogoBitMap = BitmapFactory.decodeResource(res, id);
-        remoteViews = new RemoteViews(getPackageName(), R.layout.notification_layout);
+        LogoBitMap= BitmapFactory.decodeResource(res, id);
+        remoteViews=new RemoteViews(getPackageName(),R.layout.notification_layout);
 
         //Added for perfect uploading;
-        UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
-        CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-        AlbumExpiry = currentDatabase.GetAlbumExpiry();
-        uploadDatabaseHelper.UpdateUploadStatus(currentDatabase.GetUploadingTargetColumn(), "NOT_UPLOADED");
+        UploadDatabaseHelper uploadDatabaseHelper=new UploadDatabaseHelper(getApplicationContext(),"",null,1);
+        CurrentDatabase      currentDatabase     =new CurrentDatabase(getApplicationContext(),"",null,1);
+        AlbumExpiry=currentDatabase.GetAlbumExpiry();
+        uploadDatabaseHelper.UpdateUploadStatus(currentDatabase.GetUploadingTargetColumn(),"NOT_UPLOADED");
         currentDatabase.close();
         uploadDatabaseHelper.close();
 
-        Toast.makeText(getApplicationContext(), "InLens Service created.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(),"InLens Service created.",Toast.LENGTH_SHORT).show();
 
-        //Notification
-        UploadnotificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Uploadbuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext());
 
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        runnable = new Runnable() {
+        runnable=new Runnable() {
             @Override
             public void run() {
 
 
-                if (CheckAlbumActive() <= 0) {
+                if (CheckAlbumActive() <=0) {
 
                     Projection[0] = new String[]{
                             MediaStore.Images.ImageColumns._ID,
@@ -163,10 +169,14 @@ public class RecentImageService extends Service {
                             file1[0] = new File(ImageLocation[0]);
 
                             if (file[0].exists()) {
-                                String CurrentImageX = "KKKK";
-                                sharedPreferences1[0] = getApplicationContext().getSharedPreferences("PhotoUpdate.pref", Context.MODE_PRIVATE);
-                                CurrentImage[0] = sharedPreferences1[0].getString("CurrentImage::", CurrentImageX);
+                                CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+                                CurrentImage[0] =currentDatabase.GetCurrentImage();
+                                currentDatabase.close();
                                 if (ImageLocation[0].contentEquals(CurrentImage[0])) {
+
+                                    Projection[0]=null;
+                                    cursor.close();
+
                                     //Do not do anything,if the current image matches the image in SharedPreference
                                 } else if ((!ImageLocation[0].contains("/WhatsApp/")) && !ImageLocation[0].contains("/Screenshots/") && !ImageLocation[0].contains(CurrentImage[0])) {
                                     calendar = Calendar.getInstance();
@@ -192,22 +202,21 @@ public class RecentImageService extends Service {
                                     );
                                     try {
                                         bitmap1[0] = new Compressor(getApplicationContext())
-                                                .setMaxHeight(640)
-                                                .setMaxWidth(480)
-                                                .setQuality(75)
+                                                .setMaxHeight(320)
+                                                .setMaxWidth(240)
+                                                .setQuality(70)
                                                 .setCompressFormat(Bitmap.CompressFormat.WEBP)
                                                 .compressToBitmap(file1[0]);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
                                     CreateNotification();
-                                    SharedPreferences.Editor e = sharedPreferences1[0].edit();
-                                    e.putString("CurrentImage::", ImageLocation[0]);
-                                    e.apply();
-                                    CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                    int Value = currentDatabase.GetRecentTotal();
-                                    currentDatabase.ResetResentTotal((Value + 1));
-                                    currentDatabase.close();
+
+                                    CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                                    int Value = currentDatabase1.GetRecentTotal();
+                                    currentDatabase1.ResetResentTotal((Value + 1));
+                                    currentDatabase.ResetCurrentImage(ImageLocation[0]);
+                                    currentDatabase1.close();
                                     cursor.close();
                                     recentImageDatabase.close();
 
@@ -226,39 +235,41 @@ public class RecentImageService extends Service {
                     }
 
                     //Situation Operation
-                    //                       SituationOperation();
+                    //SituationOperation();
                     //Upload Operation
                     UploadOperation();
 
 
-                    handler.postDelayed(this, 2500);
 
 
                 } else if (CheckAlbumActive() > 0) {
                     CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
                     if (currentDatabase1.GetUploadingTargetColumn() >= currentDatabase1.GetUploadingTotal()) {
                         QuitCloudAlbum(0);
+                        currentDatabase1.close();
+
                     } else {
                         QuitCloudAlbum(1);
+                        currentDatabase1.close();
+
                     }
                 }
-
+                handler.postDelayed(this, 2500);
             }
         };
-        handler.postDelayed(runnable, 2000);
-
+        handler.postDelayed(runnable,2000);
         return START_STICKY;
 
     }
 
     private void QuitCloudAlbum(int XYZ) {
 
-        if (XYZ == 1) {
+        if(XYZ==1){
             //Do not Quit Cloud-Album because photos are being uploaded
-        } else {
-            final SharedPreferences sharedPreferences4 = getSharedPreferences("Owner.pref", MODE_PRIVATE);
-            CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-            final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference()
+        }else {
+            final SharedPreferences sharedPreferences4=getSharedPreferences("Owner.pref",MODE_PRIVATE);
+            CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+            final DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference()
                     .child("Communities")
                     .child(currentDatabase.GetLiveCommunityID())
                     .child("ActiveIndex");
@@ -278,8 +289,6 @@ public class RecentImageService extends Service {
                                 editorC.putBoolean("UsingCommunity::", false);
                                 editorC.commit();
                                 stopService(new Intent(getApplicationContext(), RecentImageService.class));
-                                JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                                jobScheduler.cancel(7907);
                                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                 notificationManager.cancelAll();
                                 Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
@@ -290,7 +299,7 @@ public class RecentImageService extends Service {
                     public void onFailure(@NonNull Exception e) {
                     }
                 });
-            } else {
+            }else {
                 CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
                 currentDatabase1.DeleteDatabase();
                 RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
@@ -302,70 +311,100 @@ public class RecentImageService extends Service {
                 editorC.putBoolean("UsingCommunity::", false);
                 editorC.commit();
                 stopService(new Intent(getApplicationContext(), RecentImageService.class));
-                JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                jobScheduler.cancel(7907);
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancelAll();
-                Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
-            }
+                Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show(); }
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     private int CheckAlbumActive() {
-        Calendar calendarW = Calendar.getInstance();
-        AlbumTime = calendarW.get(Calendar.DAY_OF_MONTH) + "-" + (calendarW.get(Calendar.MONTH) + 1) + "-" + calendarW.get(Calendar.YEAR);
+        Calendar calendarW=Calendar.getInstance();
+        AlbumTime = calendarW.get(Calendar.DAY_OF_MONTH) + "-" + (calendarW.get(Calendar.MONTH)+1) + "-" + calendarW.get(Calendar.YEAR);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        Date d1 = null, d2 = null;
+        Date d1 = null,d2=null;
         try {
 
-            d1 = dateFormat.parse(AlbumTime);
-            d2 = dateFormat.parse(AlbumExpiry);
+            d1=dateFormat.parse(AlbumTime);
+            d2=dateFormat.parse(AlbumExpiry);
 
         } catch (ParseException e) {
             e.printStackTrace();
+        }catch (NullPointerException e){
+            e.printStackTrace();
         }
+        try {
+            return d1.compareTo(d2);
 
-        return d1.compareTo(d2);
+        }catch (NullPointerException e){
+            return 0;
+        }
     }
 
     private void UploadOperation() {
-        CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-        CommunityID = currentDatabase.GetLiveCommunityID();
-        UploadingIntegerID = currentDatabase.GetUploadingTargetColumn();
-        Record = currentDatabase.GetUploadingTotal();
+        CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+        CommunityID=currentDatabase.GetLiveCommunityID();
+        UploadingIntegerID=currentDatabase.GetUploadingTargetColumn();
+        Record=currentDatabase.GetUploadingTotal();
         currentDatabase.close();
 
 
-        UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
-        UPLOAD_STATUS = uploadDatabaseHelper.GetUploadStatus(UploadingIntegerID);
-        if ((UploadingIntegerID <= Record)) {
+        UploadDatabaseHelper uploadDatabaseHelper= new UploadDatabaseHelper(getApplicationContext(),"",null,1);
+        UPLOAD_STATUS=uploadDatabaseHelper.GetUploadStatus(UploadingIntegerID);
+        if((UploadingIntegerID<=Record)) {
             try {
-                if (UPLOAD_STATUS.contentEquals("NOT_UPLOADED")) {
+                if(UPLOAD_STATUS.contentEquals("NOT_UPLOADED")) {
 
-                    StartUpload(UploadingIntegerID, Record);
+                    StartUpload(UploadingIntegerID,Record);
 
                 }
 
-            } catch (NullPointerException e) {
+            }catch (NullPointerException e){
                 e.printStackTrace();
             }
 
         }
 
+        uploadDatabaseHelper.close();
 
     }
 
 
-    private void StartUpload(final int uploadID, final int Record) {
 
 
-        Uploadbuilder.setContentTitle("Upload Started")
+
+    private void StartUpload(final int uploadID,final int Record) {
+
+
+        UploadnotificationManager =(NotificationManager)getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        Uploadbuilder = (NotificationCompat.Builder)new NotificationCompat.Builder(getApplicationContext())
+                .setContentTitle("Upload Started")
                 .setContentText("Uploading " + uploadID + "/" + Record)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.drawable.inlens_logo_m)
                 .setPriority(Notification.PRIORITY_MAX)
-                .setOngoing(true);
+                .setOngoing(true)
+                .setProgress(100,0,true);
+
+
+        UploadnotificationManager.notify(672, Uploadbuilder.build());
+
+
 
 
         //Toast.makeText(getApplicationContext(), "Uploading :: " + uploadID + "/" + Record, Toast.LENGTH_SHORT).show();
@@ -530,65 +569,63 @@ public class RecentImageService extends Service {
 
                 }
             }
-        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-
-                int progress = (int) ((100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount());
-                Uploadbuilder.setProgress(100, progress, false)
-                        .setContentText("Uploading " + uploadID + "/" + Record);
-                UploadnotificationManager.notify(672,Uploadbuilder.build());
-
-            }
         });
 
+        uploadDatabaseHelper.close();
     }
+
+
+
+
+
 
     private void storeImage(Bitmap image) {
         pictureFile = getOutputMediaFile();
 
-        if (pictureFile == null) {
-            Toast.makeText(getApplicationContext(), "Unable to create file " +
-                    ",Please check Storage Permission", Toast.LENGTH_SHORT).show();
+        if (pictureFile == null)
+        {
+            Toast.makeText(getApplicationContext(),"Unable to create file " +
+                    ",Please check Storage Permission",Toast.LENGTH_SHORT).show();
             return;
         }
-        try {
+        try
+        {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            ImageUri = Uri.fromFile(pictureFile);
+            ImageUri=Uri.fromFile(pictureFile);
             fos.close();
         } catch (FileNotFoundException e) {
-            Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"File not found",Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "Error accessing file.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Error accessing file.",Toast.LENGTH_SHORT).show();
         }
     }
 
     private void storeThumbImage(Bitmap image) {
         pictureFile1 = getOutputMediaFile();
 
-        if (pictureFile1 == null) {
-            Toast.makeText(getApplicationContext(), "Unable to create file " +
-                    ",Please check Storage Permission", Toast.LENGTH_SHORT).show();
+        if (pictureFile1 == null)
+        {
+            Toast.makeText(getApplicationContext(),"Unable to create file " +
+                    ",Please check Storage Permission",Toast.LENGTH_SHORT).show();
             return;
         }
-        try {
+        try
+        {
             FileOutputStream fos = new FileOutputStream(pictureFile1);
             image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            ThumbImageUri = Uri.fromFile(pictureFile1);
+            ThumbImageUri=Uri.fromFile(pictureFile1);
             fos.close();
         } catch (FileNotFoundException e) {
-            Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"File not found",Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "Error accessing file.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Error accessing file.",Toast.LENGTH_SHORT).show();
         }
     }
 
-    /**
-     * Create a File for saving an image or video
-     */
+    /** Create a File for saving an image or video */
 
-    private File getOutputMediaFile() {
+    private  File getOutputMediaFile(){
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory()
@@ -599,14 +636,14 @@ public class RecentImageService extends Service {
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
         // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
                 return null;
             }
         }
         // Create a media file name
         File mediaFile;
-        String mImageName = "InLens_" + System.currentTimeMillis() + ".jpg";
+        String mImageName="InLens_"+ System.currentTimeMillis() +".jpg";
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
         return mediaFile;
     }
@@ -614,21 +651,21 @@ public class RecentImageService extends Service {
     private void CreateNotification() {
         RecentImage++;
         remoteViews.setImageViewBitmap(R.id.UploadImageViewNotification, bitmap1[0]);
-        remoteViews.setTextViewText(R.id.recentImageTextView, RecentImage + " recent image(s) updated for album.\n Tap to upload each");
+        remoteViews.setTextViewText(R.id.recentImageTextView,RecentImage +" recent image(s) updated for album.\n Tap to upload each");
         NotificationManager notificationManager =
                 (NotificationManager)
                         getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         Intent upload_intent = new Intent("ADD_FOR_UPLOAD_INLENS");
         Intent attach_intent = new Intent("ATTACH_ACTIVITY_INLENS");
         Intent upload_activity_intent = new Intent("RECENT_IMAGES_GRID_INLENS");
-        Intent intent = new Intent(getApplicationContext(), integrals.inlens.GridView.MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent= new Intent(getApplicationContext(), integrals.inlens.GridView.MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK  | Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent=PendingIntent.getActivity(getApplicationContext(),0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
 
-        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 9388, upload_intent, 0);
-        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(getApplicationContext(), 1428, upload_activity_intent, 0);
+        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 9388,upload_intent , 0);
+        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(getApplicationContext(), 1428,  upload_activity_intent, 0);
 
-        remoteViews.setOnClickPendingIntent(R.id.AddForUpload, pendingIntent1);
+        remoteViews.setOnClickPendingIntent(R.id.AddForUpload,pendingIntent1);
         remoteViews.setOnClickPendingIntent(R.id.GotoUploadActivity, pendingIntent3);
 
 
@@ -643,7 +680,8 @@ public class RecentImageService extends Service {
                                 .setWhen(System.currentTimeMillis())
                                 .setSmallIcon(R.drawable.inlens_logo_m)
                                 .setLargeIcon(LogoBitMap)
-                                .setPriority(Notification.PRIORITY_MAX);
+                                .setPriority(Notification.PRIORITY_MAX)
+                ;
         builder.setContentIntent(pendingIntent);
         notificationManager.notify(0, builder.build());
 
@@ -653,10 +691,10 @@ public class RecentImageService extends Service {
     public void onDestroy() {
         super.onDestroy();
         handler.removeMessages(0);
-
-        Toast.makeText(getApplicationContext(),"Inlens service stopped",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(),"InLens Service destroyed.",Toast.LENGTH_SHORT).show();
         Intent broadcastIntent = new Intent(this, RestartRecentImageService.class);
         sendBroadcast(broadcastIntent);
+
     }
 
 
@@ -665,6 +703,8 @@ public class RecentImageService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
+
 
 
 }
