@@ -62,6 +62,7 @@
             android:name=".Activities.CreateCloudAlbum"
             android:screenOrientation="portrait"/>
 
+        <service android:name=".Services.RecentImageService" />
 
         <activity
             android:name=".Activities.RegisterUser"

@@ -23,8 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import integrals.inlens.Activities.AttachSituation;
-import integrals.inlens.Activities.Uploading_view;
+
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
