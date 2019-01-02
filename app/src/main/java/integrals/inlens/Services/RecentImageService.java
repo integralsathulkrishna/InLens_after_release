@@ -654,6 +654,7 @@ public class RecentImageService extends Service {
         super.onDestroy();
         handler.removeMessages(0);
 
+        Toast.makeText(getApplicationContext(),"Inlens service stopped",Toast.LENGTH_SHORT).show();
         Intent broadcastIntent = new Intent(this, RestartRecentImageService.class);
         sendBroadcast(broadcastIntent);
     }
