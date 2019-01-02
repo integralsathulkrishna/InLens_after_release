@@ -60,9 +60,21 @@
             android:launchMode="singleInstance" />
         <activity
             android:name=".Activities.CreateCloudAlbum"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
-        <service android:name=".Services.RecentImageService" />
+        <service
+            android:name=".InLensJobScheduler.InLensJobScheduler"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".Services.RecentImageService"
+            android:enabled="true" />
+
+        <receiver
+            android:name=".Broadcast_Receivers.RestartRecentImageService"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartWhenStopped" />
 
         <activity
             android:name=".Activities.RegisterUser"
@@ -72,8 +84,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.CloudAlbum"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.QRCodeGenerator"
             android:screenOrientation="portrait" />
@@ -92,6 +103,8 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
+        <activity android:name=".Activities.DisplayPhotographer" />
 
         <receiver android:name=".Broadcast_Receivers.NotificationWorks">
             <intent-filter>
@@ -116,9 +129,11 @@
 
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.PhotoView" />
+        <activity android:name=".Activities.Uploading_view" />
         <activity
             android:name=".Activities.IntroActivity"
             android:theme="@style/NoActionBarTheme" />
+        <activity android:name=".Activities.WebViewActivity"></activity>
     </application>
 
 </manifest>

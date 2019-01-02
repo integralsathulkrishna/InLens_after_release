@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
@@ -45,7 +46,6 @@ public class MainActivity extends AppCompatActivity
     private String DatabaseUploaderName = "NULLX";
     private String DatabaseUploaderProfilePic = "NULLX";
     private String DatabaseCurrentTimeMilliSecond = "NULLX";
-    private CardView cardView;
     GalleryAdapter mAdapter;
     GalleryAdapter.MyItemHolder myItemHolder;
     private RecyclerView mRecyclerView;
@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity
     private String DefaultDialogue="";
     private final int NOTIFICATION_ID = 237;
     private static int value = 0;
+    private FloatingActionButton StartUploadBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +78,6 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), this));
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         mRecyclerView.setHasFixedSize(true);
-        cardView = (CardView) findViewById(R.id.iDCard);
         SelectedText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -86,7 +86,13 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
+        StartUploadBtn = findViewById(R.id.floatingstartupload);
+        StartUploadBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 
 
@@ -152,14 +158,14 @@ public class MainActivity extends AppCompatActivity
             if(FirstImageClicked==true){
                 DefaultDialogue="Remove";
             }else{
-                DefaultDialogue="Upload";
+                DefaultDialogue="Add";
             }
         }
         else {
             if (isImageSelected(PositionArray, position) == true) {
                 DefaultDialogue="Remove";
             }else{
-                DefaultDialogue="Upload";
+                DefaultDialogue="Add";
             }
 
         }
@@ -177,6 +183,8 @@ public class MainActivity extends AppCompatActivity
                         ResetText(SelectedNumber);
                         FirstImageClicked = true;
                         SelectIndex=true;
+                        StartUploadBtn.setVisibility(View.VISIBLE);
+
                     } else if (FirstImageClicked == true) {
                         SelectedNumber -= 1;
                         PositionArray[position] = 0;
@@ -199,8 +207,7 @@ public class MainActivity extends AppCompatActivity
                         PositionArray[position] = position;
                         ResetText(SelectedNumber);
                         SelectIndex=true;
-
-
+                        StartUploadBtn.setVisibility(View.VISIBLE);
                     }
 
 
@@ -309,12 +316,12 @@ public class MainActivity extends AppCompatActivity
         return result;
     }
 
+
     private void ResetText(int selectedNumber) {
         if (selectedNumber == 0) {
             SelectedText.setText("Tap item to select , long Tap to attach");
             SelectIndex=false;
-
-
+            StartUploadBtn.setVisibility(View.GONE);
 
         }
         else

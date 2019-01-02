@@ -173,6 +173,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setElevation(25);
 
         activity = this;
+
+
         //1.Service Running Continuation
         RecentImageService recentImageService;
         recentImageService = new RecentImageService(getApplicationContext());
