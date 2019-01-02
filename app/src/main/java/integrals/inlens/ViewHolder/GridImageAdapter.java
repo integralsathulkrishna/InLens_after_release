@@ -139,9 +139,10 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
                                 break;
 
                             case R.id.copy_link:
+                                String SubString = "https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb";
                                 Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                                 SharingIntent.setType("text/plain");
-                                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens" + "\n\t" + BlogList.get(position).getImageThumb());
+                                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens" + "\n\n Paste the link on InLens app to view the image. Encrypted Image : " +"https://inlens.in/"+BlogList.get(position).getImageThumb().replace(SubString,""));
                                 SharingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 context.startActivity(SharingIntent);
                                 break;

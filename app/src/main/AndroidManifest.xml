@@ -117,7 +117,7 @@
         <receiver android:name=".Broadcast_Receivers.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"    />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
@@ -126,7 +126,9 @@
         <activity
             android:name=".Activities.IntroActivity"
             android:theme="@style/NoActionBarTheme" />
-        <activity android:name=".Activities.WebViewActivity"></activity>
+        <activity android:name=".Activities.SharedImageActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/NoActionBarTheme"></activity>
     </application>
 
 </manifest>

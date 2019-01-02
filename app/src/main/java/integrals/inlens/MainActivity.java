@@ -79,9 +79,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidParameterSpecException;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
@@ -90,6 +101,7 @@ import integrals.inlens.Activities.CreateCloudAlbum;
 import integrals.inlens.Activities.IntroActivity;
 import integrals.inlens.Activities.LoginActivity;
 import integrals.inlens.Activities.QRCodeReader;
+import integrals.inlens.Activities.SharedImageActivity;
 import integrals.inlens.Helper.CurrentDatabase;
 
 import integrals.inlens.Helper.RecentImageDatabase;
@@ -122,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String PostKeyForEdit;
     private Activity activity;
-    private Dialog ProfileDialog, AlbumCoverEditDialog;
+    private Dialog ProfileDialog, AlbumCoverEditDialog , PasteImageLink;
     private String dbname = "", dbimage = "", dbemail = "";
     private static final int GALLERY_PICK = 1;
     private StorageReference mStorageRef;
@@ -150,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
     //For snackbar about Connectivity Info;
     private RelativeLayout RootForMainActivity;
+    private String EncryptionKey = "-798-$%^&*-Athul_#$%^&*()_Elson_!~~hjsdf";
 
     //
     //
@@ -186,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
         RootForMainActivity = findViewById(R.id.root_for_main_activity);
 
         //ProfileDialog
-        ProfileDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
+        ProfileDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
         ProfileDialog.setCancelable(true);
         ProfileDialog.setCanceledOnTouchOutside(true);
         ProfileDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -223,23 +236,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(IsConnectedToNet())
-                {
+                if (IsConnectedToNet()) {
                     COVER_CHANGE = false;
                     PROFILE_CHANGE = true;
                     GetStartedWithNewProfileImage();
-                }
-
-                else
-                {
-                    Snackbar.make(RootForMainActivity,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(RootForMainActivity, "Unable to connect to internet. Try again.", Snackbar.LENGTH_SHORT).show();
 
                 }
             }
         });
 
         //AlbumCoverEditDialog
-        AlbumCoverEditDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
+        AlbumCoverEditDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
         AlbumCoverEditDialog.setCancelable(true);
         AlbumCoverEditDialog.setCanceledOnTouchOutside(true);
         AlbumCoverEditDialog.setContentView(R.layout.custom_profile_dialog);
@@ -271,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(IsConnectedToNet()) {
+                if (IsConnectedToNet()) {
 
                     COVER_CHANGE = true;
                     PROFILE_CHANGE = false;
@@ -282,10 +291,8 @@ public class MainActivity extends AppCompatActivity {
                             .setFixAspectRatio(true)
                             .start(MainActivity.this);
 
-                }
-                else
-                {
-                    Snackbar.make(RootForMainActivity,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(RootForMainActivity, "Unable to connect to internet. Try again.", Snackbar.LENGTH_SHORT).show();
 
                 }
             }
@@ -606,7 +613,7 @@ public class MainActivity extends AppCompatActivity {
 
         ParticpantsBottomSheetDialog.show();
 
-        final Dialog BottomSheetUserDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
+        final Dialog BottomSheetUserDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
         BottomSheetUserDialog.setCancelable(true);
         BottomSheetUserDialog.setCanceledOnTouchOutside(true);
         BottomSheetUserDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -667,9 +674,8 @@ public class MainActivity extends AppCompatActivity {
 
                                 ProfileUserEmail.setText(String.format("Email : %s", model.getEmail_ID()));
 
-                                if(!TextUtils.isEmpty(model.getProfile_picture()))
-                                {
-                                    RequestOptions requestOptions=new RequestOptions()
+                                if (!TextUtils.isEmpty(model.getProfile_picture())) {
+                                    RequestOptions requestOptions = new RequestOptions()
                                             .fitCenter();
 
                                     Glide.with(MainActivity.this)
@@ -689,9 +695,7 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             })
                                             .into(UserImage);
-                                }
-                                else
-                                {
+                                } else {
                                     Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
                                     progressBar.setVisibility(View.GONE);
                                 }
@@ -755,7 +759,7 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
                                 break;
                             case R.id.profile_pic:
-                               DatabaseReference DbRef = FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                DatabaseReference DbRef = FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 DbRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -838,9 +842,20 @@ public class MainActivity extends AppCompatActivity {
                                 } else
 
                                 {   // To paste invite link
-                                    PasteCloudAlbumLink = new Dialog(MainActivity.this);
-                                    PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
+                                    PasteCloudAlbumLink = new Dialog(MainActivity.this, android.R.style.Theme_Light_NoTitleBar);
                                     PasteCloudAlbumLink.setCancelable(true);
+                                    PasteCloudAlbumLink.setCanceledOnTouchOutside(true);
+                                    PasteCloudAlbumLink.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                    PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
+                                    PasteCloudAlbumLink.getWindow().getAttributes().windowAnimations = R.style.UpBottomSlideDialogAnimation;
+
+                                    Window PasteCloudAlbumLinkWindow = PasteCloudAlbumLink.getWindow();
+                                    PasteCloudAlbumLinkWindow.setGravity(Gravity.TOP);
+                                    PasteCloudAlbumLinkWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+                                    PasteCloudAlbumLinkWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                                    PasteCloudAlbumLinkWindow.setDimAmount(0.75f);
+                                    PasteCloudAlbumLinkWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
                                     final EditText Link = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_edittext);
 
                                     Link.requestFocus();
@@ -884,15 +899,69 @@ public class MainActivity extends AppCompatActivity {
                                     PasteCloudAlbumLink.show();
                                     break;
                                 }
+                            case R.id.paste_image_link:
+                            {
+                                PasteImageLink = new Dialog(MainActivity.this,android.R.style.Theme_Light_NoTitleBar);
+                                PasteImageLink.setCancelable(true);
+                                PasteImageLink.setCanceledOnTouchOutside(true);
+                                PasteImageLink.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                PasteImageLink.setContentView(R.layout.create_new_situation_layout);
+                                PasteImageLink.getWindow().getAttributes().windowAnimations = R.style.UpBottomSlideDialogAnimation;
+
+                                Window PasteCloudAlbumLinkWindow = PasteImageLink.getWindow();
+                                PasteCloudAlbumLinkWindow.setGravity(Gravity.TOP);
+                                PasteCloudAlbumLinkWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+                                PasteCloudAlbumLinkWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                                PasteCloudAlbumLinkWindow.setDimAmount(0.75f);
+                                PasteCloudAlbumLinkWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+                                TextView PasteImageLinkTitle , PasteImageLinkMessage;
+                                PasteImageLinkMessage = PasteImageLink.findViewById(R.id.message);
+                                PasteImageLinkTitle = PasteImageLink.findViewById(R.id.title);
+                                PasteImageLinkTitle.setText("Album Image");
+                                PasteImageLinkMessage.setText("Paste your image here to decrypt and open it. Open Web Links coming son.");
+                                final EditText LinkEdit = PasteImageLink.findViewById(R.id.situation_name);
+                                LinkEdit.setHint("Paste Link Here");
+                                LinkEdit.requestFocus();
+                                Button Done ,Cancel;
+                                Done =   PasteImageLink.findViewById(R.id.done_btn);
+                                Cancel = PasteImageLink.findViewById(R.id.cancel_btn);
+
+                                Cancel.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        PasteImageLink.dismiss();
+                                    }
+                                });
+                                Done.setText("Decrypt");
+                                Done.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+
+                                        if(!TextUtils.isEmpty(LinkEdit.getText().toString()))
+                                        {
+
+                                            String realdata = LinkEdit.getText().toString().replace("https://inlens.in/","");
+                                            String SubString = "https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb";
+                                            String ImageUrl=SubString+realdata;
+                                            startActivity(new Intent(MainActivity.this,SharedImageActivity.class).putExtra("url",ImageUrl));
+                                        }
+                                        else
+                                        {
+                                            Toast.makeText(getApplicationContext(),"Empty link.",Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    }
+                                });
+                                PasteImageLink.show();
+                            }
 
 
                         }
                     }
                 }).show();
-            }
-            else
-            {
-                Snackbar.make(RootForMainActivity,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
+            } else {
+                Snackbar.make(RootForMainActivity, "Unable to connect to internet. Try again.", Snackbar.LENGTH_SHORT).show();
             }
 
         }
@@ -900,6 +969,7 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
+
 
 
     private void QuitCloudAlbum(int XYZ) {
@@ -978,7 +1048,6 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.create().show();
     }
-
 
 
     private void AddToCloud(String substring, final ProgressBar progressBar, final Dialog dialog) {
@@ -1061,7 +1130,7 @@ public class MainActivity extends AppCompatActivity {
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             String ALBT = dataSnapshot.getValue().toString();
                                             CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                            currentDatabase.InsertUploadValues(CommunityID, 0, 1, 0, ALBT, 1, 1,"NILL");
+                                            currentDatabase.InsertUploadValues(CommunityID, 0, 1, 0, ALBT, 1, 1, "NILL");
                                             currentDatabase.close();
                                             StartServices();
                                         }
