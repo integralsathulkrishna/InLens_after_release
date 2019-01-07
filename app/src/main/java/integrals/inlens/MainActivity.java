@@ -834,8 +834,8 @@ public class MainActivity extends AppCompatActivity {
 
                                 break;
 
-
                             case R.id.paste_album_link:
+
                                 SharedPreferences sharedPreferences2 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                                 if (sharedPreferences2.getBoolean("UsingCommunity::", false) == true) {
                                     Toast.makeText(getApplicationContext(), "Sorry,You can't participate in a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
@@ -897,8 +897,10 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                     });
                                     PasteCloudAlbumLink.show();
-                                    break;
+
                                 }
+
+                                break;
                             case R.id.paste_image_link:
                             {
                                 PasteImageLink = new Dialog(MainActivity.this,android.R.style.Theme_Light_NoTitleBar);
@@ -944,7 +946,11 @@ public class MainActivity extends AppCompatActivity {
                                             String realdata = LinkEdit.getText().toString().replace("https://inlens.in/","");
                                             String SubString = "https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb";
                                             String ImageUrl=SubString+realdata;
-                                            startActivity(new Intent(MainActivity.this,SharedImageActivity.class).putExtra("url",ImageUrl));
+                                            if(!ImageUrl.contains("joins"))
+                                                startActivity(new Intent(MainActivity.this,SharedImageActivity.class).putExtra("url",ImageUrl));
+                                            else
+                                                Toast.makeText(getApplicationContext(),"Album link detected.",Toast.LENGTH_SHORT).show();
+
                                         }
                                         else
                                         {
@@ -955,7 +961,7 @@ public class MainActivity extends AppCompatActivity {
                                 });
                                 PasteImageLink.show();
                             }
-
+                            break;
 
                         }
                     }

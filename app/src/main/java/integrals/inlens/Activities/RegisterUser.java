@@ -26,6 +26,7 @@ import com.vistrav.ask.Ask;
 
 import java.util.HashMap;
 
+import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 
 public class RegisterUser extends AppCompatActivity {
@@ -47,6 +48,8 @@ public class RegisterUser extends AppCompatActivity {
         setContentView(R.layout.activity_register_user);
         getSupportActionBar().setTitle(" Register User");
         getSupportActionBar().setElevation(0);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mAuth = FirebaseAuth.getInstance();
         mDisplayName = (EditText) findViewById(R.id.NameField);
         VerifiedButton = (Button) findViewById(R.id.VerifiedButton);
@@ -133,19 +136,16 @@ public class RegisterUser extends AppCompatActivity {
                     String device_token = FirebaseInstanceId.getInstance().getToken();
                     HashMap<String, String> usermap = new HashMap<>();
                     usermap.put("Name", display_name);
-                    usermap.put("Name", display_name);
                     usermap.put("Email", email);
-                    usermap.put("bio", "New to inLense");
                     usermap.put("Profile_picture", "default");
                     usermap.put("thumb_image", "default");
-                    usermap.put("device_token", "");
                     mDatabase.setValue(usermap).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
 
                             if (task.isSuccessful()) {
-                                progressDialog.setMessage("Sending E-mail verfification. Please wait");
+                                progressDialog.setMessage("Sending E-mail verification. Please wait");
                                 sendEmailVerification();
 
                             } else {
@@ -176,18 +176,8 @@ public class RegisterUser extends AppCompatActivity {
             firebaseUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    final android.app.AlertDialog.Builder alertbuilder = new android.app.AlertDialog.Builder(RegisterUser.this);
                     progressDialog.dismiss();
-                    alertbuilder.setTitle("Verify E-mail").setMessage("Verify your E-mail address for InLens registration , then login with the provided \n E-mail address and password .")
-                            .setPositiveButton("Proceed", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(final DialogInterface dialogInterface, int i) {
-                                    finish();
-                                }
-                            })
-                            .setCancelable(false)
-                            .create()
-                            .show();
+                    Toast.makeText(getApplicationContext(),"Verification mail sent.",Toast.LENGTH_SHORT).show();
                     VerifiedButton.setEnabled(true);
                 }
             });
@@ -200,7 +190,7 @@ public class RegisterUser extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         user.reload();
         if (user.isEmailVerified()) {
-            startActivity(new Intent(RegisterUser.this, SettingActivity.class));
+            startActivity(new Intent(RegisterUser.this, MainActivity.class));
             finish();
         } else {
             Toast.makeText(getApplicationContext(), "E-mail verification send. Please check your mail and click the link to verify.", Toast.LENGTH_LONG).show();

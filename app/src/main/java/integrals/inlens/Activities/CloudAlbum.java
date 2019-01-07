@@ -118,6 +118,7 @@ public class CloudAlbum extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
         actionBar=getSupportActionBar();
+
         QRCodeInit();
 
         RootForCloudAlbum = findViewById(R.id.root_for_cloud_album);
@@ -166,6 +167,7 @@ public class CloudAlbum extends AppCompatActivity {
         }
 
         getSupportActionBar().setTitle(AlbumName);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //////////////////////////////////////////////////////////////////////////////////////////
         databaseReference = FirebaseDatabase.getInstance().getReference().child("Communities")
@@ -461,6 +463,13 @@ public class CloudAlbum extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+        if(item.getItemId() == R.id.home)
+        {
+            onBackPressed();
+        }
+
+
+
         if(IsConnectedToNet()) {
 
             if (item.getItemId() == 0) {
@@ -507,7 +516,11 @@ public class CloudAlbum extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onBackPressed() {
 
+        finish();
+    }
 
     @Override
     protected void onStart() {

@@ -2,7 +2,6 @@ package integrals.inlens.Helper;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -25,16 +24,9 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
-
-import org.w3c.dom.Text;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import integrals.inlens.Activities.SettingActivity;
-import integrals.inlens.MainActivity;
 import integrals.inlens.R;
-import integrals.inlens.Weather.Model.Wind;
 
 public class ProfileDilaogHelper extends Dialog {
 

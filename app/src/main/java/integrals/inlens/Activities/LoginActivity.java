@@ -51,6 +51,8 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Login");
 
         Ask.on(this)
                 .id(INTID) // in case you are invoking multiple time Ask from same activity or fragment

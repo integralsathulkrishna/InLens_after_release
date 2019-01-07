@@ -52,6 +52,7 @@ public class IntroActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(IntroActivity.this,LoginActivity.class));
+                finish();
             }
         });
 
@@ -60,6 +61,7 @@ public class IntroActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 startActivity(new Intent(IntroActivity.this,RegisterUser.class));
+                finish();
             }
         });
     }

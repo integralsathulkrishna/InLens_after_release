@@ -80,8 +80,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_cloud_album);
-        Boolean Default = false;
-        getSupportActionBar().hide();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
 
         InAuthentication = FirebaseAuth.getInstance();
         InUser = InAuthentication.getCurrentUser();

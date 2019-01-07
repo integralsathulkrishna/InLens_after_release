@@ -34,6 +34,7 @@ public class SharedImageActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_shared_image);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         ShareImageView = findViewById(R.id.shareimage_photoview);
         ShareImageProgressbar = findViewById(R.id.shareimage_progressbar);
