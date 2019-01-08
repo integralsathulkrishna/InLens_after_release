@@ -978,6 +978,16 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 break;
+
+
+                            case R.id.restart_service:{
+                                SharedPreferences sharedPreferencesS = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                                if (sharedPreferencesS.getBoolean("UsingCommunity::", false)) {
+                                    startService(new Intent(getApplicationContext(),RecentImageService.class));
+                                }
+
+                            }
+                            break;
                             case R.id.paste_image_link:
                             {
                                 PasteImageLink = new Dialog(MainActivity.this,android.R.style.Theme_Light_NoTitleBar);

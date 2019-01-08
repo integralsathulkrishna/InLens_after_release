@@ -350,6 +350,8 @@ public class PhotoListHelper {
 
                     }catch (WindowManager.BadTokenException e){
                         e.printStackTrace();
+                    }catch (IllegalStateException e){
+                        e.printStackTrace();
                     }
 
 

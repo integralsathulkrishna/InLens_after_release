@@ -6,6 +6,8 @@
     <item android:id="@+id/paste_image_link" android:title="Paste Image Link" android:icon="@drawable/ic_recent_images"/>
     <item android:id="@+id/upload_activity" android:title="Inlens Gallery" android:icon="@drawable/ic_cloud_upload"/>
     <item android:id="@+id/profile_pic" android:title="User Profile" android:icon="@drawable/ic_profile_pic"/>
+    <item android:id="@+id/restart_service" android:title="Restart scanning for Recent-Image" android:icon="@drawable/ic_refresh_black"/>
+
     <item android:id="@+id/quit_cloud_album" android:title="Quit Current Cloud-Album" android:icon="@drawable/ic_close_album"/>
 
 </menu>

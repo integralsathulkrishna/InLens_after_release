@@ -290,6 +290,15 @@ public class MainActivity extends AppCompatActivity
         else if(SelectIndex==false){
             Toast.makeText(getApplicationContext(),"No Image Selected",Toast.LENGTH_SHORT).show();
         }
+
+
+        SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+        if (sharedPreferences.getBoolean("UsingCommunity::", false)) {
+            startService(new Intent(getApplicationContext(),RecentImageService.class));
+        }
+
+
+
     }
 
 

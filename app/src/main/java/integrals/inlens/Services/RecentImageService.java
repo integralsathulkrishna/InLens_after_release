@@ -1,6 +1,7 @@
 package integrals.inlens.Services;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -53,6 +54,7 @@ import id.zelory.compressor.Compressor;
 
 import integrals.inlens.Broadcast_Receivers.RestartRecentImageService;
 import integrals.inlens.Helper.CurrentDatabase;
+import integrals.inlens.Helper.NotificationHelper;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.R;
@@ -95,7 +97,7 @@ public class RecentImageService extends Service {
     private Bitmap ThumbBitmap = null;
     private NotificationManager UploadnotificationManager;
     private NotificationCompat.Builder Uploadbuilder;
-
+    private NotificationHelper         notificationHelper;
     public RecentImageService(Context applicationContext) {
         super();
     }
@@ -119,6 +121,8 @@ public class RecentImageService extends Service {
         int id = R.drawable.inlens_logo_m;
         LogoBitMap = BitmapFactory.decodeResource(res, id);
         remoteViews = new RemoteViews(getPackageName(), R.layout.notification_layout);
+        notificationHelper=new NotificationHelper(getBaseContext());
+
 
         //Added for perfect uploading;
         UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
@@ -632,39 +636,54 @@ public class RecentImageService extends Service {
         RecentImage++;
         remoteViews.setImageViewBitmap(R.id.UploadImageViewNotification, bitmap1[0]);
         remoteViews.setTextViewText(R.id.recentImageTextView, RecentImage + " recent image(s) updated for album.\n Tap to upload each");
-        NotificationManager notificationManager =
-                (NotificationManager)
-                        getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent upload_intent = new Intent("ADD_FOR_UPLOAD_INLENS");
-        Intent attach_intent = new Intent("ATTACH_ACTIVITY_INLENS");
-        Intent upload_activity_intent = new Intent("RECENT_IMAGES_GRID_INLENS");
-        Intent intent = new Intent(getApplicationContext(), integrals.inlens.GridView.MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 9388, upload_intent, 0);
-        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(getApplicationContext(), 1428, upload_activity_intent, 0);
-
-        remoteViews.setOnClickPendingIntent(R.id.AddForUpload, pendingIntent1);
-        remoteViews.setOnClickPendingIntent(R.id.GotoUploadActivity, pendingIntent3);
 
 
-        NotificationCompat.Builder builder =
-                (NotificationCompat.Builder)
-                        new NotificationCompat.Builder(getApplicationContext())
-                                .setContentTitle("New image detected")
-                                .setContentText("Inlens has detected a new image. Expand to get more info.")
-                                .setDefaults(Notification.DEFAULT_ALL)
-                                .setOnlyAlertOnce(true)
-                                .setCustomBigContentView(remoteViews)
-                                .setWhen(System.currentTimeMillis())
-                                .setSmallIcon(R.drawable.inlens_logo_m)
-                                .setLargeIcon(LogoBitMap)
-                                .setPriority(Notification.PRIORITY_MAX);
-        builder.setContentIntent(pendingIntent);
-        notificationManager.notify(0, builder.build());
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+             Notification.Builder builder=notificationHelper.buildNotificationForRecentImage(
+                     remoteViews,
+                     LogoBitMap
+             );
+             builder.setOnlyAlertOnce(true);
+             notificationHelper.getNotificationManager().notify(7907,builder.build());
 
+
+
+        } else {
+            NotificationManager notificationManager =
+                    (NotificationManager)
+                            getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            Intent upload_intent = new Intent("ADD_FOR_UPLOAD_INLENS");
+            Intent attach_intent = new Intent("ATTACH_ACTIVITY_INLENS");
+            Intent upload_activity_intent = new Intent("RECENT_IMAGES_GRID_INLENS");
+            Intent intent = new Intent(getApplicationContext(), integrals.inlens.GridView.MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 9388, upload_intent, 0);
+            PendingIntent pendingIntent3 = PendingIntent.getBroadcast(getApplicationContext(), 1428, upload_activity_intent, 0);
+
+            remoteViews.setOnClickPendingIntent(R.id.AddForUpload, pendingIntent1);
+            remoteViews.setOnClickPendingIntent(R.id.GotoUploadActivity, pendingIntent3);
+
+
+            NotificationCompat.Builder builder =
+                    (NotificationCompat.Builder)
+                            new NotificationCompat.Builder(getApplicationContext())
+                                    .setContentTitle("New image detected")
+                                    .setContentText("Inlens has detected a new image. Expand to get more info.")
+                                    .setDefaults(Notification.DEFAULT_ALL)
+                                    .setOnlyAlertOnce(true)
+                                    .setCustomBigContentView(remoteViews)
+                                    .setWhen(System.currentTimeMillis())
+                                    .setSmallIcon(R.drawable.inlens_logo_m)
+                                    .setLargeIcon(LogoBitMap)
+                                    .setPriority(Notification.PRIORITY_MAX);
+            builder.setContentIntent(pendingIntent);
+            notificationManager.notify(0, builder.build());
+
+        }
     }
+
 
     @Override
     public void onDestroy() {
