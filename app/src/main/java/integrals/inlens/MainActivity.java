@@ -1,5 +1,6 @@
 package integrals.inlens;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -17,9 +18,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -29,7 +32,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.Gravity;
@@ -37,11 +42,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -166,7 +174,8 @@ public class MainActivity extends AppCompatActivity {
     //For snackbar about Connectivity Info;
     private RelativeLayout RootForMainActivity;
     private static boolean SEARCH_IN_PROGRESS = false;
-
+    private Menu MainMenu;
+    private IBinder WindowToken;
     //
     //
     // Import from Elson.............................................................................
@@ -404,6 +413,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         EDIT_COUNT = 0;
         CLICK_COUNT = 0;
+        MemoryRecyclerView.setVisibility(View.VISIBLE);
         // Downloading Recycler View
         MainLoadingProgressBar.setVisibility(View.VISIBLE);
         try {
@@ -722,7 +732,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 1, 1, "Add Participant")
+
+        MainMenu = menu;
+
+        menu.add(0, 1, 1, "Menu")
                 .setIcon(R.drawable.menu_icon)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         menu.add(0, 0, 0, "Search")
@@ -737,21 +750,55 @@ public class MainActivity extends AppCompatActivity {
 
         if(item.getItemId()==0)
         {
+            MainMenu.setGroupVisible(0,false);
+            MainMenu.setGroupVisible(1,false);
+
             getSupportActionBar().setDisplayShowCustomEnabled(true);
-            getSupportActionBar().setTitle("");
             SEARCH_IN_PROGRESS = true;
-            LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View SearchActionbarView = inflater.inflate(R.layout.search_layout,null);
-            getSupportActionBar().setCustomView(SearchActionbarView);
+            View SearchActionbarView = LayoutInflater.from(getSupportActionBar().getThemedContext()).inflate(R.layout.search_layout,null);
+            android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            getSupportActionBar().setCustomView(SearchActionbarView,params);
 
             ImageButton SearchBack = SearchActionbarView.findViewById(R.id.search_back_btn);
-            EditText SearchEditText = SearchActionbarView.findViewById(R.id.search_edittext);
+            final EditText SearchEditText = SearchActionbarView.findViewById(R.id.search_edittext);
+            WindowToken = SearchEditText.getWindowToken();
+            SearchEditText.requestFocus();
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(SearchEditText,InputMethodManager.SHOW_IMPLICIT);
 
             SearchBack.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(SearchEditText.getWindowToken(),0);
+                    onStart();
                     getSupportActionBar().setDisplayShowCustomEnabled(false);
+                    MainMenu.setGroupVisible(0,true);
+                    MainMenu.setGroupVisible(1,true);
+                }
+            });
+
+            SearchEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                    if(!TextUtils.isEmpty(editable.toString()))
+                    {
+                        MemoryRecyclerView.setVisibility(View.VISIBLE);
+                        ShowSearchResults(editable.toString());
+                    }
+
                 }
             });
 
@@ -1006,6 +1053,223 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void ShowSearchResults(final String s) {
+
+        try {
+
+            InDatabaseReference =
+                    FirebaseDatabase
+                            .getInstance()
+                            .getReference()
+                            .child("Users")
+                            .child(CurrentUser)
+                            .child("Communities");
+
+            final FirebaseRecyclerAdapter<AlbumModel, AlbumViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<AlbumModel, AlbumViewHolder>(
+                    AlbumModel.class,
+                    R.layout.cloud_album_card,
+                    AlbumViewHolder.class,
+                    InDatabaseReference
+
+            ) {
+                @Override
+                protected void populateViewHolder(final AlbumViewHolder viewHolder, final AlbumModel model, final int position) {
+
+                    if(model.getAlbumTitle().toLowerCase().contains(s.toLowerCase()))
+                    {
+                        viewHolder.SetAlbumCover(getApplicationContext(), model.getAlbumCoverImage());
+                        viewHolder.SetTitle(model.getAlbumTitle());
+                        viewHolder.SetProfilePic(getApplicationContext(), model.getPostedByProfilePic());
+                        viewHolder.SetAlbumDescription(model.getAlbumDescription());
+
+
+                        try {
+                            InDatabaseReference.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    try {
+                                        CommunityID = dataSnapshot.child(getRef(position).getKey()).child("CommunityID").getValue().toString().trim();
+                                        getParticipantDatabaseReference = participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
+                                        viewHolder.SetParticipants(MainActivity.this, getParticipantDatabaseReference, FirebaseDatabase.getInstance().getReference().child("Users"));
+
+
+                                        // for timestamp
+
+                                        String key = dataSnapshot.child(getRef(position).getKey()).getKey();
+
+                                        if (dataSnapshot.child(key).hasChild("CreatedTimestamp")) {
+                                            String timestamp = dataSnapshot.child(key).child("CreatedTimestamp").getValue().toString();
+                                            long time = Long.parseLong(timestamp);
+                                            CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+                                            String timesubstring = Time.toString().substring(Time.length() - 8);
+                                            Date date = new Date(time);
+                                            String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
+                                            viewHolder.SetAlbumTime("Event occured on : " + dateformat + " @ " + timesubstring);
+                                        } else {
+                                            viewHolder.SetAlbumTime("Event occured on : " + model.getTime());
+
+                                        }
+
+                                    } catch (IndexOutOfBoundsException e) {
+                                        e.printStackTrace();
+                                    } catch (NullPointerException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        } catch (NullPointerException e) {
+                        }
+                        viewHolder.ShareButton.setOnClickListener(new View.OnClickListener() {
+                            final String PostKeyS = getRef(position).getKey().trim();
+
+
+                            @Override
+                            public void onClick(View v) {
+
+                                final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
+                                SharingIntent.setType("text/plain");
+                                InDatabaseReference.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        CommunityPostKey = dataSnapshot.child(PostKeyS).child("CommunityID").getValue().toString().trim();
+                                        SharingIntent.putExtra(Intent.EXTRA_TEXT, "https://inlens.in/watch/" + CommunityPostKey);
+                                        startActivity(SharingIntent);
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                        });
+                        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                final String PostKey = getRef(position).getKey().trim();
+                                CLICK_COUNT++;
+                                if (CLICK_COUNT == 1 && !TextUtils.isEmpty(PostKey)) {
+                                    try {
+                                        startActivity(new Intent(MainActivity.this, CloudAlbum.class)
+                                                .putExtra("AlbumName", model.getAlbumTitle())
+                                                .putExtra("GlobalID::", PostKey)
+                                                .putExtra("LocalID::", PostKey)
+                                                .putExtra("UserID::", CurrentUser));
+
+                                    } catch (NullPointerException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+
+                            }
+                        });
+
+                        viewHolder.AlbuymCoverEditBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                AlbumCoverEditprogressBar.setVisibility(View.VISIBLE);
+                                AlbumCoverEditProfileuserName.setText(model.getAlbumTitle());
+                                AlbumCoverEditProfileUserEmail.setTextSize(13);
+                                AlbumCoverEditProfileUserEmail.setText(String.format("Change Cover for the album \" %s \"", model.getAlbumTitle()));
+
+                                PostKeyForEdit = getRef(position).getKey().trim();
+                                FirebaseDatabase.getInstance().getReference().child("Users")
+                                        .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                        .child("Communities")
+                                        .child(PostKeyForEdit)
+                                        .addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                                String Image = dataSnapshot.child("AlbumCoverImage").getValue().toString();
+                                                RequestOptions requestOptions = new RequestOptions()
+                                                        .fitCenter();
+
+                                                Glide.with(getApplicationContext())
+                                                        .load(Image)
+                                                        .thumbnail(0.1f)
+                                                        .apply(requestOptions)
+                                                        .listener(new RequestListener<Drawable>() {
+                                                            @Override
+                                                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                                                AlbumCoverEditprogressBar.setVisibility(View.GONE);
+                                                                return false;
+                                                            }
+
+                                                            @Override
+                                                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                                                AlbumCoverEditprogressBar.setVisibility(View.GONE);
+                                                                return false;
+                                                            }
+                                                        })
+                                                        .into(AlbumCoverEditUserImage);
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                AlbumCoverEditDialog.show();
+
+
+                            }
+                        });
+
+                        // more participants
+
+                        viewHolder.ParticipantsMoreBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                ParticpantsBottomSheetDialogProgressbar.setVisibility(View.VISIBLE);
+                                PostKeyForEdit = getRef(position).getKey().trim();
+                                DisplayAllParticipantsAsBottomSheet(PostKeyForEdit, FirebaseDatabase.getInstance().getReference());
+
+                            }
+                        });
+
+                        MainLoadingProgressBar.setVisibility(View.INVISIBLE);
+
+
+                    }
+                    else
+                    {
+                        MemoryRecyclerView.setVisibility(View.GONE);
+                       Toast.makeText(getApplicationContext(),"No album found",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+
+            };
+
+            MemoryRecyclerView.setAdapter(firebaseRecyclerAdapter);
+
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (DatabaseException e) {
+            e.printStackTrace();
+        }
+        try {
+            InDatabaseReference.keepSynced(true);
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
 
     private void QuitCloudAlbum(int XYZ) {
@@ -1453,6 +1717,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(SEARCH_IN_PROGRESS)
         {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(WindowToken,0);
+            MainMenu.setGroupVisible(0,true);
+            MainMenu.setGroupVisible(1,true);
             SEARCH_IN_PROGRESS = false;
             getSupportActionBar().setDisplayShowCustomEnabled(false);
             onStart();

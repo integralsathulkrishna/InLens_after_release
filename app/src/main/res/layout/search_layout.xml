@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:background="#ffffff">
+    android:background="@drawable/curved_corners"
+    android:backgroundTint="#ffffff"
+    >
 
     <ImageButton
         android:id="@+id/search_back_btn"
@@ -11,16 +13,19 @@
         android:background="@android:color/transparent"
         android:src="@drawable/ic_arrow_back"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="3dp"
+        android:layout_marginStart="5dp"
         />
 
     <EditText
         android:id="@+id/search_edittext"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="15dp"
         android:layout_marginEnd="10dp"
         android:layout_gravity="center_vertical"
-        android:hint="Search"/>
+        android:hint="Search by title"
+        android:textColorHint="#a0a0a0"
+        android:inputType="text"
+        android:textColor="@color/colorPrimaryDark"/>
 
 </LinearLayout>
