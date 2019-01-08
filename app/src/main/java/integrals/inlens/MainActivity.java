@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.app.SearchManager;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,10 +28,12 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -162,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
 
     //For snackbar about Connectivity Info;
     private RelativeLayout RootForMainActivity;
-    private String EncryptionKey = "-798-$%^&*-Athul_#$%^&*()_Elson_!~~hjsdf";
+    private static boolean SEARCH_IN_PROGRESS = false;
 
     //
     //
@@ -184,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().setElevation(25);
+
 
         activity = this;
 
@@ -718,8 +722,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 0, 0, "Add Participant")
+        menu.add(0, 1, 1, "Add Participant")
                 .setIcon(R.drawable.menu_icon)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(0, 0, 0, "Search")
+                .setIcon(R.drawable.ic_search)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
@@ -727,7 +734,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == 0) {
+
+        if(item.getItemId()==0)
+        {
+            getSupportActionBar().setDisplayShowCustomEnabled(true);
+            getSupportActionBar().setTitle("");
+            SEARCH_IN_PROGRESS = true;
+            LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View SearchActionbarView = inflater.inflate(R.layout.search_layout,null);
+            getSupportActionBar().setCustomView(SearchActionbarView);
+
+            ImageButton SearchBack = SearchActionbarView.findViewById(R.id.search_back_btn);
+            EditText SearchEditText = SearchActionbarView.findViewById(R.id.search_edittext);
+
+            SearchBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    getSupportActionBar().setDisplayShowCustomEnabled(false);
+                }
+            });
+
+        }
+
+        else if (item.getItemId() == 1) {
 
             if (IsConnectedToNet()) {
                 new BottomSheet.Builder(this).title(" Options").sheet(R.menu.main_menu).listener(new DialogInterface.OnClickListener() {
@@ -1418,6 +1448,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if(SEARCH_IN_PROGRESS)
+        {
+            SEARCH_IN_PROGRESS = false;
+            getSupportActionBar().setDisplayShowCustomEnabled(false);
+            onStart();
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
 }
 
 
