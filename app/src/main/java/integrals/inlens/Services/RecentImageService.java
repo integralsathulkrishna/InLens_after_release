@@ -645,7 +645,8 @@ public class RecentImageService extends Service {
              );
              builder.setOnlyAlertOnce(true);
              notificationHelper.getNotificationManager().notify(7907,builder.build());
-
+/////////Need to cancel notification
+            ////Need to create broadcast intent
 
 
         } else {
