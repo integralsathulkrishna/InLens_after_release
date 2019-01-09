@@ -118,10 +118,15 @@ public class CloudAlbum extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_cloud_album);
         actionBar=getSupportActionBar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         QRCodeInit();
-
         RootForCloudAlbum = findViewById(R.id.root_for_cloud_album);
+
+        if(!IsConnectedToNet())
+        {
+            Snackbar.make(RootForCloudAlbum,"Unable to connect to internet.",Snackbar.LENGTH_SHORT).show();
+        }
 
         cloudalbumcontext = this;
         activity=this;
@@ -167,7 +172,6 @@ public class CloudAlbum extends AppCompatActivity {
         }
 
         getSupportActionBar().setTitle(AlbumName);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //////////////////////////////////////////////////////////////////////////////////////////
         databaseReference = FirebaseDatabase.getInstance().getReference().child("Communities")
@@ -502,7 +506,7 @@ public class CloudAlbum extends AppCompatActivity {
 
         }
 
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
 
@@ -518,8 +522,7 @@ public class CloudAlbum extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        finish();
+        super.onBackPressed();
     }
 
     @Override

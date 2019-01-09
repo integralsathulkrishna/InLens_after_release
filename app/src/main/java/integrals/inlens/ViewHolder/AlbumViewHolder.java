@@ -88,7 +88,7 @@ import integrals.inlens.R;
                  .centerCrop()
                  .placeholder(R.drawable.ic_account_circle)
                  .override(176,176);
-         ;
+
          Glide.with(context)
                  .load(ImageUri)
                  .thumbnail(0.1f)
