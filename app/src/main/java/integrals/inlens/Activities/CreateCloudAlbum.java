@@ -14,6 +14,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -47,6 +49,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.encoder.QRCode;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
@@ -56,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 
 import integrals.inlens.Helper.CurrentDatabase;
+import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 import integrals.inlens.Services.RecentImageService;
 
@@ -93,7 +97,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private TextView EventPicker ;
     private Dialog EventDialog,QRCodeDialog;
     private String EventType = "";
-    private Button InviteLinkButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +105,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         EventDialogInit();
-        QRCodeInit();
 
         InAuthentication = FirebaseAuth.getInstance();
         InUser = InAuthentication.getCurrentUser();
@@ -199,6 +201,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
         SubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SubmitButton.setEnabled(false);
                 PostingStarts();
             }
         });
@@ -305,7 +308,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                SetCheckFalse(EventWedding,EventOthers,EventParty,EventCeremony,EventCeremony);
+                SetCheckFalse(EventWedding,EventOthers,EventParty,EventCeremony,EventParty);
                 EventType = "Hangouts";
             }
         });
@@ -433,14 +436,24 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                 SubmitButton.setVisibility(View.VISIBLE);
                                 CloudAlbumDone=true;
                                 StartServices();
-                                QRCodeDialog.show();
-
-                            }else {
+                                SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
+                                SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
+                                AlbumEditor.putInt("last_clicked_position",0);
+                                AlbumEditor.apply();
+                                startActivity(new Intent(CreateCloudAlbum.this,MainActivity.class).putExtra("QRCodeVisible",true));
+                                finish();
 
                             }
 
                         }
                     }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                    Toast.makeText(getApplicationContext(),"Error Detected",Toast.LENGTH_SHORT).show();
+                    SubmitButton.setEnabled(true);
                 }
             });
 
@@ -457,74 +470,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
     }
 
 
-    private void QRCodeInit() {
-
-        QRCodeDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
-        QRCodeDialog.setCancelable(true);
-        QRCodeDialog.setCanceledOnTouchOutside(true);
-        QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        QRCodeDialog.setContentView(R.layout.activity_qrcode_generator);
-        QRCodeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-        QRCodeDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
-
-        Window QRCodewindow = QRCodeDialog.getWindow();
-        QRCodewindow.setGravity(Gravity.CENTER_HORIZONTAL);
-        QRCodewindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
-        QRCodewindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        QRCodewindow.setDimAmount(0.75f);
-        QRCodewindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-        CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-        final String QRCommunityID=currentDatabase.GetLiveCommunityID();
-        currentDatabase.close();
-
-        InviteLinkButton= QRCodeDialog.findViewById(R.id.InviteLinkButton);
-
-
-        ImageButton QRCodeCloseBtn = QRCodeDialog.findViewById(R.id.QR_dialog_closebtn);
-        QRCodeCloseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                QRCodeDialog.dismiss();
-
-            }
-        });
-        TextView textView= QRCodeDialog.findViewById(R.id.textViewAlbumQR);
-        ImageView QRCodeImageView= QRCodeDialog.findViewById(R.id.QR_Display);
-
-        MultiFormatWriter multiFormatWriter=new MultiFormatWriter();
-        try {
-            BitMatrix bitMatrix=multiFormatWriter.encode(QRCommunityID, BarcodeFormat.QR_CODE,200,200);
-            BarcodeEncoder barcodeEncoder=new BarcodeEncoder();
-            Bitmap bitmap=barcodeEncoder.createBitmap(bitMatrix);
-            QRCodeImageView.setImageBitmap(bitmap);
-        } catch (WriterException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e){
-            e.printStackTrace();
-            QRCodeImageView.setVisibility(View.INVISIBLE);
-            textView.setText("You must be in an album to generate QR code");
-        }catch (NullPointerException e){
-            QRCodeImageView.setVisibility(View.INVISIBLE);
-            textView.setText("You must be in an album to generate QR code");
-
-        }
-        InviteLinkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
-                SharingIntent.setType("text/plain");
-                String CommunityPostKey=QRCommunityID;
-
-                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
-                        "Copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
-                startActivity(SharingIntent);
-
-            }
-        });
-    }
 
 
     private void StartServices() {
@@ -571,13 +516,11 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
         if (OngoingTask == true) {
             Toast.makeText(getApplicationContext(), "Creating your Cloud-Album. Please wait.", Toast.LENGTH_SHORT).show();
         }
-        else
-        {
-            finish();
-        }
+
     }
 
 
@@ -655,4 +598,21 @@ public class CreateCloudAlbum extends AppCompatActivity {
        currentDatabase.close();
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(item.getItemId()==R.id.home)
+        {
+            startActivity(new Intent(CreateCloudAlbum.this,MainActivity.class).putExtra("QRCodeVisible",false));
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }

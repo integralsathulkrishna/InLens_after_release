@@ -352,7 +352,7 @@ public class CloudAlbum extends AppCompatActivity {
         QRCodeDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
 
         Window QRCodewindow = QRCodeDialog.getWindow();
-        QRCodewindow.setGravity(Gravity.CENTER_HORIZONTAL);
+        QRCodewindow.setGravity(Gravity.BOTTOM);
         QRCodewindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
         QRCodewindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         QRCodewindow.setDimAmount(0.75f);
