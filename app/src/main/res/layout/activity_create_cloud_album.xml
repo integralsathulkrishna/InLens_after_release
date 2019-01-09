@@ -13,16 +13,15 @@
         android:layout_width="43dp"
         android:layout_height="43dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginBottom="30dp"
-        android:layout_marginRight="30dp"
+        android:layout_marginEnd="30dp"
         android:visibility="invisible" />
 
     <ImageView
         android:id="@+id/CoverPhoto"
         android:layout_width="match_parent"
         android:layout_height="230dp"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:background="@android:color/white" />
@@ -31,11 +30,10 @@
         android:id="@+id/AlbumTitleLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/CoverPhoto"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="8dp"
         android:background="@android:color/white"
         android:hint="Album Title">
@@ -52,11 +50,10 @@
         android:id="@+id/AlbumDescriptionLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/AlbumTitleLayout"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="8dp"
         android:background="@android:color/white"
         android:hint="Album Description">
@@ -75,10 +72,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/AlbumDescriptionLayout"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="20dp"
         android:hint="Click to pick completion date."
+        android:textSize="16sp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"/>
+    <TextView
+        android:id="@+id/EventTypeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/TimeEditText"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:hint="Click to pick event type."
         android:textSize="16sp"
         android:layout_centerHorizontal="true"
         android:gravity="center"/>
@@ -87,10 +96,10 @@
         android:layout_width="63dp"
         android:layout_height="63dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginBottom="20dp"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="1dp"
         android:background="@drawable/ic_tick" />
 
@@ -109,7 +118,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/CoverPhoto"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="5dp"
+        android:layout_marginEnd="5dp"
         android:text="Tap to add album cover"
         android:textSize="10sp" />
 

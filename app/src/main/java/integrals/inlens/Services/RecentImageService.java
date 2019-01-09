@@ -690,6 +690,12 @@ public class RecentImageService extends Service {
     public void onDestroy() {
         super.onDestroy();
         handler.removeMessages(0);
+
+        SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
+        SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
+        AlbumEditor.putInt("last_clicked_position",0);
+        AlbumEditor.apply();
+
         Toast.makeText(getApplicationContext(), "InLens Service destroyed.", Toast.LENGTH_SHORT).show();
         Intent broadcastIntent = new Intent(this, RestartRecentImageService.class);
         sendBroadcast(broadcastIntent);

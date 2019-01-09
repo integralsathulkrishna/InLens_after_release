@@ -1,21 +1,29 @@
 package integrals.inlens.Activities;
 
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -38,6 +46,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import integrals.inlens.Helper.CurrentDatabase;
@@ -75,6 +84,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private String                              AlbumTime;
     private DatePickerDialog.OnDateSetListener  dateSetListener;
     private Calendar calendar;
+    private TextView EventPicker ;
+    private Dialog EventDialog;
+    private String EventType = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +94,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
         setContentView(R.layout.activity_create_cloud_album);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
+        EventDialogInit();
 
         InAuthentication = FirebaseAuth.getInstance();
         InUser = InAuthentication.getCurrentUser();
@@ -93,7 +105,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                 .child(InUser.getUid());
         UserID = InUser.getUid();
 
-
+        EventPicker = findViewById(R.id.EventTypeText);
         DisplayButton = (ImageButton) findViewById(R.id.DisplayImage);
         UploadProgressTextView = (TextView) findViewById(R.id.UploadProgressTextView);
         CommunityAlbumTitle = (EditText) findViewById(R.id.AlbumTitleEditText);
@@ -135,13 +147,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
             }
         };
-
-
-
-
-
-
-
 
 
 
@@ -189,6 +194,123 @@ public class CreateCloudAlbum extends AppCompatActivity {
                 PostingStarts();
             }
         });
+
+        EventPicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+
+            }
+        });
+
+    }
+
+    private void EventDialogInit() {
+
+        EventDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
+        EventDialog.setCancelable(true);
+        EventDialog.setCanceledOnTouchOutside(false);
+        EventDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        EventDialog.setContentView(R.layout.event_type_layout);
+        EventDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        EventDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window EventDialogwindow = EventDialog.getWindow();
+        EventDialogwindow.setGravity(Gravity.BOTTOM);
+        EventDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        EventDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        EventDialogwindow.setDimAmount(0.75f);
+
+        final RadioButton EventWedding = EventDialog.findViewById(R.id.event_type_wedding_btn);
+        final RadioButton EventCeremony = EventDialog.findViewById(R.id.event_type_ceremony_btn);
+        final RadioButton EventOthers = EventDialog.findViewById(R.id.event_type_others_btn);
+        final RadioButton EventParty = EventDialog.findViewById(R.id.event_type_party_btn);
+        final RadioButton EventTravel = EventDialog.findViewById(R.id.event_type_travel_btn);
+        final RadioButton EventHangout = EventDialog.findViewById(R.id.event_type_hangouts_btn);
+
+        ImageButton EventTypeDone  = EventDialog.findViewById(R.id.event_done_btn);
+
+        EventTypeDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(!TextUtils.isEmpty(EventType))
+                {
+                    EventDialog.dismiss();
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(),"Please select an event type.",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+        EventCeremony.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SetCheckFalse(EventWedding,EventOthers,EventParty,EventTravel,EventHangout);
+                EventType = "Ceremony";
+            }
+        });
+
+        EventWedding.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SetCheckFalse(EventCeremony,EventOthers,EventParty,EventTravel,EventHangout);
+                EventType = "Wedding";
+            }
+        });
+
+        EventOthers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SetCheckFalse(EventWedding,EventCeremony,EventParty,EventTravel,EventHangout);
+                EventType = "Others";
+            }
+        });
+
+        EventParty.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SetCheckFalse(EventWedding,EventOthers,EventCeremony,EventTravel,EventHangout);
+                EventType = "Party";
+            }
+        });
+
+        EventTravel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SetCheckFalse(EventWedding,EventOthers,EventParty,EventCeremony,EventHangout);
+                EventType = "Travel";
+            }
+        });
+
+        EventHangout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SetCheckFalse(EventWedding,EventOthers,EventParty,EventCeremony,EventCeremony);
+                EventType = "Hangouts";
+            }
+        });
+
+
+    }
+
+    private void SetCheckFalse(RadioButton btn1, RadioButton btn2, RadioButton btn3, RadioButton btn4, RadioButton btn5) {
+
+        btn1.setChecked(false);
+        btn2.setChecked(false);
+        btn3.setChecked(false);
+        btn4.setChecked(false);
+        btn5.setChecked(false);
 
     }
 

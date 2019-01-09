@@ -97,6 +97,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidParameterSpecException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,6 +129,7 @@ import integrals.inlens.ViewHolder.ParticipantsViewHolder;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView MemoryRecyclerView;
+    private LinearLayoutManager linearLayoutManager;
     private DatabaseReference InDatabaseReference;
     private String CommunityPostKey, AlbumCoverEditKey;
     private ComponentName componentName;
@@ -142,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
     private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
 
-    private int EDIT_COUNT, CLICK_COUNT;
     private DatabaseReference ProgressRef;
 
     private String PostKeyForEdit;
@@ -198,6 +199,8 @@ public class MainActivity extends AppCompatActivity {
     //Situation Adapter
     //Setting Activity
 
+    //for lastclick album
+    private SharedPreferences AlbumClickDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,6 +210,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         activity = this;
+
+        // to handle album clicks
+
+        AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
 
 
         //1.Service Running Continuation
@@ -377,9 +384,7 @@ public class MainActivity extends AppCompatActivity {
         //Setting Recycler View
         MemoryRecyclerView = (RecyclerView) findViewById(R.id.CloudAlbumRecyclerView);
         MemoryRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        linearLayoutManager.setStackFromEnd(true);
-        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         MemoryRecyclerView.setLayoutManager(linearLayoutManager);
         MainLoadingProgressBar = findViewById(R.id.mainloadingpbar);
 
@@ -419,215 +424,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        EDIT_COUNT = 0;
-        CLICK_COUNT = 0;
-        // Downloading Recycler View
-        MainLoadingProgressBar.setVisibility(View.VISIBLE);
-        try {
-
-            InDatabaseReference =
-                    FirebaseDatabase
-                            .getInstance()
-                            .getReference()
-                            .child("Users")
-                            .child(CurrentUser)
-                            .child("Communities");
-
-            final FirebaseRecyclerAdapter<AlbumModel, AlbumViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<AlbumModel, AlbumViewHolder>(
-                    AlbumModel.class,
-                    R.layout.cloud_album_card,
-                    AlbumViewHolder.class,
-                    InDatabaseReference
-
-            ) {
-                @Override
-                protected void populateViewHolder(final AlbumViewHolder viewHolder, final AlbumModel model, final int position) {
-
-                    viewHolder.SetAlbumCover(getApplicationContext(), model.getAlbumCoverImage());
-                    viewHolder.SetTitle(model.getAlbumTitle());
-                    viewHolder.SetProfilePic(getApplicationContext(), model.getPostedByProfilePic());
-                    viewHolder.SetAlbumDescription(model.getAlbumDescription());
-
-
-                    try {
-                        InDatabaseReference.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                try {
-                                    CommunityID = dataSnapshot.child(getRef(position).getKey()).child("CommunityID").getValue().toString().trim();
-                                    getParticipantDatabaseReference = participantDatabaseReference.child("Communities").child(CommunityID).child("CommunityPhotographer");
-                                    viewHolder.SetParticipants(MainActivity.this, getParticipantDatabaseReference, FirebaseDatabase.getInstance().getReference().child("Users"));
-
-
-                                    // for timestamp
-
-                                    String key = dataSnapshot.child(getRef(position).getKey()).getKey();
-
-                                    if (dataSnapshot.child(key).hasChild("CreatedTimestamp")) {
-                                        String timestamp = dataSnapshot.child(key).child("CreatedTimestamp").getValue().toString();
-                                        long time = Long.parseLong(timestamp);
-                                        CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
-                                        String timesubstring = Time.toString().substring(Time.length() - 8);
-                                        Date date = new Date(time);
-                                        String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
-                                        viewHolder.SetAlbumTime("Event occured on : " + dateformat + " @ " + timesubstring);
-                                    } else {
-                                        viewHolder.SetAlbumTime("Event occured on : " + model.getTime());
-
-                                    }
-
-                                } catch (IndexOutOfBoundsException e) {
-                                    e.printStackTrace();
-                                } catch (NullPointerException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-                    } catch (NullPointerException e) {
-                    }
-                    viewHolder.ShareButton.setOnClickListener(new View.OnClickListener() {
-                        final String PostKeyS = getRef(position).getKey().trim();
-
-
-                        @Override
-                        public void onClick(View v) {
-
-                            final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
-                            SharingIntent.setType("text/plain");
-                            InDatabaseReference.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    CommunityPostKey = dataSnapshot.child(PostKeyS).child("CommunityID").getValue().toString().trim();
-                                    SharingIntent.putExtra(Intent.EXTRA_TEXT, "https://inlens.in/watch/" + CommunityPostKey);
-                                    startActivity(SharingIntent);
-
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
-                    });
-                    viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            final String PostKey = getRef(position).getKey().trim();
-                            CLICK_COUNT++;
-                            if (CLICK_COUNT == 1 && !TextUtils.isEmpty(PostKey)) {
-                                try {
-                                    startActivity(new Intent(MainActivity.this, CloudAlbum.class)
-                                            .putExtra("AlbumName", model.getAlbumTitle())
-                                            .putExtra("GlobalID::", PostKey)
-                                            .putExtra("LocalID::", PostKey)
-                                            .putExtra("UserID::", CurrentUser));
-
-                                } catch (NullPointerException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-
-                        }
-                    });
-
-                    viewHolder.AlbuymCoverEditBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-
-                            AlbumCoverEditprogressBar.setVisibility(View.VISIBLE);
-                            AlbumCoverEditProfileuserName.setText(model.getAlbumTitle());
-                            AlbumCoverEditProfileUserEmail.setTextSize(13);
-                            AlbumCoverEditProfileUserEmail.setText(String.format("Change Cover for the album \" %s \"", model.getAlbumTitle()));
-
-                            PostKeyForEdit = getRef(position).getKey().trim();
-                            FirebaseDatabase.getInstance().getReference().child("Users")
-                                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                    .child("Communities")
-                                    .child(PostKeyForEdit)
-                                    .addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                            String Image = dataSnapshot.child("AlbumCoverImage").getValue().toString();
-                                            RequestOptions requestOptions = new RequestOptions()
-                                                    .fitCenter();
-
-                                            Glide.with(getApplicationContext())
-                                                    .load(Image)
-                                                    .thumbnail(0.1f)
-                                                    .apply(requestOptions)
-                                                    .listener(new RequestListener<Drawable>() {
-                                                        @Override
-                                                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                                            AlbumCoverEditprogressBar.setVisibility(View.GONE);
-                                                            return false;
-                                                        }
-
-                                                        @Override
-                                                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                                            AlbumCoverEditprogressBar.setVisibility(View.GONE);
-                                                            return false;
-                                                        }
-                                                    })
-                                                    .into(AlbumCoverEditUserImage);
-
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-
-                                        }
-                                    });
-                            AlbumCoverEditDialog.show();
-
-
-                        }
-                    });
-
-                    // more participants
-
-                    viewHolder.ParticipantsMoreBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-
-                            ParticpantsBottomSheetDialogProgressbar.setVisibility(View.VISIBLE);
-                            PostKeyForEdit = getRef(position).getKey().trim();
-                            DisplayAllParticipantsAsBottomSheet(PostKeyForEdit, FirebaseDatabase.getInstance().getReference());
-
-                        }
-                    });
-
-                    MainLoadingProgressBar.setVisibility(View.INVISIBLE);
-                    MemoryRecyclerView.setVisibility(View.VISIBLE);
-
-                }
-
-
-            };
-
-            MemoryRecyclerView.setAdapter(firebaseRecyclerAdapter);
-
-
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (DatabaseException e) {
-            e.printStackTrace();
-        }
-        try {
-            InDatabaseReference.keepSynced(true);
-
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-
+        ShowAllAlbums();
     }
 
     private void DisplayAllParticipantsAsBottomSheet(String postKeyForEdit, DatabaseReference getParticipantDatabaseReference) {
@@ -1073,6 +870,72 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void ShowAllAlbums()
+    {
+        MainLoadingProgressBar.setVisibility(View.VISIBLE);
+        MemoryRecyclerView.setVisibility(View.GONE);
+
+        InDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(CurrentUser).child("Communities");
+        InDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                SearchedAlbums.clear();
+                MemoryRecyclerView.removeAllViews();
+
+                for(DataSnapshot snapshot: dataSnapshot.getChildren())
+                {
+                    String AlbumName = snapshot.child("AlbumTitle").getValue().toString();
+
+
+                        String AlbumKey = snapshot.getKey();
+                        String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
+                        String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
+                        String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
+                        SearchParticpantRef = participantDatabaseReference.child("Communities").child(AlbumKey).child("CommunityPhotographer");
+                        String DateandTime="";
+                        String User_ID = snapshot.child("User_ID").getValue().toString();
+                        String UserName = snapshot.child("UserName").getValue().toString();
+
+                        if (snapshot.hasChild("CreatedTimestamp")) {
+                            String timestamp = snapshot.child("CreatedTimestamp").getValue().toString();
+                            long time = Long.parseLong(timestamp);
+                            CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+                            String timesubstring = Time.toString().substring(Time.length() - 8);
+                            Date date = new Date(time);
+                            String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
+                            DateandTime = "Event occured on : " + dateformat + " @ " + timesubstring ;
+                        } else if(snapshot.hasChild("Time")) {
+
+                            DateandTime = "Event occured on : "+snapshot.child("Time").getValue().toString();
+                        }
+
+                        AlbumModel Album = new AlbumModel(AlbumCoverImage,AlbumDescription,AlbumName,PostedByProfilePic,DateandTime,UserName,User_ID);
+                        SearchedAlbums.add(Album);
+                        ParticipantRefs.add(SearchParticpantRef);
+                        AlbumKeys.add(AlbumKey);
+
+                }
+
+                Collections.reverse(SearchedAlbums);
+                Collections.reverse(ParticipantRefs);
+                Collections.reverse(AlbumKeys);
+
+
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys);
+                MemoryRecyclerView.setAdapter(MainAdapterForSearch);
+                MemoryRecyclerView.scrollToPosition(AlbumClickDetails.getInt("last_clicked_position",0));
+                MainLoadingProgressBar.setVisibility(View.GONE);
+                MemoryRecyclerView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void ShowSearchResults(final String s) {
 
         MainLoadingProgressBar.setVisibility(View.VISIBLE);
@@ -1125,6 +988,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"No albums found.",Toast.LENGTH_SHORT).show();
                 }
 
+                Collections.reverse(SearchedAlbums);
+                Collections.reverse(ParticipantRefs);
+                Collections.reverse(AlbumKeys);
+
                 MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys);
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
                 MainLoadingProgressBar.setVisibility(View.GONE);
@@ -1137,9 +1004,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
-
 
 
     }
@@ -1664,9 +1528,13 @@ public class MainActivity extends AppCompatActivity {
                     getSupportActionBar().setDisplayShowCustomEnabled(false);
 
                     final String PostKey = AlbumKeyIDs.get(position);
-                    CLICK_COUNT++;
-                    if (CLICK_COUNT == 1 && !TextUtils.isEmpty(PostKey)) {
+                    if (!TextUtils.isEmpty(PostKey)) {
                         try {
+
+                            SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
+                            AlbumEditor.putInt("last_clicked_position",position);
+                            AlbumEditor.apply();
+
                             startActivity(new Intent(MainActivity.this, CloudAlbum.class)
                                     .putExtra("AlbumName",AlbumList.get(position).getAlbumTitle())
                                     .putExtra("GlobalID::", PostKey)
@@ -1758,6 +1626,15 @@ public class MainActivity extends AppCompatActivity {
         public int getItemCount() {
             return AlbumList.size();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
+        SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
+        AlbumEditor.putInt("last_clicked_position",0);
+        AlbumEditor.apply();
     }
 }
 
