@@ -371,34 +371,37 @@ public class RecentImageService extends Service {
 
 
     private void StartUpload(final int uploadID, final int Record) {
-
-
-        UploadnotificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Uploadbuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
-                .setContentTitle("Upload Started")
-                .setContentText("Uploading " + uploadID + "/" + Record)
-                .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.inlens_logo_m)
-                .setPriority(Notification.PRIORITY_MAX)
-                .setOngoing(true)
-                .setProgress(100, 0, true);
-
-
-        UploadnotificationManager.notify(672, Uploadbuilder.build());
-
-
-        //Toast.makeText(getApplicationContext(), "Uploading :: " + uploadID + "/" + Record, Toast.LENGTH_SHORT).show();
-        final DatabaseReference
-                InUserReference,
-                PostDatabaseReference;
-        StorageReference PostStorageReference;
-        FirebaseAuth InAuthentication;
-        final FirebaseUser InUser;
-        Bitmap bitmap = null;
-        Bitmap ThumbBitmap = null;
         InAuthentication = FirebaseAuth.getInstance();
         InUser = InAuthentication.getCurrentUser();
         PostStorageReference = FirebaseStorage.getInstance().getReference();
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Notification.Builder builder=notificationHelper.buildNotificationForUploadData(
+                    uploadID,
+                    Record
+            );
+            builder.setAutoCancel(true);
+            notificationHelper.getNotificationManager().notify(672,builder.build());
+
+        }
+        else {
+
+            UploadnotificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            Uploadbuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
+                    .setContentTitle("Upload Started")
+                    .setContentText("Uploading " + uploadID + "/" + Record)
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.drawable.inlens_logo_m)
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setOngoing(true)
+                    .setProgress(100, 0, true);
+
+
+            UploadnotificationManager.notify(672, Uploadbuilder.build());
+
+        }
+
 
         final UploadDatabaseHelper uploadDatabaseHelper = new UploadDatabaseHelper(getApplicationContext(), "", null, 1);
         uploadDatabaseHelper.UpdateUploadStatus(uploadID, "UPLOADING");
@@ -477,7 +480,14 @@ public class RecentImageService extends Service {
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             if (task.isSuccessful()) {
 
-                                UploadnotificationManager.cancel(672);
+
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                    notificationHelper.cancelUploadDataNotification();
+                                }
+                                else
+                                    {
+                                    UploadnotificationManager.cancel(672);
+                                    }
 
                                 final DatabaseReference NewPost = PostDatabaseReference.push();
                                 InUserReference.addValueEventListener(new ValueEventListener() {
@@ -547,12 +557,20 @@ public class RecentImageService extends Service {
                     }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-
                             int progress = (int) ((100*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount());
-                            Uploadbuilder.setProgress(100,progress,false);
-                            Uploadbuilder.setContentText("Uploading " + uploadID + "/" + Record);
-                            UploadnotificationManager.notify(672, Uploadbuilder.build());
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            // Set progress cancelled for oreo
+                            }else {
+                                try {
+                                    Uploadbuilder.setProgress(100,progress,false);
+                                    Uploadbuilder.setContentText("Uploading " + uploadID + "/" + Record);
+                                    UploadnotificationManager.notify(672, Uploadbuilder.build());
 
+                                }catch (NullPointerException e){
+                                    e.printStackTrace();
+                                }
+
+                            }
                         }
                     });
 
@@ -644,8 +662,9 @@ public class RecentImageService extends Service {
                      LogoBitMap
              );
              builder.setOnlyAlertOnce(true);
+
              notificationHelper.getNotificationManager().notify(7907,builder.build());
-/////////Need to cancel notification
+            /////////Need to cancel notification
             ////Need to create broadcast intent
 
 

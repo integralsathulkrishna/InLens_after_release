@@ -1,6 +1,8 @@
 package integrals.inlens.GridView;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,6 +29,7 @@ import java.util.Calendar;
 
 
 import integrals.inlens.Helper.CurrentDatabase;
+import integrals.inlens.Helper.NotificationHelper;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.R;
@@ -94,6 +97,32 @@ public class MainActivity extends AppCompatActivity
                 finish();
             }
         });
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            // Set progress cancelled for oreo
+           try {
+               NotificationHelper notificationHelper=new NotificationHelper(getBaseContext());
+               notificationHelper.cancelNotificationRecentImage();
+
+           }catch (NullPointerException e){
+               e.printStackTrace();
+           }
+
+        }else {
+            try {
+                cancelNotification();
+                }catch (NullPointerException e){
+                e.printStackTrace();
+            }
+           }
+    }
+
+    private void cancelNotification() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(7907);
+        SharedPreferences sharedPreferences3= getSharedPreferences("Notificationclick.pref",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor3=sharedPreferences3.edit();
+        editor3.putBoolean("ClickIndex:",true);
+        editor3.commit();
     }
 
 

@@ -32,19 +32,27 @@ public class NotificationHelper extends ContextWrapper {
             notificationChannel = new NotificationChannel("ID_503","Recent Image Notification",NotificationManager.IMPORTANCE_HIGH);
             notificationChannel.enableLights(true);
             notificationChannel.enableLights(true);
+            notificationChannel.setSound(null,null);
             notificationChannel.setLightColor(Color.WHITE);
             notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
             getNotificationManager().createNotificationChannel(notificationChannel);
 
         }
 
+        NotificationChannel uploadNotificationChannel= null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            uploadNotificationChannel = new NotificationChannel("ID_504","Upload  Notification",NotificationManager.IMPORTANCE_MIN);
+            getNotificationManager().createNotificationChannel(uploadNotificationChannel);
+
+        }
+        
+
     }
 
     public NotificationManager getNotificationManager() {
      if(notificationManager==null)
          notificationManager=(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-
-     return notificationManager;
+        return notificationManager;
     }
 
 
@@ -82,6 +90,31 @@ public class NotificationHelper extends ContextWrapper {
             }
 
         return builder;
+    }
+
+
+    public Notification.Builder buildNotificationForUploadData(
+            int uploadID,int Record
+    ){
+
+        Notification.Builder Uploadbuilder = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Uploadbuilder = (Notification.Builder) new Notification.Builder(getApplicationContext(),"ID_504")
+                    .setContentTitle("Upload Started")
+                    .setContentText("Uploading " + uploadID + "/" + Record)
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.drawable.inlens_logo_m)
+                    .setProgress(100, 0, true);
+        }
+
+        return Uploadbuilder;
+    }
+
+    public void cancelUploadDataNotification(){
+        notificationManager.cancel(672);
+        }
+    public void cancelNotificationRecentImage(){
+        notificationManager.cancel(7907);
     }
 
 }
