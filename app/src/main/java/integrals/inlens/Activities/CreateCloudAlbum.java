@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -42,6 +43,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import java.util.Calendar;
@@ -85,8 +91,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener  dateSetListener;
     private Calendar calendar;
     private TextView EventPicker ;
-    private Dialog EventDialog;
+    private Dialog EventDialog,QRCodeDialog;
     private String EventType = "";
+    private Button InviteLinkButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +102,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         EventDialogInit();
+        QRCodeInit();
 
         InAuthentication = FirebaseAuth.getInstance();
         InUser = InAuthentication.getCurrentUser();
@@ -199,7 +207,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-
+                EventDialog.show();
 
             }
         });
@@ -213,7 +221,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
         EventDialog.setCanceledOnTouchOutside(false);
         EventDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         EventDialog.setContentView(R.layout.event_type_layout);
-        EventDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         EventDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
 
         Window EventDialogwindow = EventDialog.getWindow();
@@ -238,6 +245,8 @@ public class CreateCloudAlbum extends AppCompatActivity {
                 if(!TextUtils.isEmpty(EventType))
                 {
                     EventDialog.dismiss();
+                    EventPicker.setText(String.format("Event Selected : %s", EventType));
+                    EventPicker.setTextSize(12);
                 }
                 else
                 {
@@ -317,7 +326,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private void PostingStarts() {
         final String TitleValue = CommunityAlbumTitle.getText().toString().trim();
         final String DescriptionValue = CommunityAlbumDescription.getText().toString().trim();
-        if (!TextUtils.isEmpty(TitleValue) && (!TextUtils.isEmpty(DescriptionValue) &&
+        if (!TextUtils.isEmpty(TitleValue) && !(TextUtils.isEmpty(EventType)) &&(!TextUtils.isEmpty(DescriptionValue) &&
                 (!TextUtils.isEmpty(AlbumTime)))) {
 
             if(ImageUri==null)
@@ -350,7 +359,10 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                     CommunityPost.child("Time").setValue(DatabaseTimeTaken);
                                     CommunityPost.child("ActiveIndex").setValue("T");
                                     CommunityPost.child("AlbumExpiry").setValue(AlbumTime);
+                                    CommunityPost.child("AlbumType").setValue(EventType);
+
                                     PostKey = CommunityPost.getKey().trim();
+
                                     NewPost.child("AlbumTitle").setValue(TitleValue);
                                     NewPost.child("AlbumDescription").setValue(DescriptionValue);
                                     NewPost.child("AlbumCoverImage").setValue((DownloadUri).toString());
@@ -360,6 +372,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                     NewPost.child("Time").setValue(DatabaseTimeTaken);
                                     NewPost.child("CommunityID").setValue(PostKey);
                                     NewPost.child("CreatedTimestamp").setValue(ServerValue.TIMESTAMP);
+                                    NewPost.child("AlbumType").setValue(EventType);
 
                                     InProgressDialog.setMessage("Saving new data....");
                                     CurrentDatabase currentDatabase= new CurrentDatabase(getApplicationContext(),"",null,1);
@@ -420,7 +433,8 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                 SubmitButton.setVisibility(View.VISIBLE);
                                 CloudAlbumDone=true;
                                 StartServices();
-                                finish();
+                                QRCodeDialog.show();
+
                             }else {
 
                             }
@@ -440,6 +454,76 @@ public class CreateCloudAlbum extends AppCompatActivity {
                     "Please fill up all the provided fields " +
                             "and add album cover photo ", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private void QRCodeInit() {
+
+        QRCodeDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
+        QRCodeDialog.setCancelable(true);
+        QRCodeDialog.setCanceledOnTouchOutside(true);
+        QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        QRCodeDialog.setContentView(R.layout.activity_qrcode_generator);
+        QRCodeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        QRCodeDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window QRCodewindow = QRCodeDialog.getWindow();
+        QRCodewindow.setGravity(Gravity.CENTER_HORIZONTAL);
+        QRCodewindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        QRCodewindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        QRCodewindow.setDimAmount(0.75f);
+        QRCodewindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+        CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
+        final String QRCommunityID=currentDatabase.GetLiveCommunityID();
+        currentDatabase.close();
+
+        InviteLinkButton= QRCodeDialog.findViewById(R.id.InviteLinkButton);
+
+
+        ImageButton QRCodeCloseBtn = QRCodeDialog.findViewById(R.id.QR_dialog_closebtn);
+        QRCodeCloseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                QRCodeDialog.dismiss();
+
+            }
+        });
+        TextView textView= QRCodeDialog.findViewById(R.id.textViewAlbumQR);
+        ImageView QRCodeImageView= QRCodeDialog.findViewById(R.id.QR_Display);
+
+        MultiFormatWriter multiFormatWriter=new MultiFormatWriter();
+        try {
+            BitMatrix bitMatrix=multiFormatWriter.encode(QRCommunityID, BarcodeFormat.QR_CODE,200,200);
+            BarcodeEncoder barcodeEncoder=new BarcodeEncoder();
+            Bitmap bitmap=barcodeEncoder.createBitmap(bitMatrix);
+            QRCodeImageView.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e){
+            e.printStackTrace();
+            QRCodeImageView.setVisibility(View.INVISIBLE);
+            textView.setText("You must be in an album to generate QR code");
+        }catch (NullPointerException e){
+            QRCodeImageView.setVisibility(View.INVISIBLE);
+            textView.setText("You must be in an album to generate QR code");
+
+        }
+        InviteLinkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
+                SharingIntent.setType("text/plain");
+                String CommunityPostKey=QRCommunityID;
+
+                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
+                        "Copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
+                startActivity(SharingIntent);
+
+            }
+        });
     }
 
 
