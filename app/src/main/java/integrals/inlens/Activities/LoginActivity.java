@@ -5,18 +5,24 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,31 +48,21 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth      InAuth;
     private DatabaseReference InDatabaseUser;
     private ProgressDialog    InProgressDialogue;
-    private int               INTID=3939;
     private FirebaseAuth      InAuthentication;
     private FirebaseUser      firebaseUser;
     private TextView          ForgotPassword;
+    private RelativeLayout RootForLoginActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Login");
+        getSupportActionBar().setTitle("Sign In");
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        Ask.on(this)
-                .id(INTID) // in case you are invoking multiple time Ask from same activity or fragment
-                .forPermissions(
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                         , Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        ,Manifest.permission.INTERNET
-                        ,Manifest.permission.CAMERA
-                        ,Manifest.permission.ACCESS_FINE_LOCATION
-                        ,Manifest.permission.RECORD_AUDIO
-                        ,Manifest.permission.VIBRATE
-                        ,Manifest.permission.SYSTEM_ALERT_WINDOW
-                         )
-                .go();
+        RootForLoginActivity = findViewById(R.id.root_for_login_activity);
+
 
         EmailField=(EditText)findViewById(R.id.EmailEditText);
         PassWordField=(EditText)findViewById(R.id.PasswordField);
@@ -126,11 +122,12 @@ public class LoginActivity extends AppCompatActivity {
                         if(firebaseUser!=null && firebaseUser.isEmailVerified())
                         {
                             startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
                             finish();
                         }
                         else
                         {
-                            Toast.makeText(LoginActivity.this,"Verify Email Address",Toast.LENGTH_LONG).show();
+                            DisplaySnackBar("Verify Email Address");
                         }
 
                         InProgressDialogue.dismiss();
@@ -138,7 +135,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     else{
                         InProgressDialogue.dismiss();
-                        Toast.makeText(LoginActivity.this,"Email or password authentication failed",Toast.LENGTH_LONG).show();
+                        DisplaySnackBar("Email or password authentication failed");
                     }
                 }
             });
@@ -147,17 +144,50 @@ public class LoginActivity extends AppCompatActivity {
         {
             if(TextUtils.isEmpty(Email))
             {
-                Toast.makeText(LoginActivity.this,"Please enter your email.",Toast.LENGTH_LONG).show();
+                DisplaySnackBar("Please enter your email.");
             }
             else
             {
-                Toast.makeText(LoginActivity.this,"Please enter your password.",Toast.LENGTH_LONG).show();
+                DisplaySnackBar("Please enter your password.");
 
             }
         }
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==android.R.id.home)
+        {
+            startActivity(new Intent(this,IntroActivity.class));
+            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if(keyCode == KeyEvent.KEYCODE_BACK)
+        {
+            startActivity(new Intent(this,IntroActivity.class));
+            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void DisplaySnackBar(String message)
+    {
+        Snackbar.make(RootForLoginActivity,message,Snackbar.LENGTH_SHORT).show();
+    }
 
 }

@@ -1,5 +1,6 @@
 package integrals.inlens;
 
+import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -22,6 +23,7 @@ import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -87,9 +89,11 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.encoder.QRCode;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.vistrav.ask.Ask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -192,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
     private List<DatabaseReference> ParticipantRefs = new ArrayList<>();
     private List<String> AlbumKeys = new ArrayList<>();
     private Boolean QRCodeVisible = false;
+    private int INTID=3939;
     //
     //
     // Import from Elson.............................................................................
@@ -216,24 +221,24 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setElevation(25);
 
         QRCodeInit();
+        PermissionsInit();
+
         QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible",false);
         if(QRCodeVisible)
-            QRCodeDialog.show();
+        {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    QRCodeDialog.show();
+                }
+            },600);
+        }
 
         activity = this;
 
         // to handle album clicks
 
         AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
-
-
-        //1.Service Running Continuation
-        RecentImageService recentImageService;
-        recentImageService = new RecentImageService(getApplicationContext());
-        if (!isMyServiceRunning(recentImageService.getClass()) && firebaseUser != null) {
-            startService(new Intent(getApplicationContext(), RecentImageService.class));
-        }
-
         //Snackbar
         RootForMainActivity = findViewById(R.id.root_for_main_activity);
 
@@ -416,6 +421,22 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+    }
+
+    private void PermissionsInit() {
+        Ask.on(this)
+                .id(INTID) // in case you are invoking multiple time Ask from same activity or fragment
+                .forPermissions(
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                        , android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        , android.Manifest.permission.INTERNET
+                        , android.Manifest.permission.CAMERA
+                        , android.Manifest.permission.ACCESS_FINE_LOCATION
+                        , android.Manifest.permission.RECORD_AUDIO
+                        , android.Manifest.permission.VIBRATE
+                        ,Manifest.permission.SYSTEM_ALERT_WINDOW
+                )
+                .go();
     }
 
     // Added By Elson
@@ -616,6 +637,7 @@ public class MainActivity extends AppCompatActivity {
                     {
                         SearchedAlbums.clear();
                         MemoryRecyclerView.removeAllViews();
+                        onStart();
                     }
 
                 }

@@ -4,13 +4,19 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -40,16 +46,19 @@ public class RegisterUser extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
     private ProgressDialog progressDialog;
-    private int INTID = 8798;
+
+    private RelativeLayout RootForRegisterActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_user);
-        getSupportActionBar().setTitle(" Register User");
+        getSupportActionBar().setTitle("Sign Up");
         getSupportActionBar().setElevation(0);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        RootForRegisterActivity = findViewById(R.id.root_for_register_activity);
         mAuth = FirebaseAuth.getInstance();
         mDisplayName = (EditText) findViewById(R.id.NameField);
         VerifiedButton = (Button) findViewById(R.id.VerifiedButton);
@@ -59,22 +68,7 @@ public class RegisterUser extends AppCompatActivity {
         mCreateBtn = (Button) findViewById(R.id.ProceedButton);
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
-        getSupportActionBar().setTitle("User Registration");
         VerifiedButton.setEnabled(false);
-
-        Ask.on(this)
-                .id(INTID) // in case you are invoking multiple time Ask from same activity or fragment
-                .forPermissions(
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                        , Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        , Manifest.permission.INTERNET
-                        , Manifest.permission.CAMERA
-                        , Manifest.permission.ACCESS_FINE_LOCATION
-                        , Manifest.permission.RECORD_AUDIO
-                        , Manifest.permission.VIBRATE
-                        , Manifest.permission.SYSTEM_ALERT_WINDOW
-                )
-                .go();
 
         mCreateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,16 +78,16 @@ public class RegisterUser extends AppCompatActivity {
                 String password = mPassword.getText().toString();
                 String repassword = ReTypePassword.getText().toString();
                 if (!password.equals(repassword)) {
-                    Toast.makeText(RegisterUser.this, "Passwords do not match", Toast.LENGTH_LONG).show();
+                    DisplaySnackBar("Passwords do not match");
 
                 } else {
                     if (TextUtils.isEmpty(display_name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
 
 
-                        Toast.makeText(RegisterUser.this, "Check the details you entered", Toast.LENGTH_LONG).show();
+                        DisplaySnackBar("Check the details you entered");
                     } else {
                         if (password.length() <= 7) {
-                            Toast.makeText(getApplicationContext(), "Retype Password it  must contain minimum 8 charachters", Toast.LENGTH_SHORT).show();
+                            DisplaySnackBar("Retype Password it  must contain minimum 8 charachters");
                         } else {
                             progressDialog.setMessage("Registering user. Please wait...");
                             progressDialog.show();
@@ -151,7 +145,7 @@ public class RegisterUser extends AppCompatActivity {
                             } else {
 
                                 progressDialog.dismiss();
-                                Toast.makeText(RegisterUser.this, task.getResult().toString(), Toast.LENGTH_LONG).show();
+                                DisplaySnackBar(task.getResult().toString());
                             }
 
 
@@ -162,7 +156,7 @@ public class RegisterUser extends AppCompatActivity {
                 } else {
 
                     progressDialog.dismiss();
-                    Toast.makeText(RegisterUser.this, "Cannot register,Please try again.. ", Toast.LENGTH_LONG).show();
+                    DisplaySnackBar("Cannot register,Please try again.. ");
                 }
             }
         });
@@ -177,7 +171,7 @@ public class RegisterUser extends AppCompatActivity {
                 @Override
                 public void onSuccess(Void aVoid) {
                     progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(),"Verification mail sent.",Toast.LENGTH_SHORT).show();
+                    DisplaySnackBar("Verification mail sent.");
                     VerifiedButton.setEnabled(true);
                 }
             });
@@ -191,17 +185,49 @@ public class RegisterUser extends AppCompatActivity {
         user.reload();
         if (user.isEmailVerified()) {
             startActivity(new Intent(RegisterUser.this, MainActivity.class));
+            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
             finish();
         } else {
-            Toast.makeText(getApplicationContext(), "E-mail verification send. Please check your mail and click the link to verify.", Toast.LENGTH_LONG).show();
+            DisplaySnackBar("Email verification send. Please verify and try again.");
 
         }
 
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        return super.onCreateOptionsMenu(menu);
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==android.R.id.home)
+        {
+            startActivity(new Intent(this,IntroActivity.class));
+            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if(keyCode == KeyEvent.KEYCODE_BACK)
+        {
+            startActivity(new Intent(this,IntroActivity.class));
+            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void DisplaySnackBar(String message)
+    {
+        Snackbar.make(RootForRegisterActivity,message,Snackbar.LENGTH_SHORT).show();
+    }
+
 }
 

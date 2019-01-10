@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -440,8 +441,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                 SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
                                 AlbumEditor.putInt("last_clicked_position",0);
                                 AlbumEditor.apply();
-                                startActivity(new Intent(CreateCloudAlbum.this,MainActivity.class).putExtra("QRCodeVisible",true));
-                                finish();
+
 
                             }
 
@@ -607,12 +607,25 @@ public class CreateCloudAlbum extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(item.getItemId()==R.id.home)
+        if(item.getItemId()==android.R.id.home)
         {
             startActivity(new Intent(CreateCloudAlbum.this,MainActivity.class).putExtra("QRCodeVisible",false));
+            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
             finish();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if(keyCode==KeyEvent.KEYCODE_BACK)
+        {
+            startActivity(new Intent(CreateCloudAlbum.this,MainActivity.class).putExtra("QRCodeVisible",false));
+            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

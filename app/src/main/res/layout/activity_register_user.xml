@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.RegisterUser">
+    tools:context=".Activities.RegisterUser"
+    android:id="@+id/root_for_register_activity">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/NameLayout"
