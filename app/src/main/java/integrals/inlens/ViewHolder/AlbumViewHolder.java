@@ -47,7 +47,6 @@ import integrals.inlens.R;
     private View view;
     public Button ShareButton;
     public ImageButton AlbuymCoverEditBtn;
-    private int dbcount;
     public ImageButton ParticipantsMoreBtn;
     public Dialog UserDialog;
 
@@ -60,6 +59,17 @@ import integrals.inlens.R;
 
         }
 
+    public void SetAlbumEventType(String EventType)
+    {
+        TextView EvenTypetText=(TextView)view.findViewById(R.id.AlbumEventType);
+        EvenTypetText.setText(EventType);
+    }
+
+    public void SetAlbumEndDate(String EventEnd)
+    {
+        TextView EventEndText=(TextView)view.findViewById(R.id.EventEndTime);
+        EventEndText.setText(EventEnd);
+    }
 
     public void SetAlbumCover(Context context,String Uri){
          ImageView imageView=(ImageView)view.findViewById(R.id.CloudAlbumCover);
@@ -161,7 +171,6 @@ import integrals.inlens.R;
                      @Override
                      public void onClick(View v) {
 
-                         dbcount = 0;
                          UserRef.child(model.getPhotographer_UID()).addListenerForSingleValueEvent(new ValueEventListener() {
                              @Override
                              public void onDataChange(DataSnapshot dataSnapshot) {
@@ -170,7 +179,6 @@ import integrals.inlens.R;
                                  {
                                      for(DataSnapshot snapshot : dataSnapshot.getChildren())
                                      {
-                                         dbcount++;
                                      }
                                  }
 

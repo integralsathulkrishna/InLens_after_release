@@ -152,7 +152,15 @@ public class CreateCloudAlbum extends AppCompatActivity {
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
 
                 month=month+1;
-                AlbumTime = day + "-" + month + "-" + year;
+                if(month<10)
+                {
+                    AlbumTime = day + "-" +"0"+ month + "-" + year;
+                }
+                else
+                {
+                    AlbumTime = day + "-" + month + "-" + year;
+                }
+
                 DateofCompletion.setText("Album Active until " + AlbumTime + " midnight");
                 DateofCompletion.setTextSize(12);
 
@@ -429,8 +437,8 @@ public class CreateCloudAlbum extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     if(task.isSuccessful()){
-                        if(task.isComplete()==true){
-                            if(CloudAlbumDone==false) {
+                        if(task.isComplete()){
+                            if(!CloudAlbumDone) {
                                 InProgressDialog.dismiss();
                                 UploadProgressTextView.setText("Cloud Album Created.");
                                 UploadProgress.setVisibility(View.INVISIBLE);
@@ -441,7 +449,9 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                 SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
                                 AlbumEditor.putInt("last_clicked_position",0);
                                 AlbumEditor.apply();
-
+                                startActivity(new Intent(CreateCloudAlbum.this,MainActivity.class).putExtra("QRCodeVisible",true));
+                                overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+                                finish();
 
                             }
 

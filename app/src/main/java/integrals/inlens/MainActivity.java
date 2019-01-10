@@ -138,19 +138,15 @@ import integrals.inlens.ViewHolder.ParticipantsViewHolder;
 
 
 public class MainActivity extends AppCompatActivity {
+
     private RecyclerView MemoryRecyclerView;
-    private LinearLayoutManager linearLayoutManager;
     private DatabaseReference InDatabaseReference;
-    private String CommunityPostKey, AlbumCoverEditKey;
-    private ComponentName componentName;
+
+    private String CommunityPostKey;
     private String CurrentUser;
     private FirebaseAuth InAuthentication;
     private FirebaseUser firebaseUser;
-    private DatabaseReference participantDatabaseReference,
-            getParticipantDatabaseReference, ComRef;
-    private String CommunityID;
-    private Intent intent;
-    private LayoutAnimationController animation;
+    private DatabaseReference participantDatabaseReference;
     private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
 
@@ -195,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference SearchParticpantRef = FirebaseDatabase.getInstance().getReference() ;
     private List<DatabaseReference> ParticipantRefs = new ArrayList<>();
     private List<String> AlbumKeys = new ArrayList<>();
+    private List<String> AlbumEventTypeList = new ArrayList<>();
     private Boolean QRCodeVisible = false;
     private int INTID=3939;
     //
@@ -213,6 +210,9 @@ public class MainActivity extends AppCompatActivity {
 
     //for lastclick album
     private SharedPreferences AlbumClickDetails;
+
+    public MainActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -381,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, IntroActivity.class));
                 finish();
             } else {
-                if (firebaseUser.isEmailVerified() == false) {
+                if (!firebaseUser.isEmailVerified()) {
 
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
@@ -400,8 +400,7 @@ public class MainActivity extends AppCompatActivity {
         //Setting Recycler View
         MemoryRecyclerView = (RecyclerView) findViewById(R.id.CloudAlbumRecyclerView);
         MemoryRecyclerView.setHasFixedSize(true);
-        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        MemoryRecyclerView.setLayoutManager(linearLayoutManager);
+        MemoryRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         MainLoadingProgressBar = findViewById(R.id.mainloadingpbar);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -916,6 +915,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 SearchedAlbums.clear();
+                AlbumEventTypeList.clear();
                 MemoryRecyclerView.removeAllViews();
 
                 for(DataSnapshot snapshot: dataSnapshot.getChildren())
@@ -923,7 +923,8 @@ public class MainActivity extends AppCompatActivity {
                     String AlbumName = snapshot.child("AlbumTitle").getValue().toString();
 
 
-                        String AlbumKey = snapshot.getKey();
+
+                        final String AlbumKey = snapshot.getKey();
                         String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
                         String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
                         String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
@@ -939,11 +940,24 @@ public class MainActivity extends AppCompatActivity {
                             String timesubstring = Time.toString().substring(Time.length() - 8);
                             Date date = new Date(time);
                             String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
-                            DateandTime = "Event occured on : " + dateformat + " @ " + timesubstring ;
+                            DateandTime = "Event started on : " + dateformat + " @ " + timesubstring ;
                         } else if(snapshot.hasChild("Time")) {
 
-                            DateandTime = "Event occured on : "+snapshot.child("Time").getValue().toString();
+                            DateandTime = "Event started on : "+snapshot.child("Time").getValue().toString();
                         }
+
+                        if(snapshot.hasChild("AlbumType"))
+                        {
+                            String EventType = "Event Type : "+snapshot.child("AlbumType").getValue().toString();
+                            AlbumEventTypeList.add(EventType);
+                        }
+                        else
+                        {
+                            String EventType="Data not available";
+                            AlbumEventTypeList.add(EventType);
+                        }
+
+
 
                         AlbumModel Album = new AlbumModel(AlbumCoverImage,AlbumDescription,AlbumName,PostedByProfilePic,DateandTime,UserName,User_ID);
                         SearchedAlbums.add(Album);
@@ -955,9 +969,10 @@ public class MainActivity extends AppCompatActivity {
                 Collections.reverse(SearchedAlbums);
                 Collections.reverse(ParticipantRefs);
                 Collections.reverse(AlbumKeys);
+                Collections.reverse(AlbumEventTypeList);
 
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys);
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys,FirebaseDatabase.getInstance().getReference(),AlbumEventTypeList);
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
                 MemoryRecyclerView.scrollToPosition(AlbumClickDetails.getInt("last_clicked_position",0));
                 MainLoadingProgressBar.setVisibility(View.GONE);
@@ -982,6 +997,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 SearchedAlbums.clear();
+                AlbumEventTypeList.clear();
                 MemoryRecyclerView.removeAllViews();
 
                 for(DataSnapshot snapshot: dataSnapshot.getChildren())
@@ -989,7 +1005,7 @@ public class MainActivity extends AppCompatActivity {
                     String AlbumName = snapshot.child("AlbumTitle").getValue().toString();
                     if(AlbumName.toLowerCase().contains(s.toLowerCase()))
                     {
-                        String AlbumKey = snapshot.getKey();
+                        final String AlbumKey = snapshot.getKey();
                         String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
                         String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
                         String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
@@ -998,6 +1014,7 @@ public class MainActivity extends AppCompatActivity {
                         String User_ID = snapshot.child("User_ID").getValue().toString();
                         String UserName = snapshot.child("UserName").getValue().toString();
 
+
                         if (snapshot.hasChild("CreatedTimestamp")) {
                             String timestamp = snapshot.child("CreatedTimestamp").getValue().toString();
                             long time = Long.parseLong(timestamp);
@@ -1005,11 +1022,26 @@ public class MainActivity extends AppCompatActivity {
                             String timesubstring = Time.toString().substring(Time.length() - 8);
                             Date date = new Date(time);
                             String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
-                            DateandTime = "Event occured on : " + dateformat + " @ " + timesubstring ;
+                            DateandTime = "Event started on : " + dateformat + " @ " + timesubstring ;
                         } else if(snapshot.hasChild("Time")) {
 
-                            DateandTime = "Event occured on : "+snapshot.child("Time").getValue().toString();
+                            DateandTime = "Event started on : "+snapshot.child("Time").getValue().toString();
                         }
+
+
+                        if(snapshot.hasChild("AlbumType"))
+                        {
+                            String EventType = "Event Type : "+snapshot.child("AlbumType").getValue().toString();
+                            AlbumEventTypeList.add(EventType);
+                        }
+                        else
+                        {
+                            String EventType="Data not available";
+                            AlbumEventTypeList.add(EventType);
+                        }
+
+
+
 
                         AlbumModel Album = new AlbumModel(AlbumCoverImage,AlbumDescription,AlbumName,PostedByProfilePic,DateandTime,UserName,User_ID);
                         SearchedAlbums.add(Album);
@@ -1026,8 +1058,9 @@ public class MainActivity extends AppCompatActivity {
                 Collections.reverse(SearchedAlbums);
                 Collections.reverse(ParticipantRefs);
                 Collections.reverse(AlbumKeys);
+                Collections.reverse(AlbumEventTypeList);
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys);
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys,FirebaseDatabase.getInstance().getReference(),AlbumEventTypeList);
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
                 MainLoadingProgressBar.setVisibility(View.GONE);
                 MemoryRecyclerView.setVisibility(View.VISIBLE);
@@ -1507,12 +1540,16 @@ public class MainActivity extends AppCompatActivity {
         List<AlbumModel> AlbumList;
         List<DatabaseReference> AlbumPartipantRef;
         List<String> AlbumKeyIDs;
+        DatabaseReference ExpireRef;
+        List<String> AlbumEventlist;
 
-        public MainSearchAdapter(Context context, List<AlbumModel> albumList, List<DatabaseReference> albumPartipantRef, List<String> albumKeyIDs) {
+        public MainSearchAdapter(Context context, List<AlbumModel> albumList, List<DatabaseReference> albumPartipantRef, List<String> albumKeyIDs, DatabaseReference expireRef, List<String> albumEventlist) {
             this.context = context;
             AlbumList = albumList;
             AlbumPartipantRef = albumPartipantRef;
             AlbumKeyIDs = albumKeyIDs;
+            ExpireRef = expireRef;
+            AlbumEventlist = albumEventlist;
         }
 
         @NonNull
@@ -1531,6 +1568,56 @@ public class MainActivity extends AppCompatActivity {
             holder.SetAlbumDescription(AlbumList.get(position).getAlbumDescription());
             holder.SetParticipants(MainActivity.this, AlbumPartipantRef.get(position), FirebaseDatabase.getInstance().getReference().child("Users"));
             holder.SetAlbumTime(AlbumList.get(position).getTime());
+
+            ExpireRef.child("Communities").child(AlbumKeyIDs.get(position)).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if(dataSnapshot.hasChild("ActiveIndex"))
+                    {
+                        if(dataSnapshot.child("ActiveIndex").getValue().toString().equals("T"))
+                        {
+                            if(dataSnapshot.hasChild("AlbumExpiry"))
+                            {
+                                String DateEnd = "Event expires on :"+dataSnapshot.child("AlbumExpiry").getValue().toString()+" @ 11:59 PM";
+                                holder.SetAlbumEndDate(DateEnd);
+                            }
+                            else
+                            {
+                                String DateEnd = "Data not available";
+                                holder.SetAlbumEndDate(DateEnd);
+                            }
+                        }
+                        else
+                        {
+                            if(dataSnapshot.hasChild("AlbumExpiry"))
+                            {
+                                String DateEnd = "Event expired on :"+dataSnapshot.child("AlbumExpiry").getValue().toString()+" @ 11:59 PM";
+                                holder.SetAlbumEndDate(DateEnd);
+                            }
+                            else
+                            {
+                                String DateEnd = "Data not available";
+                                holder.SetAlbumEndDate(DateEnd);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        String DateEnd = "Data not available";
+                        holder.SetAlbumEndDate(DateEnd);
+                    }
+
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            holder.SetAlbumEventType(AlbumEventlist.get(position));
 
             holder.ShareButton.setOnClickListener(new View.OnClickListener() {
                 final String PostKeyS = AlbumKeyIDs.get(position);
