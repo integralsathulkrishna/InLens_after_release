@@ -403,14 +403,17 @@ public class CloudAlbum extends AppCompatActivity {
                 SharingIntent.setType("text/plain");
                 String CommunityPostKey=QRCommunityID;
 
-                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
-                        "Copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
+                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n"+ GenarateDeepLinkForInvite(CommunityPostKey));
                 startActivity(SharingIntent);
 
             }
         });
     }
 
+    private static String GenarateDeepLinkForInvite(String CommunityID)
+    {
+        return "https://inlens.page.link/?link=https://integrals.inlens.in/comid="+CommunityID+"/&apn=integrals.inlens";
+    }
 
     private String GetUserName(String uid) {
 

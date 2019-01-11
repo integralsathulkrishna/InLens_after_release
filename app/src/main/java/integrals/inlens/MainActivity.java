@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -70,6 +71,16 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.android.gms.appinvite.AppInviteInvitationResult;
+import com.google.android.gms.appinvite.AppInviteReferral;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.Api;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -82,6 +93,8 @@ import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -97,9 +110,11 @@ import com.vistrav.ask.Ask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -111,6 +126,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -154,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String PostKeyForEdit;
     private Activity activity;
-    private Dialog ProfileDialog, AlbumCoverEditDialog , PasteImageLink;
+    private Dialog ProfileDialog, AlbumCoverEditDialog, PasteImageLink;
     private String dbname = "", dbimage = "", dbemail = "";
     private static final int GALLERY_PICK = 1;
     private StorageReference mStorageRef;
@@ -174,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
     private static boolean COVER_CHANGE = false, PROFILE_CHANGE = false;
 
     //For All ParticipantsBottomSheet
-    private Dialog ParticpantsBottomSheetDialog,QRCodeDialog;
+    private Dialog ParticpantsBottomSheetDialog, QRCodeDialog;
     private RecyclerView ParticpantsBottomSheetDialogRecyclerView;
     private ImageButton ParticpantsBottomSheetDialogCloseBtn;
     private TextView ParticpantsBottomSheetDialogTitle;
@@ -188,12 +204,12 @@ public class MainActivity extends AppCompatActivity {
     private Menu MainMenu;
     private MainSearchAdapter MainAdapterForSearch;
     private List<AlbumModel> SearchedAlbums = new ArrayList<>();
-    DatabaseReference SearchParticpantRef = FirebaseDatabase.getInstance().getReference() ;
+    DatabaseReference SearchParticpantRef = FirebaseDatabase.getInstance().getReference();
     private List<DatabaseReference> ParticipantRefs = new ArrayList<>();
     private List<String> AlbumKeys = new ArrayList<>();
     private List<String> AlbumEventTypeList = new ArrayList<>();
     private Boolean QRCodeVisible = false;
-    private int INTID=3939;
+    private int INTID = 3939;
     //
     //
     // Import from Elson.............................................................................
@@ -223,22 +239,21 @@ public class MainActivity extends AppCompatActivity {
         QRCodeInit();
         PermissionsInit();
 
-        QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible",false);
-        if(QRCodeVisible)
-        {
+        QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible", false);
+        if (QRCodeVisible) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     QRCodeDialog.show();
                 }
-            },600);
+            }, 600);
         }
 
         activity = this;
 
         // to handle album clicks
 
-        AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
+        AlbumClickDetails = getSharedPreferences("LastClickedAlbum", MODE_PRIVATE);
         //Snackbar
         RootForMainActivity = findViewById(R.id.root_for_main_activity);
 
@@ -420,6 +435,92 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        /*
+
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(AppInvite.API)
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Toast.makeText(getApplicationContext(),"Connection failed",Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .build();
+
+        AppInvite.AppInviteApi.getInvitation(googleApiClient,this,false)
+                .setResultCallback(new ResultCallback<AppInviteInvitationResult>() {
+                    @Override
+                    public void onResult(@NonNull AppInviteInvitationResult appInviteInvitationResult) {
+
+                        if(appInviteInvitationResult.getStatus().isSuccess())
+                        {
+                            Intent DataIntent = appInviteInvitationResult.getInvitationIntent();
+                            String Data = AppInviteReferral.getDeepLink(DataIntent);
+                            String URLorComID = Data.substring(Data.lastIndexOf("/")+1);
+
+                            Toast.makeText(getApplicationContext(),URLorComID,Toast.LENGTH_SHORT).show();
+
+                        }
+
+                    }});
+
+         */
+
+        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(new OnSuccessListener<PendingDynamicLinkData>() {
+            @Override
+            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+
+                Uri DeepLink;
+                if (pendingDynamicLinkData != null) {
+                    DeepLink = pendingDynamicLinkData.getLink();
+                    if (DeepLink != null) {
+
+
+                        if (DeepLink.toString().contains("comid=")) {
+
+                            String UrlOrDComId = (DeepLink.toString().substring(DeepLink.toString().length() - 27)).substring(0, 26);
+
+                            SharedPreferences sharedPreferences2 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                            if (sharedPreferences2.getBoolean("UsingCommunity::", false) == true)
+                            {
+
+                                Toast.makeText(getApplicationContext(), "Sorry,You can't participate in a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+
+                            } else
+                            {
+                                Toast.makeText(getApplicationContext(), "Join " + UrlOrDComId.substring(6, 26), Toast.LENGTH_SHORT).show();
+                                AddToCloud(UrlOrDComId.substring(6, 26), progressBar, PasteCloudAlbumLink);
+                            }
+
+
+
+                        }
+                        else if(DeepLink.toString().contains("imagelink") && DeepLink.toString().contains("linkimage"))
+                        {
+
+                            String first = DeepLink.toString().replace("https://integrals.inlens.in/","");
+                            String second = first.replace("imagelink","https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb%2F");
+                            String third = second.replace("linkimage","media&token=");
+                            String ImageUrl = third.substring(0,third.length()-1);
+
+                            startActivity(new Intent(MainActivity.this, SharedImageActivity.class).putExtra("url", ImageUrl));
+
+                        }
+                    }
+                }
+
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        Toast.makeText(getApplicationContext(), "Invite Link Failed", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+
     }
 
     private void PermissionsInit() {
@@ -433,7 +534,7 @@ public class MainActivity extends AppCompatActivity {
                         , android.Manifest.permission.ACCESS_FINE_LOCATION
                         , android.Manifest.permission.RECORD_AUDIO
                         , android.Manifest.permission.VIBRATE
-                        ,Manifest.permission.SYSTEM_ALERT_WINDOW
+                        , Manifest.permission.SYSTEM_ALERT_WINDOW
                 )
                 .go();
     }
@@ -584,17 +685,15 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
 
-
-        if(item.getItemId()==0)
-        {
-            MainMenu.setGroupVisible(0,false);
-            MainMenu.setGroupVisible(1,false);
+        if (item.getItemId() == 0) {
+            MainMenu.setGroupVisible(0, false);
+            MainMenu.setGroupVisible(1, false);
 
             getSupportActionBar().setDisplayShowCustomEnabled(true);
             SEARCH_IN_PROGRESS = true;
-            View SearchActionbarView = LayoutInflater.from(getSupportActionBar().getThemedContext()).inflate(R.layout.search_layout,null);
-            android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-            getSupportActionBar().setCustomView(SearchActionbarView,params);
+            View SearchActionbarView = LayoutInflater.from(getSupportActionBar().getThemedContext()).inflate(R.layout.search_layout, null);
+            android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            getSupportActionBar().setCustomView(SearchActionbarView, params);
 
             ImageButton SearchBack = SearchActionbarView.findViewById(R.id.search_back_btn);
             final EditText SearchEditText = SearchActionbarView.findViewById(R.id.search_edittext);
@@ -608,8 +707,8 @@ public class MainActivity extends AppCompatActivity {
 
                     onStart();
                     getSupportActionBar().setDisplayShowCustomEnabled(false);
-                    MainMenu.setGroupVisible(0,true);
-                    MainMenu.setGroupVisible(1,true);
+                    MainMenu.setGroupVisible(0, true);
+                    MainMenu.setGroupVisible(1, true);
                 }
             });
 
@@ -627,13 +726,10 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void afterTextChanged(Editable editable) {
 
-                    if(!TextUtils.isEmpty(editable.toString()))
-                    {
+                    if (!TextUtils.isEmpty(editable.toString())) {
                         MemoryRecyclerView.setVisibility(View.VISIBLE);
                         ShowSearchResults(editable.toString());
-                    }
-                    else
-                    {
+                    } else {
                         SearchedAlbums.clear();
                         MemoryRecyclerView.removeAllViews();
                         onStart();
@@ -642,9 +738,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-        }
-
-        else if (item.getItemId() == 1) {
+        } else if (item.getItemId() == 1) {
 
             if (IsConnectedToNet()) {
                 new BottomSheet.Builder(this).title(" Options").sheet(R.menu.main_menu).listener(new DialogInterface.OnClickListener() {
@@ -751,146 +845,14 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 break;
-
-                            case R.id.paste_album_link:
-
-                                SharedPreferences sharedPreferences2 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                                if (sharedPreferences2.getBoolean("UsingCommunity::", false) == true) {
-                                    Toast.makeText(getApplicationContext(), "Sorry,You can't participate in a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
-                                } else
-
-                                {   // To paste invite link
-                                    PasteCloudAlbumLink = new Dialog(MainActivity.this, android.R.style.Theme_Light_NoTitleBar);
-                                    PasteCloudAlbumLink.setCancelable(true);
-                                    PasteCloudAlbumLink.setCanceledOnTouchOutside(true);
-                                    PasteCloudAlbumLink.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                    PasteCloudAlbumLink.setContentView(R.layout.paste_link_layout);
-                                    PasteCloudAlbumLink.getWindow().getAttributes().windowAnimations = R.style.UpBottomSlideDialogAnimation;
-
-                                    Window PasteCloudAlbumLinkWindow = PasteCloudAlbumLink.getWindow();
-                                    PasteCloudAlbumLinkWindow.setGravity(Gravity.TOP);
-                                    PasteCloudAlbumLinkWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
-                                    PasteCloudAlbumLinkWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                                    PasteCloudAlbumLinkWindow.setDimAmount(0.75f);
-                                    PasteCloudAlbumLinkWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-                                    final EditText Link = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_edittext);
-
-                                    Link.requestFocus();
-                                    Button Done, Cancel;
-                                    final ProgressBar progressBar;
-                                    Done = PasteCloudAlbumLink.findViewById(R.id.done_btn_paste_link_layout);
-                                    Cancel = PasteCloudAlbumLink.findViewById(R.id.cancel_btn_paste_link_layout);
-                                    progressBar = PasteCloudAlbumLink.findViewById(R.id.cloud_album_link_progress_bar);
-                                    Done.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View view) {
-                                            try {
-                                                String Data = Link.getText().toString();
-                                                String str = Data.substring(18, 23);
-                                                if (str.contentEquals("joins")) {
-                                                    Toast.makeText(getApplicationContext(), "Join " + Data.substring(24), Toast.LENGTH_SHORT).show();
-                                                    SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                                                    if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
-                                                        Toast.makeText(getApplicationContext(), "Sorry.You can't join to a new Cloud-Album, " +
-                                                                "before you quit the current one.", Toast.LENGTH_SHORT)
-                                                                .show();
-                                                    } else {
-                                                        AddToCloud(Data.substring(24), progressBar, PasteCloudAlbumLink);
-                                                    }
-                                                } else {
-                                                    Toast.makeText(getApplicationContext(), "Invalid Link", Toast.LENGTH_LONG).show();
-                                                }
-
-                                            } catch (StringIndexOutOfBoundsException e) {
-                                                Toast.makeText(getApplicationContext(), "Invalid Link", Toast.LENGTH_LONG).show();
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
-                                    Cancel.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View view) {
-                                            PasteCloudAlbumLink.hide();
-                                        }
-                                    });
-                                    PasteCloudAlbumLink.show();
-
-                                }
-
-                                break;
-
-
-                            case R.id.restart_service:{
+                            case R.id.restart_service: {
                                 SharedPreferences sharedPreferencesS = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                                 if (sharedPreferencesS.getBoolean("UsingCommunity::", false)) {
-                                    startService(new Intent(getApplicationContext(),RecentImageService.class));
+                                    startService(new Intent(getApplicationContext(), RecentImageService.class));
                                 }
 
                             }
                             break;
-                            case R.id.paste_image_link:
-                            {
-                                PasteImageLink = new Dialog(MainActivity.this,android.R.style.Theme_Light_NoTitleBar);
-                                PasteImageLink.setCancelable(true);
-                                PasteImageLink.setCanceledOnTouchOutside(true);
-                                PasteImageLink.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                PasteImageLink.setContentView(R.layout.create_new_situation_layout);
-                                PasteImageLink.getWindow().getAttributes().windowAnimations = R.style.UpBottomSlideDialogAnimation;
-
-                                Window PasteCloudAlbumLinkWindow = PasteImageLink.getWindow();
-                                PasteCloudAlbumLinkWindow.setGravity(Gravity.TOP);
-                                PasteCloudAlbumLinkWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
-                                PasteCloudAlbumLinkWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                                PasteCloudAlbumLinkWindow.setDimAmount(0.75f);
-                                PasteCloudAlbumLinkWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
-                                TextView PasteImageLinkTitle , PasteImageLinkMessage;
-                                PasteImageLinkMessage = PasteImageLink.findViewById(R.id.message);
-                                PasteImageLinkTitle = PasteImageLink.findViewById(R.id.title);
-                                PasteImageLinkTitle.setText("Album Image");
-                                PasteImageLinkMessage.setText("Paste your image here to decrypt and open it. Open Web Links coming son.");
-                                final EditText LinkEdit = PasteImageLink.findViewById(R.id.situation_name);
-                                LinkEdit.setHint("Paste Link Here");
-                                LinkEdit.requestFocus();
-                                Button Done ,Cancel;
-                                Done =   PasteImageLink.findViewById(R.id.done_btn);
-                                Cancel = PasteImageLink.findViewById(R.id.cancel_btn);
-
-                                Cancel.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        PasteImageLink.dismiss();
-                                    }
-                                });
-                                Done.setText("Decrypt");
-                                Done.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-
-                                        if(!TextUtils.isEmpty(LinkEdit.getText().toString()))
-                                        {
-
-                                            String realdata = LinkEdit.getText().toString().replace("https://inlens.in/","");
-                                            String SubString = "https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb";
-                                            String ImageUrl=SubString+realdata;
-                                            if(!ImageUrl.contains("joins"))
-                                                startActivity(new Intent(MainActivity.this,SharedImageActivity.class).putExtra("url",ImageUrl));
-                                            else
-                                                Toast.makeText(getApplicationContext(),"Album link detected.",Toast.LENGTH_SHORT).show();
-
-                                        }
-                                        else
-                                        {
-                                            Toast.makeText(getApplicationContext(),"Empty link.",Toast.LENGTH_SHORT).show();
-                                        }
-
-                                    }
-                                });
-                                PasteImageLink.show();
-                            }
-                            break;
-
                         }
                     }
                 }).show();
@@ -904,8 +866,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void ShowAllAlbums()
-    {
+    private void ShowAllAlbums() {
         MainLoadingProgressBar.setVisibility(View.VISIBLE);
         MemoryRecyclerView.setVisibility(View.GONE);
 
@@ -918,51 +879,45 @@ public class MainActivity extends AppCompatActivity {
                 AlbumEventTypeList.clear();
                 MemoryRecyclerView.removeAllViews();
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren())
-                {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String AlbumName = snapshot.child("AlbumTitle").getValue().toString();
 
 
+                    final String AlbumKey = snapshot.getKey();
+                    String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
+                    String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
+                    String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
+                    SearchParticpantRef = participantDatabaseReference.child("Communities").child(AlbumKey).child("CommunityPhotographer");
+                    String DateandTime = "";
+                    String User_ID = snapshot.child("User_ID").getValue().toString();
+                    String UserName = snapshot.child("UserName").getValue().toString();
 
-                        final String AlbumKey = snapshot.getKey();
-                        String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
-                        String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
-                        String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
-                        SearchParticpantRef = participantDatabaseReference.child("Communities").child(AlbumKey).child("CommunityPhotographer");
-                        String DateandTime="";
-                        String User_ID = snapshot.child("User_ID").getValue().toString();
-                        String UserName = snapshot.child("UserName").getValue().toString();
+                    if (snapshot.hasChild("CreatedTimestamp")) {
+                        String timestamp = snapshot.child("CreatedTimestamp").getValue().toString();
+                        long time = Long.parseLong(timestamp);
+                        CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+                        String timesubstring = Time.toString().substring(Time.length() - 8);
+                        Date date = new Date(time);
+                        String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
+                        DateandTime = "Event started on : " + dateformat + " @ " + timesubstring;
+                    } else if (snapshot.hasChild("Time")) {
 
-                        if (snapshot.hasChild("CreatedTimestamp")) {
-                            String timestamp = snapshot.child("CreatedTimestamp").getValue().toString();
-                            long time = Long.parseLong(timestamp);
-                            CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
-                            String timesubstring = Time.toString().substring(Time.length() - 8);
-                            Date date = new Date(time);
-                            String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
-                            DateandTime = "Event started on : " + dateformat + " @ " + timesubstring ;
-                        } else if(snapshot.hasChild("Time")) {
+                        DateandTime = "Event started on : " + snapshot.child("Time").getValue().toString();
+                    }
 
-                            DateandTime = "Event started on : "+snapshot.child("Time").getValue().toString();
-                        }
-
-                        if(snapshot.hasChild("AlbumType"))
-                        {
-                            String EventType = "Event Type : "+snapshot.child("AlbumType").getValue().toString();
-                            AlbumEventTypeList.add(EventType);
-                        }
-                        else
-                        {
-                            String EventType="Data not available";
-                            AlbumEventTypeList.add(EventType);
-                        }
+                    if (snapshot.hasChild("AlbumType")) {
+                        String EventType = "Event Type : " + snapshot.child("AlbumType").getValue().toString();
+                        AlbumEventTypeList.add(EventType);
+                    } else {
+                        String EventType = "Data not available";
+                        AlbumEventTypeList.add(EventType);
+                    }
 
 
-
-                        AlbumModel Album = new AlbumModel(AlbumCoverImage,AlbumDescription,AlbumName,PostedByProfilePic,DateandTime,UserName,User_ID);
-                        SearchedAlbums.add(Album);
-                        ParticipantRefs.add(SearchParticpantRef);
-                        AlbumKeys.add(AlbumKey);
+                    AlbumModel Album = new AlbumModel(AlbumCoverImage, AlbumDescription, AlbumName, PostedByProfilePic, DateandTime, UserName, User_ID);
+                    SearchedAlbums.add(Album);
+                    ParticipantRefs.add(SearchParticpantRef);
+                    AlbumKeys.add(AlbumKey);
 
                 }
 
@@ -972,9 +927,9 @@ public class MainActivity extends AppCompatActivity {
                 Collections.reverse(AlbumEventTypeList);
 
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys,FirebaseDatabase.getInstance().getReference(),AlbumEventTypeList);
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums, ParticipantRefs, AlbumKeys, FirebaseDatabase.getInstance().getReference(), AlbumEventTypeList);
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
-                MemoryRecyclerView.scrollToPosition(AlbumClickDetails.getInt("last_clicked_position",0));
+                MemoryRecyclerView.scrollToPosition(AlbumClickDetails.getInt("last_clicked_position", 0));
                 MainLoadingProgressBar.setVisibility(View.GONE);
                 MemoryRecyclerView.setVisibility(View.VISIBLE);
             }
@@ -1000,17 +955,15 @@ public class MainActivity extends AppCompatActivity {
                 AlbumEventTypeList.clear();
                 MemoryRecyclerView.removeAllViews();
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren())
-                {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String AlbumName = snapshot.child("AlbumTitle").getValue().toString();
-                    if(AlbumName.toLowerCase().contains(s.toLowerCase()))
-                    {
+                    if (AlbumName.toLowerCase().contains(s.toLowerCase())) {
                         final String AlbumKey = snapshot.getKey();
                         String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
                         String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
                         String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
                         SearchParticpantRef = participantDatabaseReference.child("Communities").child(AlbumKey).child("CommunityPhotographer");
-                        String DateandTime="";
+                        String DateandTime = "";
                         String User_ID = snapshot.child("User_ID").getValue().toString();
                         String UserName = snapshot.child("UserName").getValue().toString();
 
@@ -1022,37 +975,31 @@ public class MainActivity extends AppCompatActivity {
                             String timesubstring = Time.toString().substring(Time.length() - 8);
                             Date date = new Date(time);
                             String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
-                            DateandTime = "Event started on : " + dateformat + " @ " + timesubstring ;
-                        } else if(snapshot.hasChild("Time")) {
+                            DateandTime = "Event started on : " + dateformat + " @ " + timesubstring;
+                        } else if (snapshot.hasChild("Time")) {
 
-                            DateandTime = "Event started on : "+snapshot.child("Time").getValue().toString();
+                            DateandTime = "Event started on : " + snapshot.child("Time").getValue().toString();
                         }
 
 
-                        if(snapshot.hasChild("AlbumType"))
-                        {
-                            String EventType = "Event Type : "+snapshot.child("AlbumType").getValue().toString();
+                        if (snapshot.hasChild("AlbumType")) {
+                            String EventType = "Event Type : " + snapshot.child("AlbumType").getValue().toString();
                             AlbumEventTypeList.add(EventType);
-                        }
-                        else
-                        {
-                            String EventType="Data not available";
+                        } else {
+                            String EventType = "Data not available";
                             AlbumEventTypeList.add(EventType);
                         }
 
 
-
-
-                        AlbumModel Album = new AlbumModel(AlbumCoverImage,AlbumDescription,AlbumName,PostedByProfilePic,DateandTime,UserName,User_ID);
+                        AlbumModel Album = new AlbumModel(AlbumCoverImage, AlbumDescription, AlbumName, PostedByProfilePic, DateandTime, UserName, User_ID);
                         SearchedAlbums.add(Album);
                         ParticipantRefs.add(SearchParticpantRef);
                         AlbumKeys.add(AlbumKey);
                     }
                 }
 
-                if(SearchedAlbums.size()==0)
-                {
-                    Toast.makeText(getApplicationContext(),"No albums found.",Toast.LENGTH_SHORT).show();
+                if (SearchedAlbums.size() == 0) {
+                    Toast.makeText(getApplicationContext(), "No albums found.", Toast.LENGTH_SHORT).show();
                 }
 
                 Collections.reverse(SearchedAlbums);
@@ -1060,7 +1007,7 @@ public class MainActivity extends AppCompatActivity {
                 Collections.reverse(AlbumKeys);
                 Collections.reverse(AlbumEventTypeList);
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys,FirebaseDatabase.getInstance().getReference(),AlbumEventTypeList);
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums, ParticipantRefs, AlbumKeys, FirebaseDatabase.getInstance().getReference(), AlbumEventTypeList);
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
                 MainLoadingProgressBar.setVisibility(View.GONE);
                 MemoryRecyclerView.setVisibility(View.VISIBLE);
@@ -1520,16 +1467,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        if(SEARCH_IN_PROGRESS)
-        {
-            MainMenu.setGroupVisible(0,true);
-            MainMenu.setGroupVisible(1,true);
+        if (SEARCH_IN_PROGRESS) {
+            MainMenu.setGroupVisible(0, true);
+            MainMenu.setGroupVisible(1, true);
             SEARCH_IN_PROGRESS = false;
             getSupportActionBar().setDisplayShowCustomEnabled(false);
             onStart();
-        }
-        else
-        {
+        } else {
             super.onBackPressed();
         }
     }
@@ -1555,8 +1499,8 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public AlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-           View SearchLayoutView = LayoutInflater.from(context).inflate(R.layout.cloud_album_card,parent,false);
-           return new AlbumViewHolder(SearchLayoutView);
+            View SearchLayoutView = LayoutInflater.from(context).inflate(R.layout.cloud_album_card, parent, false);
+            return new AlbumViewHolder(SearchLayoutView);
         }
 
         @Override
@@ -1573,37 +1517,25 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    if(dataSnapshot.hasChild("ActiveIndex"))
-                    {
-                        if(dataSnapshot.child("ActiveIndex").getValue().toString().equals("T"))
-                        {
-                            if(dataSnapshot.hasChild("AlbumExpiry"))
-                            {
-                                String DateEnd = "Event expires on :"+dataSnapshot.child("AlbumExpiry").getValue().toString()+" @ 11:59 PM";
+                    if (dataSnapshot.hasChild("ActiveIndex")) {
+                        if (dataSnapshot.child("ActiveIndex").getValue().toString().equals("T")) {
+                            if (dataSnapshot.hasChild("AlbumExpiry")) {
+                                String DateEnd = "Event expires on :" + dataSnapshot.child("AlbumExpiry").getValue().toString() + " @ 11:59 PM";
+                                holder.SetAlbumEndDate(DateEnd);
+                            } else {
+                                String DateEnd = "Data not available";
                                 holder.SetAlbumEndDate(DateEnd);
                             }
-                            else
-                            {
+                        } else {
+                            if (dataSnapshot.hasChild("AlbumExpiry")) {
+                                String DateEnd = "Event expired on :" + dataSnapshot.child("AlbumExpiry").getValue().toString() + " @ 11:59 PM";
+                                holder.SetAlbumEndDate(DateEnd);
+                            } else {
                                 String DateEnd = "Data not available";
                                 holder.SetAlbumEndDate(DateEnd);
                             }
                         }
-                        else
-                        {
-                            if(dataSnapshot.hasChild("AlbumExpiry"))
-                            {
-                                String DateEnd = "Event expired on :"+dataSnapshot.child("AlbumExpiry").getValue().toString()+" @ 11:59 PM";
-                                holder.SetAlbumEndDate(DateEnd);
-                            }
-                            else
-                            {
-                                String DateEnd = "Data not available";
-                                holder.SetAlbumEndDate(DateEnd);
-                            }
-                        }
-                    }
-                    else
-                    {
+                    } else {
                         String DateEnd = "Data not available";
                         holder.SetAlbumEndDate(DateEnd);
                     }
@@ -1653,12 +1585,12 @@ public class MainActivity extends AppCompatActivity {
                     if (!TextUtils.isEmpty(PostKey)) {
                         try {
 
-                            SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
-                            AlbumEditor.putInt("last_clicked_position",position);
+                            SharedPreferences.Editor AlbumEditor = AlbumClickDetails.edit();
+                            AlbumEditor.putInt("last_clicked_position", position);
                             AlbumEditor.apply();
 
                             startActivity(new Intent(MainActivity.this, CloudAlbum.class)
-                                    .putExtra("AlbumName",AlbumList.get(position).getAlbumTitle())
+                                    .putExtra("AlbumName", AlbumList.get(position).getAlbumTitle())
                                     .putExtra("GlobalID::", PostKey)
                                     .putExtra("LocalID::", PostKey)
                                     .putExtra("UserID::", CurrentUser));
@@ -1753,15 +1685,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
-        SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
-        AlbumEditor.putInt("last_clicked_position",0);
+        SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum", MODE_PRIVATE);
+        SharedPreferences.Editor AlbumEditor = AlbumClickDetails.edit();
+        AlbumEditor.putInt("last_clicked_position", 0);
         AlbumEditor.apply();
     }
 
     private void QRCodeInit() {
 
-        QRCodeDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
+        QRCodeDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
         QRCodeDialog.setCancelable(false);
         QRCodeDialog.setCanceledOnTouchOutside(false);
         QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -1777,12 +1709,12 @@ public class MainActivity extends AppCompatActivity {
         QRCodewindow.setDimAmount(0.75f);
         QRCodewindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-        final String QRCommunityID=currentDatabase.GetLiveCommunityID();
+        CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+        final String QRCommunityID = currentDatabase.GetLiveCommunityID();
         currentDatabase.close();
 
-        Button InviteLinkButton= QRCodeDialog.findViewById(R.id.InviteLinkButton);
-        String QRPhotographerID=QRCommunityID;
+        Button InviteLinkButton = QRCodeDialog.findViewById(R.id.InviteLinkButton);
+        String QRPhotographerID = QRCommunityID;
 
         ImageButton QRCodeCloseBtn = QRCodeDialog.findViewById(R.id.QR_dialog_closebtn);
         QRCodeCloseBtn.setOnClickListener(new View.OnClickListener() {
@@ -1793,22 +1725,22 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        TextView textView= QRCodeDialog.findViewById(R.id.textViewAlbumQR);
-        ImageView QRCodeImageView= QRCodeDialog.findViewById(R.id.QR_Display);
+        TextView textView = QRCodeDialog.findViewById(R.id.textViewAlbumQR);
+        ImageView QRCodeImageView = QRCodeDialog.findViewById(R.id.QR_Display);
 
-        MultiFormatWriter multiFormatWriter=new MultiFormatWriter();
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
         try {
-            BitMatrix bitMatrix=multiFormatWriter.encode(QRPhotographerID, BarcodeFormat.QR_CODE,200,200);
-            BarcodeEncoder barcodeEncoder=new BarcodeEncoder();
-            Bitmap bitmap=barcodeEncoder.createBitmap(bitMatrix);
+            BitMatrix bitMatrix = multiFormatWriter.encode(QRPhotographerID, BarcodeFormat.QR_CODE, 200, 200);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
             QRCodeImageView.setImageBitmap(bitmap);
         } catch (WriterException e) {
             e.printStackTrace();
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
             QRCodeImageView.setVisibility(View.INVISIBLE);
             textView.setText("You must be in an album to generate QR code");
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             QRCodeImageView.setVisibility(View.INVISIBLE);
             textView.setText("You must be in an album to generate QR code");
 
@@ -1818,10 +1750,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                 SharingIntent.setType("text/plain");
-                String CommunityPostKey=QRCommunityID;
+                String CommunityPostKey = QRCommunityID;
 
-                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
-                        "Copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
+                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens Cloud-Album Invite Link \n\n" +
+                        "Copy and paste the link on InLens app https://inlens.in/joins/" + CommunityPostKey);
                 startActivity(SharingIntent);
 
             }

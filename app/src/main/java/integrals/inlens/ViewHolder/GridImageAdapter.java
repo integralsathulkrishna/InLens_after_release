@@ -139,10 +139,9 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
                                 break;
 
                             case R.id.copy_link:
-                                String SubString = "https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb";
                                 Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                                 SharingIntent.setType("text/plain");
-                                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens" + "\n\n Paste the link on InLens app to view the image. Encrypted Image : " +"https://inlens.in/"+BlogList.get(position).getImageThumb().replace(SubString,""));
+                                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens Image" + "\n\n"+GenarateDeepLinkForImage(BlogList.get(position).getImageThumb()));
                                 SharingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 context.startActivity(SharingIntent);
                                 break;
@@ -213,5 +212,11 @@ public class GridImageAdapter extends RecyclerView.Adapter<GridImageAdapter.Grid
 
     }
 
+    private static String GenarateDeepLinkForImage(String URL)
+    {
+        String url = URL.replace("https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb%2F","imagelink");
+        String Modification = url.replace("media&token=","linkimage");
+        return "https://inlens.page.link/?link=https://integrals.inlens.in/"+Modification+"/&apn=integrals.inlens";
+    }
 
 }
