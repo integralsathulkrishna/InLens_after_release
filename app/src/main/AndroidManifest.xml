@@ -122,17 +122,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".Broadcast_Receivers.OreoBroadCast"
-            android:enabled="true">
-
-            <intent-filter>
-                <action android:name="com.inlens.AddToUpload" />
-            </intent-filter>
-
-        </receiver>
-
-
-
+        <service android:name=".Services.OreoService" />
 
         <activity android:name=".Activities.ResetPassword" />
         <activity android:name=".Activities.PhotoView" />

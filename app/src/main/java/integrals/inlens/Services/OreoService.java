@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,7 +38,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -52,15 +52,14 @@ import java.util.Calendar;
 import java.util.Date;
 
 import id.zelory.compressor.Compressor;
-
-import integrals.inlens.Broadcast_Receivers.RestartRecentImageService;
+import integrals.inlens.GridView.MainActivity;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.NotificationHelper;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.R;
 
-public class RecentImageService extends Service {
+public class OreoService extends Service {
     private Bitmap LogoBitMap = null;
     private Handler handler;
     private Runnable runnable;
@@ -98,14 +97,9 @@ public class RecentImageService extends Service {
     private Bitmap ThumbBitmap = null;
     private NotificationManager UploadnotificationManager;
     private NotificationCompat.Builder Uploadbuilder;
-    private NotificationHelper         notificationHelper;
-    public RecentImageService(Context applicationContext) {
-        super();
-    }
+    private NotificationHelper notificationHelper;
 
-    public RecentImageService() {
 
-    }
 
 
     @Override
@@ -117,7 +111,7 @@ public class RecentImageService extends Service {
         InUser = InAuthentication.getCurrentUser();
         PostStorageReference = FirebaseStorage.getInstance().getReference();
 
-
+        //
         Resources res = getApplicationContext().getResources();
         int id = R.drawable.inlens_logo_m;
         LogoBitMap = BitmapFactory.decodeResource(res, id);
@@ -135,133 +129,150 @@ public class RecentImageService extends Service {
 
         Toast.makeText(getApplicationContext(), "InLens Service created.", Toast.LENGTH_SHORT).show();
 
-
-    }
+        }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String input = intent.getStringExtra("inputExtra");
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent, 0);
+
+        Notification notification = new NotificationCompat.Builder(this, "ID_505")
+                .setContentTitle("InLens Service")
+                .setContentText(input)
+                .setSmallIcon(R.drawable.inlens_notification)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        startForeground(1, notification);
         runnable = new Runnable() {
             @Override
             public void run() {
+                ServiceCode();
+                handler.postDelayed(this, 2500);
+                }
+
+        };
+                handler.postDelayed(runnable,2000);
+                return START_NOT_STICKY;
+    }
+
+    private void ServiceCode() {
 
 
-                if (CheckAlbumActive() <= 0) {
+        if (CheckAlbumActive() <= 0) {
 
-                    Projection[0] = new String[]{
-                            MediaStore.Images.ImageColumns._ID,
-                            MediaStore.Images.ImageColumns.DATA,
-                            MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
-                            MediaStore.Images.ImageColumns.DATE_MODIFIED,
-                            MediaStore.Images.ImageColumns.MIME_TYPE
+            Projection[0] = new String[]{
+                    MediaStore.Images.ImageColumns._ID,
+                    MediaStore.Images.ImageColumns.DATA,
+                    MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+                    MediaStore.Images.ImageColumns.DATE_MODIFIED,
+                    MediaStore.Images.ImageColumns.MIME_TYPE
 
-                    };
+            };
 
 
-                    cursor = getApplicationContext().getContentResolver().
-                            query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                    Projection[0], null, null,
-                                    MediaStore.Images.ImageColumns.DATE_MODIFIED + " DESC");
+            cursor = getApplicationContext().getContentResolver().
+                    query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            Projection[0], null, null,
+                            MediaStore.Images.ImageColumns.DATE_MODIFIED + " DESC");
 
-                    //Cursor Control
-                    try {
+            //Cursor Control
+            try {
 
-                        if (cursor.moveToFirst()) {
-                            ImageLocation[0] = cursor.getString(1);
-                            file[0] = new File(ImageLocation[0]);
-                            file1[0] = new File(ImageLocation[0]);
+                if (cursor.moveToFirst()) {
+                    ImageLocation[0] = cursor.getString(1);
+                    file[0] = new File(ImageLocation[0]);
+                    file1[0] = new File(ImageLocation[0]);
 
-                            if (file[0].exists()) {
-                                CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                CurrentImage[0] = currentDatabase.GetCurrentImage();
-                                currentDatabase.close();
-                                if (ImageLocation[0].contentEquals(CurrentImage[0])) {
+                    if (file[0].exists()) {
+                        CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                        CurrentImage[0] = currentDatabase.GetCurrentImage();
+                        currentDatabase.close();
+                        if (ImageLocation[0].contentEquals(CurrentImage[0])) {
 
-                                    Projection[0] = null;
-                                    cursor.close();
+                            Projection[0] = null;
+                            cursor.close();
 
-                                    //Do not do anything,if the current image matches the image in SharedPreference
-                                } else if ((!ImageLocation[0].contains("/WhatsApp/")) && !ImageLocation[0].contains("/Screenshots/") && !ImageLocation[0].contains(CurrentImage[0])) {
-                                    calendar = Calendar.getInstance();
-                                    String TimeTaken = calendar.get(Calendar.YEAR) + "-"
-                                            + calendar.get(Calendar.MONTH) + "-"
-                                            + calendar.get(Calendar.DAY_OF_MONTH) + "T"
-                                            + calendar.get(Calendar.HOUR_OF_DAY) + "-"
-                                            + calendar.get(Calendar.MINUTE) + "-"
-                                            + calendar.get(Calendar.SECOND);
+                            //Do not do anything,if the current image matches the image in SharedPreference
+                        } else if ((!ImageLocation[0].contains("/WhatsApp/")) && !ImageLocation[0].contains("/Screenshots/") && !ImageLocation[0].contains(CurrentImage[0])) {
+                            calendar = Calendar.getInstance();
+                            String TimeTaken = calendar.get(Calendar.YEAR) + "-"
+                                    + calendar.get(Calendar.MONTH) + "-"
+                                    + calendar.get(Calendar.DAY_OF_MONTH) + "T"
+                                    + calendar.get(Calendar.HOUR_OF_DAY) + "-"
+                                    + calendar.get(Calendar.MINUTE) + "-"
+                                    + calendar.get(Calendar.SECOND);
 
-                                    RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
-                                    recentImageDatabase.InsertUploadValues(
-                                            ImageLocation[0].toString(),
-                                            "NULL",
-                                            "NULL",
-                                            "NULL",
-                                            TimeTaken,
-                                            "NULL",
-                                            "NULL",
-                                            "NULL",
-                                            "NULL",
-                                            "NULL"
-                                    );
-                                    try {
-                                        bitmap1[0] = new Compressor(getApplicationContext())
-                                                .setMaxHeight(320)
-                                                .setMaxWidth(240)
-                                                .setQuality(70)
-                                                .setCompressFormat(Bitmap.CompressFormat.WEBP)
-                                                .compressToBitmap(file1[0]);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    CreateNotification();
-
-                                    CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                                    int Value = currentDatabase1.GetRecentTotal();
-                                    currentDatabase1.ResetResentTotal((Value + 1));
-                                    currentDatabase.ResetCurrentImage(ImageLocation[0]);
-                                    currentDatabase1.close();
-                                    cursor.close();
-                                    recentImageDatabase.close();
-
-                                }
-
-                            } else {
-                                Projection[0] = null;
-
+                            RecentImageDatabase recentImageDatabase = new RecentImageDatabase(getApplicationContext(), "", null, 1);
+                            recentImageDatabase.InsertUploadValues(
+                                    ImageLocation[0].toString(),
+                                    "NULL",
+                                    "NULL",
+                                    "NULL",
+                                    TimeTaken,
+                                    "NULL",
+                                    "NULL",
+                                    "NULL",
+                                    "NULL",
+                                    "NULL"
+                            );
+                            try {
+                                bitmap1[0] = new Compressor(getApplicationContext())
+                                        .setMaxHeight(320)
+                                        .setMaxWidth(240)
+                                        .setQuality(70)
+                                        .setCompressFormat(Bitmap.CompressFormat.WEBP)
+                                        .compressToBitmap(file1[0]);
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
+                            CreateNotification();
+
+                            CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
+                            int Value = currentDatabase1.GetRecentTotal();
+                            currentDatabase1.ResetResentTotal((Value + 1));
+                            currentDatabase.ResetCurrentImage(ImageLocation[0]);
+                            currentDatabase1.close();
+                            cursor.close();
+                            recentImageDatabase.close();
 
                         }
-                    }
-                    //Error Fix 7
-                    catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
-
-
-                    if(IsConnectedToNet()) {
-                        UploadOperation();
-                    }
-
-
-
-                } else if (CheckAlbumActive() > 0) {
-                    CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
-                    if (currentDatabase1.GetUploadingTargetColumn() >= currentDatabase1.GetUploadingTotal()) {
-                        QuitCloudAlbum(0);
-                        currentDatabase1.close();
 
                     } else {
-                        QuitCloudAlbum(1);
-                        currentDatabase1.close();
+                        Projection[0] = null;
 
                     }
-                }
-                handler.postDelayed(this, 2500);
-            }
-        };
-        handler.postDelayed(runnable, 2000);
-        return START_STICKY;
 
+                }
+            }
+            //Error Fix 7
+            catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+
+
+            if (IsConnectedToNet()) {
+                UploadOperation();
+            }
+
+
+        } else if (CheckAlbumActive() > 0) {
+            CurrentDatabase currentDatabase1 = new CurrentDatabase(getApplicationContext(), "", null, 1);
+            if (currentDatabase1.GetUploadingTargetColumn() >= currentDatabase1.GetUploadingTotal()) {
+                QuitCloudAlbum(0);
+                currentDatabase1.close();
+
+            } else {
+                QuitCloudAlbum(1);
+                currentDatabase1.close();
+
+            }
+        }
     }
+
 
     private void QuitCloudAlbum(int XYZ) {
 
@@ -289,7 +300,11 @@ public class RecentImageService extends Service {
                                 SharedPreferences.Editor editorC = sharedPreferencesC.edit();
                                 editorC.putBoolean("UsingCommunity::", false);
                                 editorC.commit();
-                                stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                    stopService(new Intent(getApplicationContext(), OreoService.class));
+                                    }else{
+                                     stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                                     }
                                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                 notificationManager.cancelAll();
                                 Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
@@ -311,7 +326,11 @@ public class RecentImageService extends Service {
                 SharedPreferences.Editor editorC = sharedPreferencesC.edit();
                 editorC.putBoolean("UsingCommunity::", false);
                 editorC.commit();
-                stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    stopService(new Intent(getApplicationContext(), OreoService.class));
+                }else{
+                    stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                }
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancelAll();
                 Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
@@ -487,9 +506,9 @@ public class RecentImageService extends Service {
                                     notificationHelper.cancelUploadDataNotification();
                                 }
                                 else
-                                    {
+                                {
                                     UploadnotificationManager.cancel(672);
-                                    }
+                                }
 
                                 final DatabaseReference NewPost = PostDatabaseReference.push();
                                 InUserReference.addValueEventListener(new ValueEventListener() {
@@ -561,7 +580,7 @@ public class RecentImageService extends Service {
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             int progress = (int) ((100*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount());
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            // Set progress cancelled for oreo
+                                // Set progress cancelled for oreo
                             }else {
                                 try {
                                     Uploadbuilder.setProgress(100,progress,false);
@@ -659,13 +678,13 @@ public class RecentImageService extends Service {
 
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-             Notification.Builder builder=notificationHelper.buildNotificationForRecentImage(
-                     remoteViews,
-                     LogoBitMap
-             );
-             builder.setOnlyAlertOnce(true);
+            Notification.Builder builder=notificationHelper.buildNotificationForRecentImage(
+                    remoteViews,
+                    LogoBitMap
+            );
+            builder.setOnlyAlertOnce(true);
 
-             notificationHelper.getNotificationManager().notify(7907,builder.build());
+            notificationHelper.getNotificationManager().notify(7907,builder.build());
             /////////Need to cancel notification
             ////Need to create broadcast intent
 
@@ -719,28 +738,23 @@ public class RecentImageService extends Service {
 
 
 
+
+
+
+
+
+
+
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        handler.removeMessages(0);
-
-        SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
-        SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
-        AlbumEditor.putInt("last_clicked_position",0);
-        AlbumEditor.apply();
-
-        Toast.makeText(getApplicationContext(), "InLens Service destroyed.", Toast.LENGTH_SHORT).show();
-        Intent broadcastIntent = new Intent(this, RestartRecentImageService.class);
-        sendBroadcast(broadcastIntent);
-
     }
-
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-
 }

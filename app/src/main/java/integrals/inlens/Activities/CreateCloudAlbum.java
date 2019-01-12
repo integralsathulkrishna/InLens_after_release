@@ -3,13 +3,16 @@ package integrals.inlens.Activities;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -62,6 +65,7 @@ import java.util.Map;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.MainActivity;
 import integrals.inlens.R;
+import integrals.inlens.Services.OreoService;
 import integrals.inlens.Services.RecentImageService;
 
 
@@ -491,8 +495,21 @@ public class CreateCloudAlbum extends AppCompatActivity {
         SharedPreferences.Editor editor1 = sharedPreferences1.edit();
         editor1.putBoolean("ThisOwner::", true);
         editor1.commit();
-        startService(new Intent(CreateCloudAlbum.this, RecentImageService.class));
+        startService(getApplicationContext(),new Intent(CreateCloudAlbum.this, RecentImageService.class));
 
+    }
+
+    ///Do For all process
+    public void startService(Context context, Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent serviceIntent = new Intent(this, OreoService.class);
+            serviceIntent.putExtra("inputExtra", "Ongoing InLens Recent-Image service.");
+            ContextCompat.startForegroundService(this, serviceIntent);
+            }
+        else
+            {
+            context.startService(intent);
+            }
     }
 
 

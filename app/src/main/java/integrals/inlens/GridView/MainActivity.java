@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
@@ -33,6 +35,7 @@ import integrals.inlens.Helper.NotificationHelper;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.R;
+import integrals.inlens.Services.OreoService;
 import integrals.inlens.Services.RecentImageService;
 
 public class MainActivity extends AppCompatActivity
@@ -323,11 +326,23 @@ public class MainActivity extends AppCompatActivity
 
         SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
         if (sharedPreferences.getBoolean("UsingCommunity::", false)) {
-            startService(new Intent(getApplicationContext(),RecentImageService.class));
+            startService(getApplicationContext(),new Intent(getApplicationContext(),RecentImageService.class));
         }
 
 
 
+    }
+    ///Do For all process
+    public void startService(Context context, Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent serviceIntent = new Intent(this, OreoService.class);
+            serviceIntent.putExtra("inputExtra", "Ongoing InLens Recent-Image service.");
+            ContextCompat.startForegroundService(this, serviceIntent);
+        }
+        else
+        {
+            context.startService(intent);
+        }
     }
 
 

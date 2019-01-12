@@ -23,11 +23,13 @@ import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -132,6 +134,7 @@ import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.Models.AlbumModel;
 import integrals.inlens.Models.Participants;
+import integrals.inlens.Services.OreoService;
 import integrals.inlens.Services.RecentImageService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 import integrals.inlens.ViewHolder.ParticipantsViewHolder;
@@ -824,7 +827,7 @@ public class MainActivity extends AppCompatActivity {
                             case R.id.restart_service:{
                                 SharedPreferences sharedPreferencesS = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                                 if (sharedPreferencesS.getBoolean("UsingCommunity::", false)) {
-                                    startService(new Intent(getApplicationContext(),RecentImageService.class));
+                                    startService(getApplicationContext(),new Intent(getApplicationContext(),RecentImageService.class));
                                 }
 
                             }
@@ -1119,7 +1122,11 @@ public class MainActivity extends AppCompatActivity {
                                     SharedPreferences.Editor editorC = sharedPreferencesC.edit();
                                     editorC.putBoolean("UsingCommunity::", false);
                                     editorC.commit();
-                                    stopService(new Intent(MainActivity.this, RecentImageService.class));
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                        stopService(new Intent(getApplicationContext(), OreoService.class));
+                                    }else{
+                                        stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                                    }
                                     JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
                                     jobScheduler.cancel(7907);
                                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -1144,7 +1151,11 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences.Editor editorC = sharedPreferencesC.edit();
                     editorC.putBoolean("UsingCommunity::", false);
                     editorC.commit();
-                    stopService(new Intent(MainActivity.this, RecentImageService.class));
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        stopService(new Intent(getApplicationContext(), OreoService.class));
+                    }else{
+                        stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                    }
                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     notificationManager.cancelAll();
                     Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
@@ -1273,7 +1284,7 @@ public class MainActivity extends AppCompatActivity {
                             editor1.putBoolean("ThisOwner::", false);
                             editor1.commit();
 
-                            startService(new Intent(MainActivity.this, RecentImageService.class));
+                            startService(getApplicationContext(),new Intent(getApplicationContext(),RecentImageService.class));
 
 
                         }
@@ -1299,6 +1310,20 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
+    public void startService(Context context, Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent serviceIntent = new Intent(context, OreoService.class);
+            serviceIntent.putExtra("inputExtra", "Ongoing InLens Recent-Image service.");
+            ContextCompat.startForegroundService(context, serviceIntent);
+        }
+        else
+        {
+            context.startService(intent);
+        }
+    }
+
 
     public void GetStartedWithNewProfileImage() {
         CropImage.activity()

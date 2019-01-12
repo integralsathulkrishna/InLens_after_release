@@ -4,13 +4,13 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import integrals.inlens.GridView.MainActivity;
@@ -60,11 +60,44 @@ public class NotificationHelper extends ContextWrapper {
             RemoteViews remoteViews,
             Bitmap LogoBitMap
     ){
-        Intent upload_intent = new Intent("ADD_FOR_UPLOAD_INLENS");
-        Intent attach_intent = new Intent("ATTACH_ACTIVITY_INLENS");
-        Intent upload_activity_intent = new Intent("RECENT_IMAGES_GRID_INLENS");
+        Intent upload_intent;
+        Intent attach_intent ;
+        Intent upload_activity_intent;
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            upload_intent = new Intent();
+            upload_intent.setAction("ADD_FOR_UPLOAD_INLENS");
+            attach_intent = new Intent("ATTACH_ACTIVITY_INLENS");
+            upload_activity_intent = new Intent("RECENT_IMAGES_GRID_INLENS");
+
+            upload_intent.setComponent(new ComponentName(getPackageName(),"integrals.inlens.Broadcast_Receivers.NotificationWorks"));
+            attach_intent.setComponent(new ComponentName(getPackageName(),"integrals.inlens.Broadcast_Receivers.NotificationWorks"));
+            upload_activity_intent.setComponent(new ComponentName(getPackageName(),"integrals.inlens.Broadcast_Receivers.NotificationWorks"));
+
+
+        }else{
+
+            upload_intent = new Intent("ADD_FOR_UPLOAD_INLENS");
+            attach_intent = new Intent("ATTACH_ACTIVITY_INLENS");
+            upload_activity_intent = new Intent("RECENT_IMAGES_GRID_INLENS");
+
+
+
+        }
+
+
+
+
+
+
+
+
+
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         PendingIntent pendingIntent1 = PendingIntent.getBroadcast(getApplicationContext(), 9388, upload_intent, 0);
