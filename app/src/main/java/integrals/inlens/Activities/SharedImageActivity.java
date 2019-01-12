@@ -11,6 +11,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -34,13 +35,13 @@ public class SharedImageActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_shared_image);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         ShareImageView = findViewById(R.id.shareimage_photoview);
         ShareImageProgressbar = findViewById(R.id.shareimage_progressbar);
         RootForSharedImage = findViewById(R.id.rootforsharedimage);
 
         String ImageUrl = getIntent().getStringExtra("url");
+
         if(!TextUtils.isEmpty(ImageUrl))
         {
             RequestOptions requestOptions = new RequestOptions()
@@ -54,6 +55,7 @@ public class SharedImageActivity extends AppCompatActivity {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                             ShareImageProgressbar.setVisibility(View.GONE);
+                            Snackbar.make(RootForSharedImage,"Failed to load image",Snackbar.LENGTH_SHORT).show();
                             return false;
                         }
 

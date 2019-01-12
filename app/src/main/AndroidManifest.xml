@@ -34,13 +34,13 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="inlens.in"
-                    android:scheme="https" />
+                    android:host="integrals.inlens.in"
+                    android:scheme="https"
+                    android:pathPattern=".*"/>
             </intent-filter>
         </activity>
         <activity
@@ -132,7 +132,9 @@
 
         <activity android:name=".Activities.SharedImageActivity"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/NoActionBarTheme"></activity>
+            android:theme="@style/NoActionBarTheme">
+
+        </activity>
     </application>
 
 </manifest>
