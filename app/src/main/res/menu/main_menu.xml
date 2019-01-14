@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/new_album" android:title="New Cloud-Album" android:icon="@drawable/ic_new_album"/>
-    <item android:id="@+id/scan_qr" android:title="Scan Cloud-Album" android:icon="@drawable/scan_qr_code"/>
    <item android:id="@+id/upload_activity" android:title="Inlens Gallery" android:icon="@drawable/ic_cloud_upload"/>
     <item android:id="@+id/profile_pic" android:title="User Profile" android:icon="@drawable/ic_profile_pic"/>
     <item android:id="@+id/restart_service" android:title="Restart scanning for Recent-Image" android:icon="@drawable/ic_refresh_black"/>

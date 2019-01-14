@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -138,6 +139,7 @@ import integrals.inlens.Services.OreoService;
 import integrals.inlens.Services.RecentImageService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 import integrals.inlens.ViewHolder.ParticipantsViewHolder;
+import integrals.inlens.Weather.Model.Main;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -213,6 +215,9 @@ public class MainActivity extends AppCompatActivity {
 
     //for lastclick album
     private SharedPreferences AlbumClickDetails;
+    private FloatingActionButton MainFab , CreateAlbumFab , ScanQrFab;
+    private Animation FabOpen , FabClose , FabRotateForward , FabRotateBackward;
+    private boolean isOpen = false;
 
     public MainActivity() {
     }
@@ -225,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
 
         QRCodeInit();
         PermissionsInit();
+        FabAnimationAndButtonsInit();
 
         QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible",false);
         if(QRCodeVisible)
@@ -421,6 +427,102 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+        }
+
+    }
+
+    private void FabAnimationAndButtonsInit() {
+
+        FabOpen = AnimationUtils.loadAnimation(this,R.anim.main_fab_open);
+        FabClose = AnimationUtils.loadAnimation(this,R.anim.main_fab_close);
+        FabRotateForward = AnimationUtils.loadAnimation(this,R.anim.main_fab_rotate_forward);
+        FabRotateBackward = AnimationUtils.loadAnimation(this,R.anim.main_fab_rotate_backward);
+
+        MainFab = findViewById(R.id.main_fab_btn);
+        ScanQrFab = findViewById(R.id.main_scan_qr_fab_btn);
+        CreateAlbumFab = findViewById(R.id.main_create_album_fab_btn);
+
+        MainFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AnimateFab();
+            }
+        });
+
+        ScanQrFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AnimateFab();
+
+                SharedPreferences sharedPreferences1 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                if (sharedPreferences1.getBoolean("UsingCommunity::", false) == true) {
+                    Toast.makeText(getApplicationContext(), "Sorry,You can't scan a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+                } else
+
+                {
+                    startActivity(new Intent(MainActivity.this, QRCodeReader.class));
+
+                }
+            }
+        });
+
+        CreateAlbumFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AnimateFab();
+                SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                if (sharedPreferences.getBoolean("UsingCommunity::", false)) {
+                    Toast.makeText(getApplicationContext(), "Sorry.You can't create a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+                } else {
+                    startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
+                    finish();
+                }
+            }
+        });
+
+    }
+
+    private void AnimateFab() {
+
+
+        if(isOpen)
+        {
+            ScanQrFab.clearAnimation();
+            ScanQrFab.setAnimation(FabClose);
+            ScanQrFab.getAnimation().start();
+
+            CreateAlbumFab.clearAnimation();
+            CreateAlbumFab.setAnimation(FabClose);
+            CreateAlbumFab.getAnimation().start();
+
+            CreateAlbumFab.setVisibility(View.INVISIBLE);
+            ScanQrFab.setVisibility(View.INVISIBLE);
+
+            MainFab.clearAnimation();
+            MainFab.setAnimation(FabRotateBackward);
+            MainFab.getAnimation().start();
+
+            isOpen=false;
+        }
+        else
+        {
+
+
+            ScanQrFab.clearAnimation();
+            ScanQrFab.setAnimation(FabOpen);
+            ScanQrFab.getAnimation().start();
+
+            CreateAlbumFab.clearAnimation();
+            CreateAlbumFab.setAnimation(FabOpen);
+            CreateAlbumFab.getAnimation().start();
+
+            CreateAlbumFab.setVisibility(View.VISIBLE);
+            ScanQrFab.setVisibility(View.VISIBLE);
+
+            MainFab.clearAnimation();
+            MainFab.setAnimation(FabRotateForward);
+            MainFab.getAnimation().start();
+            isOpen=true;
         }
 
     }
@@ -654,28 +756,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
-                            case R.id.new_album:
-                                SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                                if (sharedPreferences.getBoolean("UsingCommunity::", false) == true) {
-                                    Toast.makeText(getApplicationContext(), "Sorry.You can't create a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
-                                } else {
-                                    startActivity(new Intent(MainActivity.this, CreateCloudAlbum.class));
-                                    finish();
-                                }
-
-
-                                break;
-                            case R.id.scan_qr:
-                                SharedPreferences sharedPreferences1 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-                                if (sharedPreferences1.getBoolean("UsingCommunity::", false) == true) {
-                                    Toast.makeText(getApplicationContext(), "Sorry,You can't scan a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
-                                } else
-
-                                {
-                                    startActivity(new Intent(MainActivity.this, QRCodeReader.class));
-
-                                }
-                                break;
                             case R.id.upload_activity:
                                 startActivity(new Intent(MainActivity.this, integrals.inlens.GridView.MainActivity.class));
                                 break;
