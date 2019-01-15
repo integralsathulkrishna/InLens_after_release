@@ -57,9 +57,11 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -142,6 +144,7 @@ import integrals.inlens.Services.RecentImageService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 import integrals.inlens.ViewHolder.ParticipantsViewHolder;
 import integrals.inlens.Weather.Model.Main;
+import integrals.inlens.Weather.Model.Wind;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -217,10 +220,13 @@ public class MainActivity extends AppCompatActivity {
     private Animation FabOpen, FabClose, FabRotateForward, FabRotateBackward, AlbumCardOpen, AlbumCardClose;
     private boolean isOpen = false;
     private TextView MainCreateAlbumTxtview , MainScanQrTxtview;
+    private RelativeLayout MainDimBackground;
 
     //for details Dialog
     private TextView AlbumTitle, AlbumDesc, AlbumOwner, AlbumType, AlbumStartTime, AlbumEndTime, AlbumPostCount, AlbumMemberCount;
     private int PostCount , MemberCount;
+
+
 
     public MainActivity() {
     }
@@ -239,6 +245,8 @@ public class MainActivity extends AppCompatActivity {
         ParticipantsBottomSheetDialogInit();
         DetailsDialogInit();
 
+        MainDimBackground = findViewById(R.id.main_dim_background);
+        MainDimBackground.setVisibility(View.GONE);
 
         QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible", false);
         if (QRCodeVisible) {
@@ -590,8 +598,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void AnimateFab() {
 
-
         if (isOpen) {
+            
+            MainDimBackground.setVisibility(View.GONE);
             ScanQrFab.clearAnimation();
             ScanQrFab.setAnimation(FabClose);
             ScanQrFab.getAnimation().start();
@@ -620,7 +629,6 @@ public class MainActivity extends AppCompatActivity {
             isOpen = false;
         } else {
 
-
             ScanQrFab.clearAnimation();
             ScanQrFab.setAnimation(FabOpen);
             ScanQrFab.getAnimation().start();
@@ -646,6 +654,9 @@ public class MainActivity extends AppCompatActivity {
             MainFab.setAnimation(FabRotateForward);
             MainFab.getAnimation().start();
             isOpen = true;
+
+            MainDimBackground.setVisibility(View.VISIBLE);
+
         }
 
     }
