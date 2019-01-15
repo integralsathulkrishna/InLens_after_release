@@ -8,72 +8,16 @@
     android:layout_marginTop="5dp"
     android:layout_marginEnd="10dp"
     android:layout_marginRight="10dp"
-    android:layout_marginBottom="15dp"
+    android:layout_marginBottom="5dp"
     android:elevation="24dp"
-    app:cardBackgroundColor="@color/colorPrimary"
     app:cardCornerRadius="2dp"
     app:cardElevation="0dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="3dp">
-
-        <RelativeLayout
-            android:id="@+id/AlbumDetailLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white">
-
-            <LinearLayout
-                android:id="@+id/albumdetailsinearlayout"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/CreatedByProfilePic"
-                android:layout_alignTop="@id/CreatedByProfilePic"
-                >
-
-                <TextView
-                    android:id="@+id/AlbumTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Album Title"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="15sp"
-                    android:maxLength="25"
-                    android:layout_marginTop="5dp"
-                    android:layout_gravity="center_horizontal"
-                    />
-
-                <TextView
-                    android:id="@+id/AlbumDescription"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxLength="50"
-                    android:text="Album Description"
-                    android:textColor="@color/colorPrimary"
-                    android:layout_gravity="center_horizontal"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/CreatedByProfilePic"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="1dp"
-                android:src="@drawable/ic_account_circle"
-                android:visibility="visible"
-                app:civ_border_color="@android:color/white"
-                app:civ_border_width="2dp"
-                android:layout_marginTop="2.5dp"
-                app:srcCompat="@color/colorPrimary" />
-
-        </RelativeLayout>
+        android:layout_margin="3dp"
+        android:background="@drawable/border">
 
         <ImageView
             android:id="@+id/CloudAlbumCover"
@@ -81,28 +25,61 @@
             android:layout_height="250dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="false"
-            android:layout_below="@id/AlbumDetailLayout"
             android:adjustViewBounds="true"
             android:scaleType="fitXY"
-            android:layout_marginTop="2dp"
             app:srcCompat="@color/colorPrimary"
+            android:layout_margin="2dp"
             android:background="@drawable/rounded_corners"/>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/CreatedByProfilePic"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/ic_account_circle"
+            android:visibility="visible"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/circle_primarydark"
+            android:backgroundTint="#ffffff"/>
+
+        <TextView
+            android:id="@+id/AlbumTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Album Title"
+            android:textColor="#ffffff"
+            android:textSize="16sp"
+            android:maxLength="25"
+            android:layout_marginTop="5dp"
+            android:layout_gravity="start"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/curved_corners"
+            android:backgroundTint="@color/colorAccent"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:layout_alignBottom="@id/CloudAlbumCover"
+            android:layout_marginStart="10dp"
+            />
 
         <LinearLayout
             android:id="@+id/album_card_button_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/CloudAlbumCover"
+            android:layout_below="@id/CloudAlbumCover"
             android:orientation="horizontal"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="5dp"
-            android:layout_marginEnd="5dp">
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp">
 
             <ImageButton
                 android:id="@+id/album_like_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_star_golden"
+                android:src="@drawable/ic_star_grey"
                 android:background="@android:color/transparent"
                 android:layout_marginEnd="10dp"
                 android:visibility="invisible"
@@ -114,7 +91,7 @@
                 android:id="@+id/album_details_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_info_golden"
+                android:src="@drawable/ic_info_grey"
                 android:background="@android:color/transparent"
                 android:layout_marginEnd="10dp"
                 android:visibility="invisible"
@@ -125,7 +102,7 @@
                 android:id="@+id/album_participants_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_people_golden"
+                android:src="@drawable/ic_people_grey"
                 android:background="@android:color/transparent"
                 android:layout_marginEnd="10dp"
                 android:visibility="invisible"
@@ -136,7 +113,7 @@
                 android:id="@+id/album_changecover_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_edit_golden"
+                android:src="@drawable/ic_edit_grey"
                 android:background="@android:color/transparent"
                 android:layout_marginEnd="10dp"
                 android:visibility="invisible"
@@ -147,7 +124,7 @@
                 android:id="@+id/album_share_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_share_golden"
+                android:src="@drawable/ic_share_grey"
                 android:background="@android:color/transparent"
                 android:visibility="invisible"
                 android:padding="5dp"

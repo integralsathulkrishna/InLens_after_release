@@ -94,10 +94,7 @@ import integrals.inlens.R;
                  .into(imageView);
 
      }
-     public void SetAlbumDescription(String Desc){
-         TextView textView=(TextView)view.findViewById(R.id.AlbumDescription);
-         textView.setText(Desc);
-     }
+
 
 
 

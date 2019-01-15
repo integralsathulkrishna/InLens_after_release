@@ -165,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
     private Activity activity;
     private Dialog ProfileDialog;
     private Dialog AlbumCoverEditDialog, DetailsDialog;
-    private String dbname = "", dbimage = "", dbemail = "";
     private static final int GALLERY_PICK = 1;
     private StorageReference mStorageRef;
     private ProgressBar progressBar;
@@ -599,7 +598,7 @@ public class MainActivity extends AppCompatActivity {
     private void AnimateFab() {
 
         if (isOpen) {
-            
+
             MainDimBackground.setVisibility(View.GONE);
             ScanQrFab.clearAnimation();
             ScanQrFab.setAnimation(FabClose);
@@ -878,49 +877,63 @@ public class MainActivity extends AppCompatActivity {
                                     public void onDataChange(DataSnapshot dataSnapshot) {
 
                                         if (dataSnapshot.hasChild("Name")) {
-                                            dbname = dataSnapshot.child("Name").getValue().toString();
+                                            String dbname = dataSnapshot.child("Name").getValue().toString();
+                                            ProfileuserName.setText(dbname);
+
+                                        }
+                                        else
+                                        {
+                                            ProfileuserName.setText("-NA-");
                                         }
                                         if (dataSnapshot.hasChild("Profile_picture")) {
-                                            dbimage = dataSnapshot.child("Profile_picture").getValue().toString();
-                                        }
-                                        if (dataSnapshot.hasChild("Email")) {
-                                            dbemail = dataSnapshot.child("Email").getValue().toString();
-                                        }
-                                        int count = 0;
-                                        if (dataSnapshot.hasChild("Communities")) {
-                                            for (DataSnapshot snapshot : dataSnapshot.child("Communities").getChildren()) {
-                                                count++;
+                                            String image = dataSnapshot.child("Profile_picture").getValue().toString();
+
+                                            if (!TextUtils.isEmpty(image)) {
+                                                RequestOptions requestOptions = new RequestOptions()
+                                                        .fitCenter();
+
+                                                Glide.with(MainActivity.this)
+                                                        .load(image)
+                                                        .apply(requestOptions)
+                                                        .listener(new RequestListener<Drawable>() {
+                                                            @Override
+                                                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                                                progressBar.setVisibility(View.GONE);
+                                                                return false;
+                                                            }
+
+                                                            @Override
+                                                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                                                progressBar.setVisibility(View.GONE);
+                                                                return false;
+                                                            }
+                                                        })
+                                                        .into(UserImage);
+
+                                            }
+                                            else if(image.equals("default")) {
+
+                                                Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
+                                            }
+                                            else
+                                            {
+                                                Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
                                             }
                                         }
-
-                                        ProfileUserEmail.setText(String.format("Email : %s", dbemail));
-
-                                        if (!TextUtils.isEmpty(dbimage)) {
-                                            RequestOptions requestOptions = new RequestOptions()
-                                                    .fitCenter();
-
-                                            Glide.with(MainActivity.this)
-                                                    .load(dbimage)
-                                                    .apply(requestOptions)
-                                                    .listener(new RequestListener<Drawable>() {
-                                                        @Override
-                                                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                                            progressBar.setVisibility(View.GONE);
-                                                            return false;
-                                                        }
-
-                                                        @Override
-                                                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                                            progressBar.setVisibility(View.GONE);
-                                                            return false;
-                                                        }
-                                                    })
-                                                    .into(UserImage);
-                                        } else {
+                                        else
+                                        {
                                             Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
                                         }
+                                        if (dataSnapshot.hasChild("Email")) {
 
-                                        ProfileuserName.setText(dbname);
+                                            String dbemail = dataSnapshot.child("Email").getValue().toString();
+                                            ProfileUserEmail.setText(String.format("Email : %s", dbemail));
+                                        }
+                                        else
+                                        {
+                                            ProfileUserEmail.setText("Email : -NA-");
+                                        }
+
                                         ProfileDialog.show();
                                     }
 
@@ -1567,8 +1580,6 @@ public class MainActivity extends AppCompatActivity {
             holder.SetAlbumCover(getApplicationContext(), AlbumList.get(position).getAlbumCoverImage());
             holder.SetTitle(AlbumList.get(position).getAlbumTitle());
             holder.SetProfilePic(getApplicationContext(), AlbumList.get(position).getPostedByProfilePic());
-            holder.SetAlbumDescription(AlbumList.get(position).getAlbumDescription());
-
             if (holder.AlbumContainer.isShown()) {
                 holder.StarAlbum.clearAnimation();
                 holder.StarAlbum.setAnimation(AlbumCardClose);

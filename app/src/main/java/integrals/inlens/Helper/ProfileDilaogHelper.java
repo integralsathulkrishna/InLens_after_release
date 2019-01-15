@@ -103,8 +103,6 @@ public class ProfileDilaogHelper extends Dialog {
         CircleImageView CustomDialogUserImage = findViewById(R.id.custom_profile_dialog_userprofilepic);
         TextView CustomDialogUserName = findViewById(R.id.custom_profile_dialog_username);
         TextView CustomDialogUserEmail = findViewById(R.id.custom_profile_dialog_useremail);
-        TextView CustomDialogUserAlbumCount = findViewById(R.id.custom_profile_dialog_useralbumcount);
-        RatingBar CustomDialogUserRating = findViewById(R.id.custom_profile_dialog_userrating);
         final ProgressBar CustomDialogProgressbar = findViewById(R.id.custom_profile_dialog_progressbar);
         CustomDialogProgressbar.setVisibility(View.VISIBLE);
         ImageButton UserProfileImageChangeBtn = findViewById(R.id.custom_profile_dialog_profilechangebtn);
@@ -156,8 +154,6 @@ public class ProfileDilaogHelper extends Dialog {
 
         CustomDialogUserName.setText(getUserName());
         CustomDialogUserEmail.setText(getUserEmail());
-        CustomDialogUserAlbumCount.setText(getUserAlbumCount());
-        CustomDialogUserRating.setRating(Float.valueOf(getUserRating()));
     }
 
     public ProfileDilaogHelper(@NonNull Context context) {
