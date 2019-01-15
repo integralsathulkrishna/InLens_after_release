@@ -216,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton MainFab, CreateAlbumFab, ScanQrFab;
     private Animation FabOpen, FabClose, FabRotateForward, FabRotateBackward, AlbumCardOpen, AlbumCardClose;
     private boolean isOpen = false;
+    private TextView MainCreateAlbumTxtview , MainScanQrTxtview;
 
     //for details Dialog
     private TextView AlbumTitle, AlbumDesc, AlbumOwner, AlbumType, AlbumStartTime, AlbumEndTime, AlbumPostCount, AlbumMemberCount;
@@ -238,8 +239,6 @@ public class MainActivity extends AppCompatActivity {
         ParticipantsBottomSheetDialogInit();
         DetailsDialogInit();
 
-        AlbumCardOpen = AnimationUtils.loadAnimation(this, R.anim.album_card_open);
-        AlbumCardClose = AnimationUtils.loadAnimation(this, R.anim.album_card_close);
 
         QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible", false);
         if (QRCodeVisible) {
@@ -535,6 +534,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void FabAnimationAndButtonsInit() {
 
+        AlbumCardOpen = AnimationUtils.loadAnimation(this, R.anim.album_card_open);
+        AlbumCardClose = AnimationUtils.loadAnimation(this, R.anim.album_card_close);
+
         FabOpen = AnimationUtils.loadAnimation(this, R.anim.main_fab_open);
         FabClose = AnimationUtils.loadAnimation(this, R.anim.main_fab_close);
         FabRotateForward = AnimationUtils.loadAnimation(this, R.anim.main_fab_rotate_forward);
@@ -543,6 +545,8 @@ public class MainActivity extends AppCompatActivity {
         MainFab = findViewById(R.id.main_fab_btn);
         ScanQrFab = findViewById(R.id.main_scan_qr_fab_btn);
         CreateAlbumFab = findViewById(R.id.main_create_album_fab_btn);
+        MainCreateAlbumTxtview = findViewById(R.id.main_create_album_fab_txtview);
+        MainScanQrTxtview = findViewById(R.id.main_scan_qr_fab_textview);
 
         MainFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -596,8 +600,18 @@ public class MainActivity extends AppCompatActivity {
             CreateAlbumFab.setAnimation(FabClose);
             CreateAlbumFab.getAnimation().start();
 
+            MainScanQrTxtview.clearAnimation();
+            MainScanQrTxtview.setAnimation(FabClose);
+            MainScanQrTxtview.getAnimation().start();
+
+            MainCreateAlbumTxtview.clearAnimation();
+            MainCreateAlbumTxtview.setAnimation(FabClose);
+            MainCreateAlbumTxtview.getAnimation().start();
+
             CreateAlbumFab.setVisibility(View.INVISIBLE);
             ScanQrFab.setVisibility(View.INVISIBLE);
+            MainCreateAlbumTxtview.setVisibility(View.INVISIBLE);
+            MainScanQrTxtview.setVisibility(View.INVISIBLE);
 
             MainFab.clearAnimation();
             MainFab.setAnimation(FabRotateBackward);
@@ -615,8 +629,18 @@ public class MainActivity extends AppCompatActivity {
             CreateAlbumFab.setAnimation(FabOpen);
             CreateAlbumFab.getAnimation().start();
 
+            MainScanQrTxtview.clearAnimation();
+            MainScanQrTxtview.setAnimation(FabOpen);
+            MainScanQrTxtview.getAnimation().start();
+
+            MainCreateAlbumTxtview.clearAnimation();
+            MainCreateAlbumTxtview.setAnimation(FabOpen);
+            MainCreateAlbumTxtview.getAnimation().start();
+
             CreateAlbumFab.setVisibility(View.VISIBLE);
             ScanQrFab.setVisibility(View.VISIBLE);
+            MainScanQrTxtview.setVisibility(View.VISIBLE);
+            MainCreateAlbumTxtview.setVisibility(View.VISIBLE);
 
             MainFab.clearAnimation();
             MainFab.setAnimation(FabRotateForward);
