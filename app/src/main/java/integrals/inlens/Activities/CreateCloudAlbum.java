@@ -90,7 +90,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private FirebaseUser                        InUser;
     private DatabaseReference                   InUserReference;
     private String                              PostKey;
-    private String                              DatabaseTimeTaken;
     private DatabaseReference                   photographerReference,databaseReference,ComNotyRef;
     private String                              UserID;
     private Boolean                             PhotographerCreated = false;
@@ -404,11 +403,10 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                     CommunityPost.child("User_ID").setValue(InUser.getUid());
                                     CommunityPost.child("PostedByProfilePic").setValue(dataSnapshot.child("Profile_picture").getValue());
                                     CommunityPost.child("UserName").setValue(dataSnapshot.child("Name").getValue());
-                                    CommunityPost.child("Time").setValue(DatabaseTimeTaken);
                                     CommunityPost.child("ActiveIndex").setValue("T");
                                     CommunityPost.child("AlbumExpiry").setValue(AlbumTime);
                                     CommunityPost.child("AlbumType").setValue(EventType);
-
+                                    CommunityPost.child("CreatedTimestamp").setValue(ServerValue.TIMESTAMP);
                                     PostKey = CommunityPost.getKey().trim();
 
                                     NewPost.child("AlbumTitle").setValue(TitleValue);
@@ -417,7 +415,6 @@ public class CreateCloudAlbum extends AppCompatActivity {
                                     NewPost.child("User_ID").setValue(InUser.getUid());
                                     NewPost.child("PostedByProfilePic").setValue(dataSnapshot.child("Profile_picture").getValue());
                                     NewPost.child("UserName").setValue(dataSnapshot.child("Name").getValue());
-                                    NewPost.child("Time").setValue(DatabaseTimeTaken);
                                     NewPost.child("CommunityID").setValue(PostKey);
                                     NewPost.child("CreatedTimestamp").setValue(ServerValue.TIMESTAMP);
                                     NewPost.child("AlbumType").setValue(EventType);

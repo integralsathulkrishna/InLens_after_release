@@ -85,6 +85,8 @@ import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -152,14 +154,14 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth InAuthentication;
     private FirebaseUser firebaseUser;
     private DatabaseReference participantDatabaseReference;
-    private Dialog PasteCloudAlbumLink;
     private ProgressBar MainLoadingProgressBar;
 
     private DatabaseReference ProgressRef;
 
     private String PostKeyForEdit;
     private Activity activity;
-    private Dialog ProfileDialog, AlbumCoverEditDialog , PasteImageLink;
+    private Dialog ProfileDialog;
+    private Dialog AlbumCoverEditDialog, DetailsDialog;
     private String dbname = "", dbimage = "", dbemail = "";
     private static final int GALLERY_PICK = 1;
     private StorageReference mStorageRef;
@@ -179,10 +181,9 @@ public class MainActivity extends AppCompatActivity {
     private static boolean COVER_CHANGE = false, PROFILE_CHANGE = false;
 
     //For All ParticipantsBottomSheet
-    private Dialog ParticpantsBottomSheetDialog,QRCodeDialog;
+    private Dialog ParticpantsBottomSheetDialog, QRCodeDialog;
     private RecyclerView ParticpantsBottomSheetDialogRecyclerView;
     private ImageButton ParticpantsBottomSheetDialogCloseBtn;
-    private TextView ParticpantsBottomSheetDialogTitle;
     private ProgressBar ParticpantsBottomSheetDialogProgressbar;
 
     //For snackbar about Connectivity Info;
@@ -193,12 +194,9 @@ public class MainActivity extends AppCompatActivity {
     private Menu MainMenu;
     private MainSearchAdapter MainAdapterForSearch;
     private List<AlbumModel> SearchedAlbums = new ArrayList<>();
-    DatabaseReference SearchParticpantRef = FirebaseDatabase.getInstance().getReference() ;
-    private List<DatabaseReference> ParticipantRefs = new ArrayList<>();
     private List<String> AlbumKeys = new ArrayList<>();
-    private List<String> AlbumEventTypeList = new ArrayList<>();
     private Boolean QRCodeVisible = false;
-    private int INTID=3939;
+    private int INTID = 3939;
     //
     //
     // Import from Elson.............................................................................
@@ -215,9 +213,13 @@ public class MainActivity extends AppCompatActivity {
 
     //for lastclick album
     private SharedPreferences AlbumClickDetails;
-    private FloatingActionButton MainFab , CreateAlbumFab , ScanQrFab;
-    private Animation FabOpen , FabClose , FabRotateForward , FabRotateBackward;
+    private FloatingActionButton MainFab, CreateAlbumFab, ScanQrFab;
+    private Animation FabOpen, FabClose, FabRotateForward, FabRotateBackward, AlbumCardOpen, AlbumCardClose;
     private boolean isOpen = false;
+
+    //for details Dialog
+    private TextView AlbumTitle, AlbumDesc, AlbumOwner, AlbumType, AlbumStartTime, AlbumEndTime, AlbumPostCount, AlbumMemberCount;
+    private int PostCount , MemberCount;
 
     public MainActivity() {
     }
@@ -231,76 +233,204 @@ public class MainActivity extends AppCompatActivity {
         QRCodeInit();
         PermissionsInit();
         FabAnimationAndButtonsInit();
+        ProfileDialogInit();
+        AlbumCoverEditDialogInit();
+        ParticipantsBottomSheetDialogInit();
+        DetailsDialogInit();
 
-        QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible",false);
-        if(QRCodeVisible)
-        {
+        AlbumCardOpen = AnimationUtils.loadAnimation(this, R.anim.album_card_open);
+        AlbumCardClose = AnimationUtils.loadAnimation(this, R.anim.album_card_close);
+
+        QRCodeVisible = getIntent().getBooleanExtra("QRCodeVisible", false);
+        if (QRCodeVisible) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     QRCodeDialog.show();
                 }
-            },600);
+            }, 600);
         }
 
         activity = this;
 
         // to handle album clicks
 
-        AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
+        AlbumClickDetails = getSharedPreferences("LastClickedAlbum", MODE_PRIVATE);
         //Snackbar
         RootForMainActivity = findViewById(R.id.root_for_main_activity);
 
-        //ProfileDialog
-        ProfileDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
-        ProfileDialog.setCancelable(true);
-        ProfileDialog.setCanceledOnTouchOutside(true);
-        ProfileDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        ProfileDialog.setContentView(R.layout.custom_profile_dialog);
-        ProfileDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        ProfileDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+        //User Authentication
+        InAuthentication = FirebaseAuth.getInstance();
+        ProgressRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        firebaseUser = InAuthentication.getCurrentUser();
+        try {
+            if (firebaseUser == null) {
+                startActivity(new Intent(MainActivity.this, IntroActivity.class));
+                finish();
+            } else {
+                if (!firebaseUser.isEmailVerified()) {
 
-        Window ProfileDialogwindow = ProfileDialog.getWindow();
-        ProfileDialogwindow.setGravity(Gravity.BOTTOM);
-        ProfileDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
-        ProfileDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        ProfileDialogwindow.setDimAmount(0.75f);
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
 
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-
-        progressBar = ProfileDialog.findViewById(R.id.custom_profile_dialog_progressbar);
-        UserImage = ProfileDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
-        ChangeuserImage = ProfileDialog.findViewById(R.id.custom_profile_dialog_profilechangebtn);
-        ProfileUserEmail = ProfileDialog.findViewById(R.id.custom_profile_dialog_useremail);
-        ProfileuserName = ProfileDialog.findViewById(R.id.custom_profile_dialog_username);
-
-        CloseProfileDialog = ProfileDialog.findViewById(R.id.custom_profile_dialog_closebtn);
-
-        CloseProfileDialog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                ProfileDialog.dismiss();
-
-            }
-        });
-
-        ChangeuserImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (IsConnectedToNet()) {
-                    COVER_CHANGE = false;
-                    PROFILE_CHANGE = true;
-                    GetStartedWithNewProfileImage();
                 } else {
-                    Snackbar.make(RootForMainActivity, "Unable to connect to internet. Try again.", Snackbar.LENGTH_SHORT).show();
-
+                    CurrentUser = firebaseUser.getUid();
                 }
             }
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        participantDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        MemoryRecyclerView = (RecyclerView) findViewById(R.id.CloudAlbumRecyclerView);
+        MemoryRecyclerView.setHasFixedSize(true);
+        MemoryRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        MainLoadingProgressBar = findViewById(R.id.mainloadingpbar);
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            ProgressRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if (!dataSnapshot.hasChild("Communities")) {
+                        MainLoadingProgressBar.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+
+        DecryptDeepLink();
+
+    }
+
+    private void DecryptDeepLink() {
+
+        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(new OnSuccessListener<PendingDynamicLinkData>() {
+            @Override
+            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+
+                Uri DeepLink;
+                if (pendingDynamicLinkData != null) {
+                    DeepLink = pendingDynamicLinkData.getLink();
+                    if (DeepLink != null) {
+
+
+                        if (DeepLink.toString().contains("comid=")) {
+
+                            String UrlOrDComId = (DeepLink.toString().substring(DeepLink.toString().length() - 27)).substring(0, 26);
+
+                            SharedPreferences sharedPreferences2 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                            if (sharedPreferences2.getBoolean("UsingCommunity::", false) == true) {
+
+                                Toast.makeText(getApplicationContext(), "Sorry,You can't participate in a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
+
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Join " + UrlOrDComId.substring(6, 26), Toast.LENGTH_SHORT).show();
+                                AddToCloud(UrlOrDComId.substring(6, 26), progressBar);
+                            }
+
+
+                        } else if (DeepLink.toString().contains("imagelink") && DeepLink.toString().contains("linkimage")) {
+
+                            String first = DeepLink.toString().replace("https://integrals.inlens.in/", "");
+                            String second = first.replace("imagelink", "https://firebasestorage.googleapis.com/v0/b/inlens-f0ce2.appspot.com/o/OriginalImage_thumb%2F");
+                            String third = second.replace("linkimage", "media&token=");
+                            String ImageUrl = third.substring(0, third.length() - 1);
+
+                            startActivity(new Intent(MainActivity.this, SharedImageActivity.class).putExtra("url", ImageUrl));
+
+                        }
+                    }
+                }
+
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        Toast.makeText(getApplicationContext(), "Invite Link Failed", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+    }
+
+
+    private void DetailsDialogInit() {
+
+        DetailsDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
+        DetailsDialog.setCancelable(true);
+        DetailsDialog.setCanceledOnTouchOutside(true);
+        DetailsDialog.setContentView(R.layout.album_details_dialog_layout);
+        DetailsDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window DetailsDialogwindow = DetailsDialog.getWindow();
+        DetailsDialogwindow.setGravity(Gravity.BOTTOM);
+        DetailsDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        DetailsDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        DetailsDialogwindow.setDimAmount(0.50f);
+
+        ImageButton DetailsDialogCloseBtn = DetailsDialog.findViewById(R.id.details_dialog_close_btn);
+        DetailsDialogCloseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DetailsDialog.dismiss();
+            }
         });
 
-        //AlbumCoverEditDialog
+        AlbumTitle = DetailsDialog.findViewById(R.id.details_dialog_albumtitle);
+        AlbumDesc = DetailsDialog.findViewById(R.id.details_dialog_albumdesc);
+        AlbumOwner = DetailsDialog.findViewById(R.id.details_dialog_albumowner);
+        AlbumType = DetailsDialog.findViewById(R.id.details_dialog_albumtype);
+
+        AlbumStartTime = DetailsDialog.findViewById(R.id.details_dialog_albumstarttime);
+        AlbumEndTime = DetailsDialog.findViewById(R.id.details_dialog_albumendtime);
+
+        AlbumPostCount = DetailsDialog.findViewById(R.id.details_dialog_albumpostcount);
+        AlbumMemberCount = DetailsDialog.findViewById(R.id.details_dialog_albumparticipantscount);
+
+    }
+
+    private void ParticipantsBottomSheetDialogInit() {
+        ParticpantsBottomSheetDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
+        ParticpantsBottomSheetDialog.setCancelable(true);
+        ParticpantsBottomSheetDialog.setCanceledOnTouchOutside(true);
+        ParticpantsBottomSheetDialog.setContentView(R.layout.participants_bottomsheet_layout);
+        ParticpantsBottomSheetDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+
+        Window ParticpantsBottomSheetDialogwindow = ParticpantsBottomSheetDialog.getWindow();
+        ParticpantsBottomSheetDialogwindow.setGravity(Gravity.BOTTOM);
+        ParticpantsBottomSheetDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        ParticpantsBottomSheetDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        ParticpantsBottomSheetDialogwindow.setDimAmount(0.50f);
+
+        ParticpantsBottomSheetDialogRecyclerView = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_recyclerview);
+        ParticpantsBottomSheetDialogRecyclerView.setHasFixedSize(true);
+        GridLayoutManager Gridmanager = new GridLayoutManager(MainActivity.this, 3);
+        ParticpantsBottomSheetDialogRecyclerView.setLayoutManager(Gridmanager);
+
+
+        ParticpantsBottomSheetDialogCloseBtn = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_closebtn);
+        ParticpantsBottomSheetDialogCloseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ParticpantsBottomSheetDialog.dismiss();
+            }
+        });
+
+        ParticpantsBottomSheetDialogProgressbar = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_progressbar);
+
+    }
+
+    private void AlbumCoverEditDialogInit() {
+
         AlbumCoverEditDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
         AlbumCoverEditDialog.setCancelable(true);
         AlbumCoverEditDialog.setCanceledOnTouchOutside(true);
@@ -311,7 +441,7 @@ public class MainActivity extends AppCompatActivity {
         AlbumCoverEditwindow.setGravity(Gravity.BOTTOM);
         AlbumCoverEditwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
         AlbumCoverEditwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        AlbumCoverEditwindow.setDimAmount(0.75f);
+        AlbumCoverEditwindow.setDimAmount(0.50f);
 
         AlbumCoverEditprogressBar = AlbumCoverEditDialog.findViewById(R.id.custom_profile_dialog_progressbar);
         AlbumCoverEditUserImage = AlbumCoverEditDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
@@ -350,93 +480,65 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
-        //ParticipantsBottomSheetDialog
-        ParticpantsBottomSheetDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
-        ParticpantsBottomSheetDialog.setCancelable(true);
-        ParticpantsBottomSheetDialog.setCanceledOnTouchOutside(true);
-        ParticpantsBottomSheetDialog.setContentView(R.layout.participants_bottomsheet_layout);
-        ParticpantsBottomSheetDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
+    private void ProfileDialogInit() {
 
-        Window ParticpantsBottomSheetDialogwindow = ParticpantsBottomSheetDialog.getWindow();
-        ParticpantsBottomSheetDialogwindow.setGravity(Gravity.BOTTOM);
-        ParticpantsBottomSheetDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
-        ParticpantsBottomSheetDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        ParticpantsBottomSheetDialogwindow.setDimAmount(0.75f);
+        ProfileDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
+        ProfileDialog.setCancelable(true);
+        ProfileDialog.setCanceledOnTouchOutside(true);
+        ProfileDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        ProfileDialog.setContentView(R.layout.custom_profile_dialog);
+        ProfileDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        ProfileDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
 
-        ParticpantsBottomSheetDialogRecyclerView = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_recyclerview);
-        ParticpantsBottomSheetDialogRecyclerView.setHasFixedSize(true);
-        GridLayoutManager Gridmanager = new GridLayoutManager(MainActivity.this, 3);
-        ParticpantsBottomSheetDialogRecyclerView.setLayoutManager(Gridmanager);
+        Window ProfileDialogwindow = ProfileDialog.getWindow();
+        ProfileDialogwindow.setGravity(Gravity.BOTTOM);
+        ProfileDialogwindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
+        ProfileDialogwindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        ProfileDialogwindow.setDimAmount(0.50f);
 
-        ParticpantsBottomSheetDialogTitle = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_title);
+        mStorageRef = FirebaseStorage.getInstance().getReference();
 
-        ParticpantsBottomSheetDialogCloseBtn = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_closebtn);
-        ParticpantsBottomSheetDialogCloseBtn.setOnClickListener(new View.OnClickListener() {
+        progressBar = ProfileDialog.findViewById(R.id.custom_profile_dialog_progressbar);
+        UserImage = ProfileDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
+        ChangeuserImage = ProfileDialog.findViewById(R.id.custom_profile_dialog_profilechangebtn);
+        ProfileUserEmail = ProfileDialog.findViewById(R.id.custom_profile_dialog_useremail);
+        ProfileuserName = ProfileDialog.findViewById(R.id.custom_profile_dialog_username);
+
+        CloseProfileDialog = ProfileDialog.findViewById(R.id.custom_profile_dialog_closebtn);
+
+        CloseProfileDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ParticpantsBottomSheetDialog.dismiss();
+
+                ProfileDialog.dismiss();
+
             }
         });
 
-        ParticpantsBottomSheetDialogProgressbar = ParticpantsBottomSheetDialog.findViewById(R.id.particpants_bottomsheet_progressbar);
+        ChangeuserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        //User Authentication
-        InAuthentication = FirebaseAuth.getInstance();
-        ProgressRef = FirebaseDatabase.getInstance().getReference().child("Users");
-        firebaseUser = InAuthentication.getCurrentUser();
-        try {
-            if (firebaseUser == null) {
-                startActivity(new Intent(MainActivity.this, IntroActivity.class));
-                finish();
-            } else {
-                if (!firebaseUser.isEmailVerified()) {
-
-                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                    finish();
-
+                if (IsConnectedToNet()) {
+                    COVER_CHANGE = false;
+                    PROFILE_CHANGE = true;
+                    GetStartedWithNewProfileImage();
                 } else {
-                    CurrentUser = firebaseUser.getUid();
+                    Snackbar.make(RootForMainActivity, "Unable to connect to internet. Try again.", Snackbar.LENGTH_SHORT).show();
+
                 }
             }
-
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-        //Participant Database Reference
-        participantDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        //Setting Recycler View
-        MemoryRecyclerView = (RecyclerView) findViewById(R.id.CloudAlbumRecyclerView);
-        MemoryRecyclerView.setHasFixedSize(true);
-        MemoryRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        MainLoadingProgressBar = findViewById(R.id.mainloadingpbar);
-
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            ProgressRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if (!dataSnapshot.hasChild("Communities")) {
-                        MainLoadingProgressBar.setVisibility(View.GONE);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-
+        });
     }
 
     private void FabAnimationAndButtonsInit() {
 
-        FabOpen = AnimationUtils.loadAnimation(this,R.anim.main_fab_open);
-        FabClose = AnimationUtils.loadAnimation(this,R.anim.main_fab_close);
-        FabRotateForward = AnimationUtils.loadAnimation(this,R.anim.main_fab_rotate_forward);
-        FabRotateBackward = AnimationUtils.loadAnimation(this,R.anim.main_fab_rotate_backward);
+        FabOpen = AnimationUtils.loadAnimation(this, R.anim.main_fab_open);
+        FabClose = AnimationUtils.loadAnimation(this, R.anim.main_fab_close);
+        FabRotateForward = AnimationUtils.loadAnimation(this, R.anim.main_fab_rotate_forward);
+        FabRotateBackward = AnimationUtils.loadAnimation(this, R.anim.main_fab_rotate_backward);
 
         MainFab = findViewById(R.id.main_fab_btn);
         ScanQrFab = findViewById(R.id.main_scan_qr_fab_btn);
@@ -485,8 +587,7 @@ public class MainActivity extends AppCompatActivity {
     private void AnimateFab() {
 
 
-        if(isOpen)
-        {
+        if (isOpen) {
             ScanQrFab.clearAnimation();
             ScanQrFab.setAnimation(FabClose);
             ScanQrFab.getAnimation().start();
@@ -502,10 +603,8 @@ public class MainActivity extends AppCompatActivity {
             MainFab.setAnimation(FabRotateBackward);
             MainFab.getAnimation().start();
 
-            isOpen=false;
-        }
-        else
-        {
+            isOpen = false;
+        } else {
 
 
             ScanQrFab.clearAnimation();
@@ -522,7 +621,7 @@ public class MainActivity extends AppCompatActivity {
             MainFab.clearAnimation();
             MainFab.setAnimation(FabRotateForward);
             MainFab.getAnimation().start();
-            isOpen=true;
+            isOpen = true;
         }
 
     }
@@ -538,24 +637,10 @@ public class MainActivity extends AppCompatActivity {
                         , android.Manifest.permission.ACCESS_FINE_LOCATION
                         , android.Manifest.permission.RECORD_AUDIO
                         , android.Manifest.permission.VIBRATE
-                        ,Manifest.permission.SYSTEM_ALERT_WINDOW
+                        , Manifest.permission.SYSTEM_ALERT_WINDOW
                 )
                 .go();
     }
-
-    // Added By Elson
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
 
     @Override
     protected void onStart() {
@@ -684,22 +769,19 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
 
-
-        if(item.getItemId()==0)
-        {
-            MainMenu.setGroupVisible(0,false);
-            MainMenu.setGroupVisible(1,false);
+        if (item.getItemId() == 0) {
+            MainMenu.setGroupVisible(0, false);
+            MainMenu.setGroupVisible(1, false);
 
             getSupportActionBar().setDisplayShowCustomEnabled(true);
             SEARCH_IN_PROGRESS = true;
-            View SearchActionbarView = LayoutInflater.from(getSupportActionBar().getThemedContext()).inflate(R.layout.search_layout,null);
-            android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-            getSupportActionBar().setCustomView(SearchActionbarView,params);
+            View SearchActionbarView = LayoutInflater.from(getSupportActionBar().getThemedContext()).inflate(R.layout.search_layout, null);
+            android.support.v7.app.ActionBar.LayoutParams params = new android.support.v7.app.ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            getSupportActionBar().setCustomView(SearchActionbarView, params);
 
             ImageButton SearchBack = SearchActionbarView.findViewById(R.id.search_back_btn);
             final EditText SearchEditText = SearchActionbarView.findViewById(R.id.search_edittext);
@@ -713,8 +795,8 @@ public class MainActivity extends AppCompatActivity {
 
                     onStart();
                     getSupportActionBar().setDisplayShowCustomEnabled(false);
-                    MainMenu.setGroupVisible(0,true);
-                    MainMenu.setGroupVisible(1,true);
+                    MainMenu.setGroupVisible(0, true);
+                    MainMenu.setGroupVisible(1, true);
                 }
             });
 
@@ -732,13 +814,10 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void afterTextChanged(Editable editable) {
 
-                    if(!TextUtils.isEmpty(editable.toString()))
-                    {
+                    if (!TextUtils.isEmpty(editable.toString())) {
                         MemoryRecyclerView.setVisibility(View.VISIBLE);
                         ShowSearchResults(editable.toString());
-                    }
-                    else
-                    {
+                    } else {
                         SearchedAlbums.clear();
                         MemoryRecyclerView.removeAllViews();
                         onStart();
@@ -747,9 +826,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-        }
-
-        else if (item.getItemId() == 1) {
+        } else if (item.getItemId() == 1) {
 
             if (IsConnectedToNet()) {
                 new BottomSheet.Builder(this).title(" Options").sheet(R.menu.main_menu).listener(new DialogInterface.OnClickListener() {
@@ -836,15 +913,14 @@ public class MainActivity extends AppCompatActivity {
                                 break;
 
 
-                            case R.id.restart_service:{
+                            case R.id.restart_service: {
                                 SharedPreferences sharedPreferencesS = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                                 if (sharedPreferencesS.getBoolean("UsingCommunity::", false)) {
-                                    startService(getApplicationContext(),new Intent(getApplicationContext(),RecentImageService.class));
+                                    startService(getApplicationContext(), new Intent(getApplicationContext(), RecentImageService.class));
                                 }
 
                             }
                             break;
-
                         }
                     }
                 }).show();
@@ -858,8 +934,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void ShowAllAlbums()
-    {
+    private void ShowAllAlbums() {
         MainLoadingProgressBar.setVisibility(View.VISIBLE);
         MemoryRecyclerView.setVisibility(View.GONE);
 
@@ -869,66 +944,32 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 SearchedAlbums.clear();
-                AlbumEventTypeList.clear();
                 MemoryRecyclerView.removeAllViews();
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren())
-                {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String AlbumName = snapshot.child("AlbumTitle").getValue().toString();
 
 
-
-                        final String AlbumKey = snapshot.getKey();
-                        String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
-                        String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
-                        String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
-                        SearchParticpantRef = participantDatabaseReference.child("Communities").child(AlbumKey).child("CommunityPhotographer");
-                        String DateandTime="";
-                        String User_ID = snapshot.child("User_ID").getValue().toString();
-                        String UserName = snapshot.child("UserName").getValue().toString();
-
-                        if (snapshot.hasChild("CreatedTimestamp")) {
-                            String timestamp = snapshot.child("CreatedTimestamp").getValue().toString();
-                            long time = Long.parseLong(timestamp);
-                            CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
-                            String timesubstring = Time.toString().substring(Time.length() - 8);
-                            Date date = new Date(time);
-                            String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
-                            DateandTime = "Event started on : " + dateformat + " @ " + timesubstring ;
-                        } else if(snapshot.hasChild("Time")) {
-
-                            DateandTime = "Event started on : "+snapshot.child("Time").getValue().toString();
-                        }
-
-                        if(snapshot.hasChild("AlbumType"))
-                        {
-                            String EventType = "Event Type : "+snapshot.child("AlbumType").getValue().toString();
-                            AlbumEventTypeList.add(EventType);
-                        }
-                        else
-                        {
-                            String EventType="Data not available";
-                            AlbumEventTypeList.add(EventType);
-                        }
-
-
-
-                        AlbumModel Album = new AlbumModel(AlbumCoverImage,AlbumDescription,AlbumName,PostedByProfilePic,DateandTime,UserName,User_ID);
-                        SearchedAlbums.add(Album);
-                        ParticipantRefs.add(SearchParticpantRef);
-                        AlbumKeys.add(AlbumKey);
+                    final String AlbumKey = snapshot.getKey();
+                    String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
+                    String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
+                    String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
+                    String DateandTime = "";
+                    String User_ID = snapshot.child("User_ID").getValue().toString();
+                    String UserName = snapshot.child("UserName").getValue().toString();
+                    AlbumModel Album = new AlbumModel(AlbumCoverImage, AlbumDescription, AlbumName, PostedByProfilePic, DateandTime, UserName, User_ID);
+                    SearchedAlbums.add(Album);
+                    AlbumKeys.add(AlbumKey);
 
                 }
 
                 Collections.reverse(SearchedAlbums);
-                Collections.reverse(ParticipantRefs);
                 Collections.reverse(AlbumKeys);
-                Collections.reverse(AlbumEventTypeList);
 
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys,FirebaseDatabase.getInstance().getReference(),AlbumEventTypeList);
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums,AlbumKeys,FirebaseDatabase.getInstance().getReference().child("Communities"));
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
-                MemoryRecyclerView.scrollToPosition(AlbumClickDetails.getInt("last_clicked_position",0));
+                MemoryRecyclerView.scrollToPosition(AlbumClickDetails.getInt("last_clicked_position", 0));
                 MainLoadingProgressBar.setVisibility(View.GONE);
                 MemoryRecyclerView.setVisibility(View.VISIBLE);
             }
@@ -951,70 +992,32 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 SearchedAlbums.clear();
-                AlbumEventTypeList.clear();
                 MemoryRecyclerView.removeAllViews();
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren())
-                {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String AlbumName = snapshot.child("AlbumTitle").getValue().toString();
-                    if(AlbumName.toLowerCase().contains(s.toLowerCase()))
-                    {
+                    if (AlbumName.toLowerCase().contains(s.toLowerCase())) {
                         final String AlbumKey = snapshot.getKey();
                         String AlbumCoverImage = snapshot.child("AlbumCoverImage").getValue().toString();
                         String PostedByProfilePic = snapshot.child("PostedByProfilePic").getValue().toString();
                         String AlbumDescription = snapshot.child("AlbumDescription").getValue().toString();
-                        SearchParticpantRef = participantDatabaseReference.child("Communities").child(AlbumKey).child("CommunityPhotographer");
-                        String DateandTime="";
+                        String DateandTime = "";
                         String User_ID = snapshot.child("User_ID").getValue().toString();
                         String UserName = snapshot.child("UserName").getValue().toString();
-
-
-                        if (snapshot.hasChild("CreatedTimestamp")) {
-                            String timestamp = snapshot.child("CreatedTimestamp").getValue().toString();
-                            long time = Long.parseLong(timestamp);
-                            CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
-                            String timesubstring = Time.toString().substring(Time.length() - 8);
-                            Date date = new Date(time);
-                            String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
-                            DateandTime = "Event started on : " + dateformat + " @ " + timesubstring ;
-                        } else if(snapshot.hasChild("Time")) {
-
-                            DateandTime = "Event started on : "+snapshot.child("Time").getValue().toString();
-                        }
-
-
-                        if(snapshot.hasChild("AlbumType"))
-                        {
-                            String EventType = "Event Type : "+snapshot.child("AlbumType").getValue().toString();
-                            AlbumEventTypeList.add(EventType);
-                        }
-                        else
-                        {
-                            String EventType="Data not available";
-                            AlbumEventTypeList.add(EventType);
-                        }
-
-
-
-
-                        AlbumModel Album = new AlbumModel(AlbumCoverImage,AlbumDescription,AlbumName,PostedByProfilePic,DateandTime,UserName,User_ID);
+                        AlbumModel Album = new AlbumModel(AlbumCoverImage, AlbumDescription, AlbumName, PostedByProfilePic, DateandTime, UserName, User_ID);
                         SearchedAlbums.add(Album);
-                        ParticipantRefs.add(SearchParticpantRef);
                         AlbumKeys.add(AlbumKey);
                     }
                 }
 
-                if(SearchedAlbums.size()==0)
-                {
-                    Toast.makeText(getApplicationContext(),"No albums found.",Toast.LENGTH_SHORT).show();
+                if (SearchedAlbums.size() == 0) {
+                    Toast.makeText(getApplicationContext(), "No albums found.", Toast.LENGTH_SHORT).show();
                 }
 
                 Collections.reverse(SearchedAlbums);
-                Collections.reverse(ParticipantRefs);
                 Collections.reverse(AlbumKeys);
-                Collections.reverse(AlbumEventTypeList);
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(),SearchedAlbums,ParticipantRefs,AlbumKeys,FirebaseDatabase.getInstance().getReference(),AlbumEventTypeList);
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums, AlbumKeys,FirebaseDatabase.getInstance().getReference().child("Communities"));
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
                 MainLoadingProgressBar.setVisibility(View.GONE);
                 MemoryRecyclerView.setVisibility(View.VISIBLE);
@@ -1029,7 +1032,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
 
     private void QuitCloudAlbum(int XYZ) {
         String Txt = " ";
@@ -1075,7 +1077,7 @@ public class MainActivity extends AppCompatActivity {
                                     editorC.commit();
                                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                                         stopService(new Intent(getApplicationContext(), OreoService.class));
-                                    }else{
+                                    } else {
                                         stopService(new Intent(getApplicationContext(), RecentImageService.class));
                                     }
                                     JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
@@ -1104,7 +1106,7 @@ public class MainActivity extends AppCompatActivity {
                     editorC.commit();
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                         stopService(new Intent(getApplicationContext(), OreoService.class));
-                    }else{
+                    } else {
                         stopService(new Intent(getApplicationContext(), RecentImageService.class));
                     }
                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -1117,7 +1119,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void AddToCloud(String substring, final ProgressBar progressBar, final Dialog dialog) {
+    private void AddToCloud(String substring, final ProgressBar progressBar) {
         progressBar.setVisibility(View.VISIBLE);
         final DatabaseReference CommunityPhotographer;
         FirebaseAuth CommunityPhotographerAuthentication;
@@ -1235,7 +1237,7 @@ public class MainActivity extends AppCompatActivity {
                             editor1.putBoolean("ThisOwner::", false);
                             editor1.commit();
 
-                            startService(getApplicationContext(),new Intent(getApplicationContext(),RecentImageService.class));
+                            startService(getApplicationContext(), new Intent(getApplicationContext(), RecentImageService.class));
 
 
                         }
@@ -1243,13 +1245,11 @@ public class MainActivity extends AppCompatActivity {
                     });
                     builder.create().show();
                     progressBar.setVisibility(View.INVISIBLE);
-                    dialog.hide();
 
 
                 } else {
                     Toast.makeText(getApplicationContext(), "Album time expired. You can't participate in this Cloud-Album.", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.INVISIBLE);
-                    dialog.hide();
                 }
             }
 
@@ -1268,9 +1268,7 @@ public class MainActivity extends AppCompatActivity {
             Intent serviceIntent = new Intent(context, OreoService.class);
             serviceIntent.putExtra("inputExtra", "Ongoing InLens Recent-Image service.");
             ContextCompat.startForegroundService(context, serviceIntent);
-        }
-        else
-        {
+        } else {
             context.startService(intent);
         }
     }
@@ -1496,16 +1494,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        if(SEARCH_IN_PROGRESS)
-        {
-            MainMenu.setGroupVisible(0,true);
-            MainMenu.setGroupVisible(1,true);
+        if (SEARCH_IN_PROGRESS) {
+            MainMenu.setGroupVisible(0, true);
+            MainMenu.setGroupVisible(1, true);
             SEARCH_IN_PROGRESS = false;
             getSupportActionBar().setDisplayShowCustomEnabled(false);
             onStart();
-        }
-        else
-        {
+        } else {
             super.onBackPressed();
         }
     }
@@ -1514,25 +1509,21 @@ public class MainActivity extends AppCompatActivity {
 
         Context context;
         List<AlbumModel> AlbumList;
-        List<DatabaseReference> AlbumPartipantRef;
         List<String> AlbumKeyIDs;
-        DatabaseReference ExpireRef;
-        List<String> AlbumEventlist;
+        DatabaseReference CommunityRef;
 
-        public MainSearchAdapter(Context context, List<AlbumModel> albumList, List<DatabaseReference> albumPartipantRef, List<String> albumKeyIDs, DatabaseReference expireRef, List<String> albumEventlist) {
+        public MainSearchAdapter(Context context, List<AlbumModel> albumList, List<String> albumKeyIDs, DatabaseReference communityRef) {
             this.context = context;
             AlbumList = albumList;
-            AlbumPartipantRef = albumPartipantRef;
             AlbumKeyIDs = albumKeyIDs;
-            ExpireRef = expireRef;
-            AlbumEventlist = albumEventlist;
+            CommunityRef = communityRef;
         }
 
         @NonNull
         @Override
         public AlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-           View SearchLayoutView = LayoutInflater.from(context).inflate(R.layout.cloud_album_card,parent,false);
-           return new AlbumViewHolder(SearchLayoutView);
+            View SearchLayoutView = LayoutInflater.from(context).inflate(R.layout.cloud_album_card, parent, false);
+            return new AlbumViewHolder(SearchLayoutView);
         }
 
         @Override
@@ -1542,74 +1533,159 @@ public class MainActivity extends AppCompatActivity {
             holder.SetTitle(AlbumList.get(position).getAlbumTitle());
             holder.SetProfilePic(getApplicationContext(), AlbumList.get(position).getPostedByProfilePic());
             holder.SetAlbumDescription(AlbumList.get(position).getAlbumDescription());
-            holder.SetParticipants(MainActivity.this, AlbumPartipantRef.get(position), FirebaseDatabase.getInstance().getReference().child("Users"));
-            holder.SetAlbumTime(AlbumList.get(position).getTime());
 
-            ExpireRef.child("Communities").child(AlbumKeyIDs.get(position)).addListenerForSingleValueEvent(new ValueEventListener() {
+            if (holder.AlbumContainer.isShown()) {
+                holder.StarAlbum.clearAnimation();
+                holder.StarAlbum.setAnimation(AlbumCardClose);
+                holder.StarAlbum.getAnimation().start();
+
+                holder.ShareAlbum.clearAnimation();
+                holder.ShareAlbum.setAnimation(AlbumCardClose);
+                holder.ShareAlbum.getAnimation().start();
+
+                holder.DetailsAlbumn.clearAnimation();
+                holder.DetailsAlbumn.setAnimation(AlbumCardClose);
+                holder.DetailsAlbumn.getAnimation().start();
+
+                holder.AlbumCoverEditBtn.clearAnimation();
+                holder.AlbumCoverEditBtn.setAnimation(AlbumCardClose);
+                holder.AlbumCoverEditBtn.getAnimation().start();
+
+                holder.ParticipantsAlbum.clearAnimation();
+                holder.ParticipantsAlbum.setAnimation(AlbumCardClose);
+                holder.ParticipantsAlbum.getAnimation().start();
+
+                holder.StarAlbum.setVisibility(View.INVISIBLE);
+                holder.DetailsAlbumn.setVisibility(View.INVISIBLE);
+                holder.ShareAlbum.setVisibility(View.INVISIBLE);
+                holder.AlbumCoverEditBtn.setVisibility(View.INVISIBLE);
+                holder.ParticipantsAlbum.setVisibility(View.INVISIBLE);
+
+            } else {
+                holder.StarAlbum.clearAnimation();
+                holder.StarAlbum.setAnimation(AlbumCardOpen);
+                holder.StarAlbum.getAnimation().start();
+
+                holder.ShareAlbum.clearAnimation();
+                holder.ShareAlbum.setAnimation(AlbumCardOpen);
+                holder.ShareAlbum.getAnimation().start();
+
+                holder.DetailsAlbumn.clearAnimation();
+                holder.DetailsAlbumn.setAnimation(AlbumCardOpen);
+                holder.DetailsAlbumn.getAnimation().start();
+
+                holder.AlbumCoverEditBtn.clearAnimation();
+                holder.AlbumCoverEditBtn.setAnimation(AlbumCardOpen);
+                holder.AlbumCoverEditBtn.getAnimation().start();
+
+                holder.ParticipantsAlbum.clearAnimation();
+                holder.ParticipantsAlbum.setAnimation(AlbumCardOpen);
+                holder.ParticipantsAlbum.getAnimation().start();
+
+                holder.StarAlbum.setVisibility(View.VISIBLE);
+                holder.DetailsAlbumn.setVisibility(View.VISIBLE);
+                holder.ShareAlbum.setVisibility(View.VISIBLE);
+                holder.AlbumCoverEditBtn.setVisibility(View.VISIBLE);
+                holder.ParticipantsAlbum.setVisibility(View.VISIBLE);
+
+            }
+
+
+
+
+            holder.DetailsAlbumn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if(dataSnapshot.hasChild("ActiveIndex"))
-                    {
-                        if(dataSnapshot.child("ActiveIndex").getValue().toString().equals("T"))
-                        {
-                            if(dataSnapshot.hasChild("AlbumExpiry"))
-                            {
-                                String DateEnd = "Event expires on :"+dataSnapshot.child("AlbumExpiry").getValue().toString()+" @ 11:59 PM";
-                                holder.SetAlbumEndDate(DateEnd);
-                            }
-                            else
-                            {
-                                String DateEnd = "Data not available";
-                                holder.SetAlbumEndDate(DateEnd);
-                            }
-                        }
-                        else
-                        {
-                            if(dataSnapshot.hasChild("AlbumExpiry"))
-                            {
-                                String DateEnd = "Event expired on :"+dataSnapshot.child("AlbumExpiry").getValue().toString()+" @ 11:59 PM";
-                                holder.SetAlbumEndDate(DateEnd);
-                            }
-                            else
-                            {
-                                String DateEnd = "Data not available";
-                                holder.SetAlbumEndDate(DateEnd);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        String DateEnd = "Data not available";
-                        holder.SetAlbumEndDate(DateEnd);
-                    }
+                public void onClick(View view) {
 
 
-                }
+                    AlbumTitle.setText(String.format("Album Title : %s", AlbumList.get(position).getAlbumTitle()));
+                    AlbumDesc.setText(String.format("Album About : %s", AlbumList.get(position).getAlbumDescription()));
+                    AlbumOwner.setText("Created By : "+AlbumList.get(position).getUserName());
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
 
-            holder.SetAlbumEventType(AlbumEventlist.get(position));
-
-            holder.ShareButton.setOnClickListener(new View.OnClickListener() {
-                final String PostKeyS = AlbumKeyIDs.get(position);
-
-                @Override
-                public void onClick(View v) {
-
-                    final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
-                    SharingIntent.setType("text/plain");
-                    InDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    CommunityRef.child(AlbumKeyIDs.get(position)).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            CommunityPostKey = dataSnapshot.child(PostKeyS).child("CommunityID").getValue().toString().trim();
-                            SharingIntent.putExtra(Intent.EXTRA_TEXT, "https://inlens.in/watch/" + CommunityPostKey);
-                            startActivity(SharingIntent);
 
+                            PostCount = 0;
+                            MemberCount=0;
+
+                            if(dataSnapshot.hasChild("CommunityPhotographer"))
+                            {
+                                for(DataSnapshot PostSnapShot : dataSnapshot.child("CommunityPhotographer").getChildren())
+                                {
+                                    PostCount++;
+                                }
+                            }
+
+                            if(dataSnapshot.hasChild("Situations"))
+                            {
+                                for(DataSnapshot PostSnapShot : dataSnapshot.child("Situations").getChildren())
+                                {
+                                    MemberCount++;
+                                }
+                            }
+
+                            AlbumMemberCount.setText(String.format("Total Members : %d", MemberCount));
+                            AlbumPostCount.setText(String.format("Total Situations : %d", PostCount));
+
+                            if (dataSnapshot.hasChild("ActiveIndex")) {
+                                if (dataSnapshot.child("ActiveIndex").getValue().toString().equals("T")) {
+                                    if (dataSnapshot.hasChild("AlbumExpiry")) {
+                                        String DateEnd = "Event expires on : " + dataSnapshot.child("AlbumExpiry").getValue().toString() + " @ 11:59 PM";
+                                        AlbumEndTime.setText(DateEnd);
+                                    } else {
+                                        String DateEnd = "Data not available";
+                                        AlbumEndTime.setText(String.format("Album End Time : %s", DateEnd));
+                                    }
+                                } else {
+                                    if (dataSnapshot.hasChild("AlbumExpiry")) {
+                                        String DateEnd = "Event expired on :" + dataSnapshot.child("AlbumExpiry").getValue().toString() + " @ 11:59 PM";
+                                        AlbumEndTime.setText(DateEnd);
+                                    } else {
+                                        String DateEnd = "Data not available";
+                                        AlbumEndTime.setText(String.format("Album End Time : %s", DateEnd));
+                                    }
+                                }
+                            } else {
+                                String DateEnd = "Data not available";
+                                AlbumEndTime.setText(String.format("Album End Time : %s", DateEnd));
+                            }
+
+
+                            if(dataSnapshot.hasChild("CreatedTimestamp"))
+                            {
+                                String timestamp = dataSnapshot.child("CreatedTimestamp").getValue().toString();
+                                long time = Long.parseLong(timestamp);
+                                CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+                                String timesubstring = Time.toString().substring(Time.length() - 8);
+                                Date date = new Date(time);
+                                String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
+                                String DateandTime = "Event started on : " + dateformat + " @ " + timesubstring;
+                                AlbumStartTime.setText(DateandTime);
+                            }
+                            else if(dataSnapshot.hasChild("Time"))
+                            {
+                                String DateandTime = dataSnapshot.child("Time").getValue().toString();
+                                AlbumStartTime.setText(DateandTime);
+                            }
+                            else
+                            {
+                                String DateEnd = "Data not available";
+                                AlbumEndTime.setText(String.format("Album Start Time : %s", DateEnd));
+                            }
+
+                            if(dataSnapshot.hasChild("AlbumType"))
+                            {
+                                String EventType = dataSnapshot.child("AlbumType").getValue().toString();
+                                AlbumType.setText("Event Type : "+EventType);
+                            }
+                            else
+                            {
+                                String EventType = "Data not available";
+                                AlbumType.setText("Event Type : "+EventType);
+                            }
                         }
 
                         @Override
@@ -1617,6 +1693,46 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+
+                    DetailsDialog.show();
+
+                }
+            });
+
+            holder.StarAlbum.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Toast.makeText(context, "Coming Soon : ID : " + AlbumKeyIDs.get(position), Toast.LENGTH_SHORT).show();
+
+                }
+            });
+
+            holder.ShareAlbum.setOnClickListener(new View.OnClickListener() {
+                final String PostKeyS = AlbumKeyIDs.get(position);
+
+                @Override
+                public void onClick(View v) {
+
+                    if (holder.ShareAlbum.isShown()) {
+                        final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
+                        SharingIntent.setType("text/plain");
+                        InDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                CommunityPostKey = dataSnapshot.child(PostKeyS).child("CommunityID").getValue().toString().trim();
+                                SharingIntent.putExtra(Intent.EXTRA_TEXT, "https://inlens.in/watch/" + CommunityPostKey);
+                                startActivity(SharingIntent);
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+
                 }
             });
             holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -1629,12 +1745,12 @@ public class MainActivity extends AppCompatActivity {
                     if (!TextUtils.isEmpty(PostKey)) {
                         try {
 
-                            SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
-                            AlbumEditor.putInt("last_clicked_position",position);
+                            SharedPreferences.Editor AlbumEditor = AlbumClickDetails.edit();
+                            AlbumEditor.putInt("last_clicked_position", position);
                             AlbumEditor.apply();
 
                             startActivity(new Intent(MainActivity.this, CloudAlbum.class)
-                                    .putExtra("AlbumName",AlbumList.get(position).getAlbumTitle())
+                                    .putExtra("AlbumName", AlbumList.get(position).getAlbumTitle())
                                     .putExtra("GlobalID::", PostKey)
                                     .putExtra("LocalID::", PostKey)
                                     .putExtra("UserID::", CurrentUser));
@@ -1648,7 +1764,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            holder.AlbuymCoverEditBtn.setOnClickListener(new View.OnClickListener() {
+            holder.AlbumCoverEditBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
@@ -1704,7 +1820,7 @@ public class MainActivity extends AppCompatActivity {
 
             // more participants
 
-            holder.ParticipantsMoreBtn.setOnClickListener(new View.OnClickListener() {
+            holder.ParticipantsAlbum.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
@@ -1729,15 +1845,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum",MODE_PRIVATE);
-        SharedPreferences.Editor  AlbumEditor = AlbumClickDetails.edit();
-        AlbumEditor.putInt("last_clicked_position",0);
+        SharedPreferences AlbumClickDetails = getSharedPreferences("LastClickedAlbum", MODE_PRIVATE);
+        SharedPreferences.Editor AlbumEditor = AlbumClickDetails.edit();
+        AlbumEditor.putInt("last_clicked_position", 0);
         AlbumEditor.apply();
     }
 
     private void QRCodeInit() {
 
-        QRCodeDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
+        QRCodeDialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar);
         QRCodeDialog.setCancelable(false);
         QRCodeDialog.setCanceledOnTouchOutside(false);
         QRCodeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -1753,12 +1869,12 @@ public class MainActivity extends AppCompatActivity {
         QRCodewindow.setDimAmount(0.75f);
         QRCodewindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        CurrentDatabase currentDatabase=new CurrentDatabase(getApplicationContext(),"",null,1);
-        final String QRCommunityID=currentDatabase.GetLiveCommunityID();
+        CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
+        final String QRCommunityID = currentDatabase.GetLiveCommunityID();
         currentDatabase.close();
 
-        Button InviteLinkButton= QRCodeDialog.findViewById(R.id.InviteLinkButton);
-        String QRPhotographerID=QRCommunityID;
+        Button InviteLinkButton = QRCodeDialog.findViewById(R.id.InviteLinkButton);
+        String QRPhotographerID = QRCommunityID;
 
         ImageButton QRCodeCloseBtn = QRCodeDialog.findViewById(R.id.QR_dialog_closebtn);
         QRCodeCloseBtn.setOnClickListener(new View.OnClickListener() {
@@ -1769,22 +1885,22 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        TextView textView= QRCodeDialog.findViewById(R.id.textViewAlbumQR);
-        ImageView QRCodeImageView= QRCodeDialog.findViewById(R.id.QR_Display);
+        TextView textView = QRCodeDialog.findViewById(R.id.textViewAlbumQR);
+        ImageView QRCodeImageView = QRCodeDialog.findViewById(R.id.QR_Display);
 
-        MultiFormatWriter multiFormatWriter=new MultiFormatWriter();
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
         try {
-            BitMatrix bitMatrix=multiFormatWriter.encode(QRPhotographerID, BarcodeFormat.QR_CODE,200,200);
-            BarcodeEncoder barcodeEncoder=new BarcodeEncoder();
-            Bitmap bitmap=barcodeEncoder.createBitmap(bitMatrix);
+            BitMatrix bitMatrix = multiFormatWriter.encode(QRPhotographerID, BarcodeFormat.QR_CODE, 200, 200);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
             QRCodeImageView.setImageBitmap(bitmap);
         } catch (WriterException e) {
             e.printStackTrace();
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
             QRCodeImageView.setVisibility(View.INVISIBLE);
             textView.setText("You must be in an album to generate QR code");
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             QRCodeImageView.setVisibility(View.INVISIBLE);
             textView.setText("You must be in an album to generate QR code");
 
@@ -1794,10 +1910,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                 SharingIntent.setType("text/plain");
-                String CommunityPostKey=QRCommunityID;
+                String CommunityPostKey = QRCommunityID;
 
-                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n" +
-                        "Copy and paste the link on InLens app https://inlens.in/joins/"+CommunityPostKey);
+                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens Cloud-Album Invite Link \n\n" +
+                        "Copy and paste the link on InLens app https://inlens.in/joins/" + CommunityPostKey);
                 startActivity(SharingIntent);
 
             }

@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -45,31 +46,22 @@ import integrals.inlens.R;
    public class AlbumViewHolder extends RecyclerView.ViewHolder {
 
     private View view;
-    public Button ShareButton;
-    public ImageButton AlbuymCoverEditBtn;
-    public ImageButton ParticipantsMoreBtn;
     public Dialog UserDialog;
+    public ImageButton StarAlbum,ParticipantsAlbum,AlbumCoverEditBtn,DetailsAlbumn,ShareAlbum;
+    public LinearLayout AlbumContainer;
 
     public AlbumViewHolder(View ItemView) {
         super(ItemView);
         view=ItemView;
-        ShareButton=(Button)view.findViewById(R.id.ShareAlbum);
-        AlbuymCoverEditBtn = view.findViewById(R.id.changecover);
-        ParticipantsMoreBtn = view.findViewById(R.id.ParticipantsRecyclerView_more_btn);
-
+        AlbumCoverEditBtn = view.findViewById(R.id.album_changecover_btn);
+        StarAlbum = view.findViewById(R.id.album_like_btn);
+        ParticipantsAlbum = view.findViewById(R.id.album_participants_btn);
+        DetailsAlbumn = view.findViewById(R.id.album_details_btn);
+        ShareAlbum = view.findViewById(R.id.album_share_btn);
+        AlbumContainer = view.findViewById(R.id.album_card_button_container);
         }
 
-    public void SetAlbumEventType(String EventType)
-    {
-        TextView EvenTypetText=(TextView)view.findViewById(R.id.AlbumEventType);
-        EvenTypetText.setText(EventType);
-    }
 
-    public void SetAlbumEndDate(String EventEnd)
-    {
-        TextView EventEndText=(TextView)view.findViewById(R.id.EventEndTime);
-        EventEndText.setText(EventEnd);
-    }
 
     public void SetAlbumCover(Context context,String Uri){
          ImageView imageView=(ImageView)view.findViewById(R.id.CloudAlbumCover);
@@ -85,10 +77,6 @@ import integrals.inlens.R;
     }
     public void SetTitle(String Text){
         TextView textView=(TextView)view.findViewById(R.id.AlbumTitle);
-        textView.setText(Text);
-    }
-    public void SetAlbumTime(String Text){
-        TextView textView=(TextView)view.findViewById(R.id.EventOccurTime);
         textView.setText(Text);
     }
 
@@ -109,130 +97,6 @@ import integrals.inlens.R;
      public void SetAlbumDescription(String Desc){
          TextView textView=(TextView)view.findViewById(R.id.AlbumDescription);
          textView.setText(Desc);
-     }
-     public void SetParticipants(final Context context, DatabaseReference participantReference, final DatabaseReference UserRef){
-
-
-         UserDialog = new Dialog(context,android.R.style.Theme_Light_NoTitleBar);
-         UserDialog.setCancelable(true);
-         UserDialog.setCanceledOnTouchOutside(true);
-         UserDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-         UserDialog.setContentView(R.layout.custom_profile_dialog);
-
-         final ProgressBar progressBar = UserDialog.findViewById(R.id.custom_profile_dialog_progressbar);
-         final CircleImageView UserImage = UserDialog.findViewById(R.id.custom_profile_dialog_userprofilepic);
-         ImageButton ChangeuserImage = UserDialog.findViewById(R.id.custom_profile_dialog_profilechangebtn);
-         ChangeuserImage.setVisibility(View.GONE);
-         final TextView ProfileUserEmail = UserDialog.findViewById(R.id.custom_profile_dialog_useremail);
-         final TextView ProfileuserName = UserDialog.findViewById(R.id.custom_profile_dialog_username);
-         ImageButton CloseProfileDialog = UserDialog.findViewById(R.id.custom_profile_dialog_closebtn);
-
-         CloseProfileDialog.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-
-                 UserDialog.dismiss();
-             }
-         });
-
-         if(UserDialog.getWindow()!=null)
-         {
-             UserDialog.getWindow().getAttributes().windowAnimations = R.style.BottomUpSlideDialogAnimation;
-
-             Window UserDialogWindow = UserDialog.getWindow();
-             UserDialogWindow.setGravity(Gravity.BOTTOM);
-             UserDialogWindow.setLayout(GridLayout.LayoutParams.MATCH_PARENT, GridLayout.LayoutParams.WRAP_CONTENT);
-             UserDialogWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-             UserDialogWindow.setDimAmount(0.75f);
-
-         }
-
-
-
-         RecyclerView ParticipantsRecyclerView=(RecyclerView)view.findViewById(R.id.ParticipantsRecyclerView);
-         ParticipantsRecyclerView.setHasFixedSize(true);
-         LinearLayoutManager linearLayoutManager= new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false);
-         ParticipantsRecyclerView.setLayoutManager(linearLayoutManager);
-
-         final FirebaseRecyclerAdapter<Participants, ParticipantsViewHolder> firebaseRecyclerAdapter1 =
-                 new FirebaseRecyclerAdapter<Participants, ParticipantsViewHolder>(
-                 Participants.class,
-                 R.layout.member_card,
-                 ParticipantsViewHolder.class,
-                 participantReference
-         ) {
-             @Override
-             protected void populateViewHolder(ParticipantsViewHolder viewHolder,
-                                               final Participants model,
-                                               int position) {
-                 viewHolder.setProfile_picture(context, model.getProfile_picture());
-                 viewHolder.setUserName(model.getName());
-                 viewHolder.InView.setOnClickListener(new View.OnClickListener() {
-                     @Override
-                     public void onClick(View v) {
-
-                         UserRef.child(model.getPhotographer_UID()).addListenerForSingleValueEvent(new ValueEventListener() {
-                             @Override
-                             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                 if(dataSnapshot.hasChild("Communities"))
-                                 {
-                                     for(DataSnapshot snapshot : dataSnapshot.getChildren())
-                                     {
-                                     }
-                                 }
-
-                             }
-
-                             @Override
-                             public void onCancelled(DatabaseError databaseError) {
-
-                             }
-                         });
-
-                         ProfileUserEmail.setText("Email : "+model.getEmail_ID());
-
-                         if(!TextUtils.isEmpty(model.getProfile_picture()))
-                         {
-                             RequestOptions requestOptions=new RequestOptions()
-                                     .fitCenter();
-
-                             Glide.with(view)
-                                     .load(model.getProfile_picture())
-                                     .apply(requestOptions)
-                                     .listener(new RequestListener<Drawable>() {
-                                         @Override
-                                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                             progressBar.setVisibility(View.GONE);
-                                             return false;
-                                         }
-
-                                         @Override
-                                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                             progressBar.setVisibility(View.GONE);
-                                             return false;
-                                         }
-                                     })
-                                     .into(UserImage);
-                         }
-                         else
-                         {
-                             Glide.with(view).load(R.drawable.ic_account_200dp).into(UserImage);
-                             progressBar.setVisibility(View.GONE);
-                         }
-                         ProfileuserName.setText(model.getName());
-                         UserDialog.show();
-
-                     }
-                 });
-
-             }
-
-         };
-         ParticipantsRecyclerView.setAdapter(firebaseRecyclerAdapter1);
-
-
-
      }
 
 

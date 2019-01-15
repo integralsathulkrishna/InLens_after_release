@@ -11,104 +11,13 @@
     android:layout_marginBottom="15dp"
     android:elevation="24dp"
     app:cardBackgroundColor="@color/colorPrimary"
-    app:cardCornerRadius="0dp"
+    app:cardCornerRadius="2dp"
     app:cardElevation="0dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="1.5dp">
-
-        <ImageView
-            android:id="@+id/CloudAlbumCover"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_below="@+id/albumtimedetailsrelativelayout"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="false"
-            android:layout_gravity="center_vertical"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:layout_marginTop="2dp"
-            app:srcCompat="@color/colorPrimary"
-            android:background="@drawable/rounded_corners"/>
-
-        <RelativeLayout
-            android:id="@+id/albumtimedetailsrelativelayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/AlbumDetailLayout"
-            android:background="@android:color/white">
-
-            <TextView
-                android:id="@+id/EventOccurTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:background="@color/colorPrimary"
-                android:text="Event occured on 1/2/2019"
-                android:textColor="@android:color/white"
-                android:paddingStart="10dp"
-                android:textSize="11sp" />
-
-            <TextView
-                android:id="@+id/EventEndTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/EventOccurTime"
-                android:background="@color/colorPrimary"
-                android:text="Event Ends on 1/2/2019"
-                android:textColor="@android:color/white"
-                android:textSize="11sp"
-                android:paddingStart="10dp"
-                />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/ParticipantLayout"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_below="@+id/CloudAlbumCover"
-            android:layout_alignParentBottom="false"
-            android:layout_gravity="bottom"
-            android:background="#e9e9e9">
-
-            <TextView
-                android:id="@+id/ParticiapantsText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:background="@color/colorPrimary"
-                android:text="Participants"
-                android:textAlignment="center"
-                android:textColor="#FFF"
-                android:textSize="9sp" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/ParticipantsRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/ParticiapantsText"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/ParticipantsRecyclerView_more_btn"
-                android:background="@android:color/white" />
-
-            <ImageButton
-                android:id="@+id/ParticipantsRecyclerView_more_btn"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_below="@+id/ParticiapantsText"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="false"
-                android:layout_marginTop="30dp"
-                android:adjustViewBounds="false"
-                android:background="@drawable/ic_swipe_left"
-                android:drawingCacheQuality="high"
-                android:rotation="180" />
-
-        </RelativeLayout>
+        android:layout_margin="3dp">
 
         <RelativeLayout
             android:id="@+id/AlbumDetailLayout"
@@ -116,35 +25,13 @@
             android:layout_height="wrap_content"
             android:background="@android:color/white">
 
-            <Button
-                android:id="@+id/ShareAlbum"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_alignParentRight="true"
-                android:layout_gravity="right"
-                android:layout_margin="5dp"
-                android:background="@drawable/ic_add_participant_black"
-                android:maxLength="20"
-                android:visibility="gone" />
-
-            <ImageButton
-                android:id="@+id/changecover"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentEnd="true"
-                android:layout_gravity="right"
-                android:layout_margin="5dp"
-                android:backgroundTint="@android:color/white"
-                android:elevation="0dp"
-                android:maxLength="20"
-                android:src="@drawable/ic_edit_black_24dp" />
-
             <LinearLayout
                 android:id="@+id/albumdetailsinearlayout"
                 android:orientation="vertical"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/CreatedByProfilePic"
+                android:layout_alignBottom="@id/CreatedByProfilePic"
+                android:layout_alignTop="@id/CreatedByProfilePic"
                 >
 
                 <TextView
@@ -154,27 +41,19 @@
                     android:text="Album Title"
                     android:textColor="@color/colorPrimary"
                     android:textSize="15sp"
-                    android:maxLength="20"
+                    android:maxLength="25"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center_horizontal"
                     />
 
                 <TextView
                     android:id="@+id/AlbumDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLength="30"
+                    android:maxLength="50"
                     android:text="Album Description"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="12sp" />
-
-
-
-                <TextView
-                    android:id="@+id/AlbumEventType"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxLength="30"
-                    android:text="Album Event Type"
-                    android:textColor="@color/colorPrimary"
+                    android:layout_gravity="center_horizontal"
                     android:textSize="12sp" />
 
             </LinearLayout>
@@ -196,6 +75,87 @@
 
         </RelativeLayout>
 
+        <ImageView
+            android:id="@+id/CloudAlbumCover"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="false"
+            android:layout_below="@id/AlbumDetailLayout"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
+            android:layout_marginTop="2dp"
+            app:srcCompat="@color/colorPrimary"
+            android:background="@drawable/rounded_corners"/>
+
+        <LinearLayout
+            android:id="@+id/album_card_button_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/CloudAlbumCover"
+            android:orientation="horizontal"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginEnd="5dp">
+
+            <ImageButton
+                android:id="@+id/album_like_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_star_golden"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="10dp"
+                android:visibility="invisible"
+                android:padding="5dp"
+                />
+
+
+            <ImageButton
+                android:id="@+id/album_details_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_info_golden"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="10dp"
+                android:visibility="invisible"
+                android:padding="5dp"
+                />
+
+            <ImageButton
+                android:id="@+id/album_participants_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_people_golden"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="10dp"
+                android:visibility="invisible"
+                android:padding="5dp"
+                />
+
+            <ImageButton
+                android:id="@+id/album_changecover_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit_golden"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="10dp"
+                android:visibility="invisible"
+                android:padding="5dp"
+                />
+
+            <ImageButton
+                android:id="@+id/album_share_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_share_golden"
+                android:background="@android:color/transparent"
+                android:visibility="invisible"
+                android:padding="5dp"
+                />
+
+
+        </LinearLayout>
 
     </RelativeLayout>
+
 </android.support.v7.widget.CardView>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="30dp">
+
+        <ImageButton
+            android:id="@+id/details_dialog_close_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_closedialog"
+            android:background="@drawable/circle"
+            android:backgroundTint="#cdcdcd"/>
+
+        <TextView
+            android:id="@+id/details_dialog_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/details_dialog_close_btn"
+            android:layout_centerHorizontal="true"
+            android:text="Album Details"
+            android:textSize="18sp"
+            />
+
+
+        <LinearLayout
+            android:id="@+id/container_for_details_dialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/details_dialog_header"
+            android:layout_margin="10dp"
+            >
+
+            <TextView
+                android:id="@+id/details_dialog_albumtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album Title :"
+                android:layout_marginTop="2dp"
+                android:textSize="14sp"/>
+            <TextView
+                android:id="@+id/details_dialog_albumdesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album Desc :"
+                android:layout_marginTop="5dp"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/details_dialog_albumtype"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album Type :"
+                android:layout_marginTop="2dp"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/details_dialog_albumowner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album Creator :"
+                android:layout_marginTop="2dp"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/details_dialog_albumstarttime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album Start Time :"
+                android:layout_marginTop="10dp"
+                android:textSize="14sp"/>
+            <TextView
+                android:id="@+id/details_dialog_albumendtime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album End Time :"
+                android:layout_marginTop="2dp"
+                android:textSize="14sp"/>
+            <TextView
+                android:id="@+id/details_dialog_albumpostcount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album Post Count :"
+                android:layout_marginTop="10dp"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/details_dialog_albumparticipantscount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album Participant Count :"
+                android:layout_marginTop="2dp"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
