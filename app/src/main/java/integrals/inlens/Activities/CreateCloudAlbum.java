@@ -57,10 +57,15 @@ import com.google.zxing.qrcode.encoder.QRCode;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.MainActivity;
@@ -102,7 +107,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private TextView EventPicker ;
     private Dialog EventDialog,QRCodeDialog;
     private String EventType = "";
-
+    private String CheckTimeTaken="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +139,21 @@ public class CreateCloudAlbum extends AppCompatActivity {
         Calendar calender = Calendar.getInstance();
         //Created By Elson Jose
         DateofCompletion = findViewById(R.id.TimeEditText);
+
+
+        int Month = calender.get(Calendar.MONTH);
+        Month++;
+
+        DatabaseTimeTaken = calender.get(Calendar.HOUR_OF_DAY)+":"
+                + calender.get(Calendar.MINUTE)+""
+                +"         "+calender.get(Calendar.DAY_OF_MONTH) + "/"
+                + String.valueOf(Month) + "/"+calender.get(Calendar.YEAR)
+        ;
+
+        CheckTimeTaken=calender.get(Calendar.DAY_OF_MONTH) + "-"
+                + String.valueOf(Month) + "-"+calender.get(Calendar.YEAR)
+        ;
+
         DateofCompletion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -159,28 +179,36 @@ public class CreateCloudAlbum extends AppCompatActivity {
                 if(month<10)
                 {
                     AlbumTime = day + "-" +"0"+ month + "-" + year;
+                    if(!checkNumberOfDays(CheckTimeTaken,AlbumTime)){
+                        DateofCompletion.setText("Album Active until " + AlbumTime + " midnight");
+                        DateofCompletion.setTextSize(12);
+
+                        }else {
+                        AlbumTime = "";
+                        Toast.makeText(getApplicationContext(),"Album creation valid only for 5 days",Toast.LENGTH_SHORT).show();
+                               }
+
                 }
                 else
-                {
-                    AlbumTime = day + "-" + month + "-" + year;
+                {    AlbumTime = day + "-" + month + "-" + year;
+                     if(!checkNumberOfDays(CheckTimeTaken,AlbumTime)){
+                         DateofCompletion.setText("Album Active until " + AlbumTime + " midnight");
+                         DateofCompletion.setTextSize(12);
+
+                     }else {
+                         AlbumTime = "";
+                         Toast.makeText(getApplicationContext(),"Album creation valid only for 5 days",Toast.LENGTH_LONG).show();
+                    }
+
                 }
 
-                DateofCompletion.setText("Album Active until " + AlbumTime + " midnight");
-                DateofCompletion.setTextSize(12);
 
             }
         };
 
 
 
-        int Month = calender.get(Calendar.MONTH);
-        Month++;
 
-        DatabaseTimeTaken = calender.get(Calendar.HOUR_OF_DAY)+":"
-                + calender.get(Calendar.MINUTE)+""
-                +"         "+calender.get(Calendar.DAY_OF_MONTH) + "/"
-                + String.valueOf(Month) + "/"+calender.get(Calendar.YEAR)
-        ;
         DisplayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -329,7 +357,11 @@ public class CreateCloudAlbum extends AppCompatActivity {
 
     }
 
-    private void SetCheckFalse(RadioButton btn1, RadioButton btn2, RadioButton btn3, RadioButton btn4, RadioButton btn5) {
+    private void SetCheckFalse(RadioButton btn1,
+                               RadioButton btn2,
+                               RadioButton btn3,
+                               RadioButton btn4,
+                               RadioButton btn5) {
 
         btn1.setChecked(false);
         btn2.setChecked(false);
@@ -483,6 +515,30 @@ public class CreateCloudAlbum extends AppCompatActivity {
         }
     }
 
+    private Boolean checkNumberOfDays(String DateStart, String DateEnd){
+
+        SimpleDateFormat myFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String inputString1 = DateStart;
+        String inputString2 = DateEnd;
+
+        try {
+            Date date1 = myFormat.parse(inputString1);
+            Date date2 = myFormat.parse(inputString2);
+            long diff = date2.getTime() - date1.getTime();
+            if(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)>=5){
+                return true;
+            }else {
+                return false;
+            }
+
+            }
+            catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+             }
+
+
+    }
 
 
 
