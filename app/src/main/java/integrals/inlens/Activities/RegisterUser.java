@@ -73,10 +73,10 @@ public class RegisterUser extends AppCompatActivity {
         mCreateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String display_name = mDisplayName.getText().toString();
-                String email = mEmail.getText().toString();
-                String password = mPassword.getText().toString();
-                String repassword = ReTypePassword.getText().toString();
+                String display_name = mDisplayName.getText().toString().trim();
+                String email = mEmail.getText().toString().trim();
+                String password = mPassword.getText().toString().trim();
+                String repassword = ReTypePassword.getText().toString().trim();
                 if (!password.equals(repassword)) {
                     DisplaySnackBar("Passwords do not match");
 

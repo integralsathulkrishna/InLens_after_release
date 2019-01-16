@@ -117,8 +117,79 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
         holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
         holder.SituationLogo.setText(String.format("%s", Situation.get(position).getTitle().charAt(0)));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position + 1).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            false);
+
+                } catch (IndexOutOfBoundsException e) {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            true);
+
+                }
 
 
+            }
+        });
+
+        holder.SituationLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position + 1).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            false);
+
+                } catch (IndexOutOfBoundsException e) {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            true);
+
+                }
+
+
+            }
+        });
         holder.ExpandButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
