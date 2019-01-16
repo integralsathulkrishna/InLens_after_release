@@ -180,18 +180,28 @@ public class RegisterUser extends AppCompatActivity {
     }
 
     private void checkEmailVerification() {
+        DisplaySnackBar("Please wait....");
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user.reload().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    if (user.isEmailVerified()) {
+                        DisplaySnackBar("Done.");
+                        startActivity(new Intent(RegisterUser.this, MainActivity.class));
+                        overridePendingTransition(R.anim.activity_fade_in, R.anim.activity_fade_out);
+                        finish();
+                    } else {
+                        DisplaySnackBar("Email verification send. Please verify and try again.");
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        user.reload();
-        if (user.isEmailVerified()) {
-            startActivity(new Intent(RegisterUser.this, MainActivity.class));
-            overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
-            finish();
-        } else {
-            DisplaySnackBar("Email verification send. Please verify and try again.");
+                    }
 
-        }
+                }else{
+                    DisplaySnackBar("Verification failed. Please check your internet connection");
+                }
 
+            }
+        });
     }
 
     @Override

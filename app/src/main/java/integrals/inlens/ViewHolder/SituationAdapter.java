@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -117,6 +118,43 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
         holder.Title.setText(String.format("%s", Situation.get(position).getTitle()));
         holder.SituationLogo.setText(String.format("%s", Situation.get(position).getTitle().charAt(0)));
+        holder.recyclerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position + 1).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            false);
+
+                } catch (IndexOutOfBoundsException e) {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            true);
+
+                }
+
+
+
+            }
+        });
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -153,7 +191,42 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
 
             }
         });
+        holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position + 1).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            false);
 
+                } catch (IndexOutOfBoundsException e) {
+                    photoListHelper = new PhotoListHelper(context, CloudAlbum, databaseReferencePhotoList);
+                    photoListHelper.DisplayBottomSheet(
+                            mBottomSheetDialog,
+                            mBottomSheetDialogRecyclerView,
+                            mBottomSheetDialogCloseBtn,
+                            mBottomSheetDialogTitle,
+                            mBottomSheetDialogProgressbar,
+                            Situation.get(position).getSituationTime(),
+                            Situation.get(position).getSituationTime(),
+                            CommunityID,
+                            Situation.get(position).getTitle(),
+                            true);
+
+                }
+
+
+            }
+        });
         holder.SituationLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -414,7 +487,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
         ImageButton SituationEditBtn;
         public Button EditButton;
         public Button ExpandButton;
-
+        public RelativeLayout relativeLayout;
         public RecyclerView recyclerView;
 
         public SituationViewHolder(View itemView) {
@@ -423,6 +496,7 @@ public class SituationAdapter extends RecyclerView.Adapter<SituationAdapter.Situ
             EditButton = (Button) itemView.findViewById(R.id.EditSituationCard);
             Time = itemView.findViewById(R.id.SituationTimeCL);
             Title = itemView.findViewById(R.id.SituationNametextViewCloud_Layout);
+            relativeLayout=itemView.findViewById(R.id.RelativeExtraTouch);
             SituationLogo = itemView.findViewById(R.id.SituationLogoCL);
             ExpandButton = itemView.findViewById(R.id.ExpandPhotoListCL);
             recyclerView = itemView.findViewById(R.id.PhotoListRecyclerViewCL);
