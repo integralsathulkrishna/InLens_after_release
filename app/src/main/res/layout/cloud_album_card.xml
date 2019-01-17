@@ -8,131 +8,127 @@
     android:layout_marginTop="5dp"
     android:layout_marginEnd="10dp"
     android:layout_marginRight="10dp"
-    android:layout_marginBottom="5dp"
-    android:elevation="24dp"
-    app:cardCornerRadius="2dp"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="5dp">
+<android.support.v7.widget.CardView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="5dp"
+    android:layout_margin="2dp"
     app:cardElevation="0dp">
-
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="3dp"
-        android:background="@drawable/border">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/CloudAlbumCover"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="270dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="false"
             android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            app:srcCompat="@color/colorPrimary"
-            android:layout_margin="2dp"
-            android:background="@drawable/rounded_corners"/>
+            android:background="@drawable/rounded_corners"
+            android:scaleType="fitXY" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/CreatedByProfilePic"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_below="@+id/CloudAlbumCover"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:src="@drawable/ic_account_circle"
-            android:visibility="visible"
             android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/circle_primarydark"
-            android:backgroundTint="#ffffff"/>
+            android:backgroundTint="#ffffff"
+            android:elevation="0dp"
+            android:src="@drawable/ic_account_circle"
+            android:visibility="visible" />
 
         <TextView
             android:id="@+id/AlbumTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Album Title"
-            android:textColor="#ffffff"
-            android:textSize="16sp"
-            android:maxLength="25"
-            android:layout_marginTop="5dp"
-            android:layout_gravity="start"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/curved_corners"
-            android:backgroundTint="@color/colorAccent"
-            android:paddingEnd="10dp"
-            android:paddingStart="10dp"
-            android:paddingBottom="5dp"
-            android:paddingTop="5dp"
             android:layout_alignBottom="@id/CloudAlbumCover"
-            android:layout_marginStart="10dp"
-            />
+            android:layout_gravity="start"
+            android:background="@android:drawable/screen_background_dark_transparent"
+            android:fontFamily="sans-serif"
+            android:maxLength="25"
+
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:text="Album Title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:textColor="#ffffff"
+            android:textSize="19sp" />
 
         <LinearLayout
             android:id="@+id/album_card_button_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/CloudAlbumCover"
-            android:orientation="horizontal"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/album_like_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_star_grey"
-                android:background="@android:color/transparent"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_marginEnd="10dp"
-                android:visibility="invisible"
+                android:background="@android:color/transparent"
                 android:padding="5dp"
-                />
+                android:src="@drawable/ic_star_grey"
+                android:visibility="invisible" />
 
 
             <ImageButton
                 android:id="@+id/album_details_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_info_grey"
-                android:background="@android:color/transparent"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_marginEnd="10dp"
-                android:visibility="invisible"
+                android:background="@android:color/transparent"
                 android:padding="5dp"
-                />
+                android:src="@drawable/ic_info_grey"
+                android:visibility="invisible" />
 
             <ImageButton
                 android:id="@+id/album_participants_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_people_grey"
-                android:background="@android:color/transparent"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_marginEnd="10dp"
-                android:visibility="invisible"
+                android:background="@android:color/transparent"
                 android:padding="5dp"
-                />
+                android:src="@drawable/ic_people_grey"
+                android:visibility="invisible" />
 
             <ImageButton
                 android:id="@+id/album_changecover_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_edit_grey"
-                android:background="@android:color/transparent"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_marginEnd="10dp"
-                android:visibility="invisible"
+                android:background="@android:color/transparent"
                 android:padding="5dp"
-                />
+                android:src="@drawable/ic_edit_grey"
+                android:visibility="invisible" />
 
             <ImageButton
                 android:id="@+id/album_share_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_share_grey"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:background="@android:color/transparent"
-                android:visibility="invisible"
                 android:padding="5dp"
-                />
+                android:src="@drawable/ic_share_grey"
+                android:visibility="invisible" />
 
 
         </LinearLayout>
 
     </RelativeLayout>
-
+</android.support.v7.widget.CardView>
 </android.support.v7.widget.CardView>

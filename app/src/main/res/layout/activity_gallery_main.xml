@@ -18,10 +18,10 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="40dp"
         android:background="@color/colorPrimary"
-        android:text="Start Upload"
+        android:text="Done"
         android:textAlignment="center"
         android:textColor="@android:color/white"
-        android:visibility="visible" />
+        android:visibility="invisible" />
 
     <RelativeLayout
         android:id="@+id/ContainerLayout"

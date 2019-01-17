@@ -13,6 +13,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -143,8 +144,6 @@ import integrals.inlens.Services.OreoService;
 import integrals.inlens.Services.RecentImageService;
 import integrals.inlens.ViewHolder.AlbumViewHolder;
 import integrals.inlens.ViewHolder.ParticipantsViewHolder;
-import integrals.inlens.Weather.Model.Main;
-import integrals.inlens.Weather.Model.Wind;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -222,7 +221,10 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout MainDimBackground;
 
     //for details Dialog
-    private TextView AlbumTitle, AlbumDesc, AlbumOwner, AlbumType, AlbumStartTime, AlbumEndTime, AlbumPostCount, AlbumMemberCount;
+    private TextView AlbumTitle,
+            AlbumDesc, AlbumOwner,
+            AlbumType, AlbumStartTime,
+            AlbumEndTime, AlbumPostCount, AlbumMemberCount;
     private int PostCount , MemberCount;
 
 
@@ -313,8 +315,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         DecryptDeepLink();
-
     }
+
+
 
     private void DecryptDeepLink() {
 
@@ -1965,6 +1968,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
 }
 
