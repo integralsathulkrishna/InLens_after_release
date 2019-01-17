@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -58,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import integrals.inlens.Helper.CurrentDatabase;
 import integrals.inlens.Helper.PhotoListHelper;
+import integrals.inlens.MainActivity;
 import integrals.inlens.Models.SituationModel;
 import integrals.inlens.R;
 import integrals.inlens.ViewHolder.SituationAdapter;
@@ -112,6 +116,11 @@ public class CloudAlbum extends AppCompatActivity {
     //For Snackbar
     private RelativeLayout RootForCloudAlbum;
 
+    private RelativeLayout DimBackground;
+    private FloatingActionButton MainCloudFab , CreateSitFab , DeleteAlbumFab , InviteAlbumFab;
+    private TextView CreateSitView , DeleteAlbumView , InviteAlbumView;
+    private Animation FabOpen, FabClose, FabRotateForward, FabRotateBackward;
+    private Boolean IsFabOpen = false;
     ///////////////////////////////////////////////////////////////////////////////////////////////////|
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +129,7 @@ public class CloudAlbum extends AppCompatActivity {
         actionBar=getSupportActionBar();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        FabAnimationAndButtonsInit();
         QRCodeInit();
         RootForCloudAlbum = findViewById(R.id.root_for_cloud_album);
 
@@ -340,6 +350,177 @@ public class CloudAlbum extends AppCompatActivity {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
+    private void FabAnimationAndButtonsInit() {
+
+        DimBackground = findViewById(R.id.cloudalbum_dim_background);
+        FabOpen = AnimationUtils.loadAnimation(this, R.anim.main_fab_open);
+        FabClose = AnimationUtils.loadAnimation(this, R.anim.main_fab_close);
+        FabRotateForward = AnimationUtils.loadAnimation(this, R.anim.main_fab_rotate_forward);
+        FabRotateBackward = AnimationUtils.loadAnimation(this, R.anim.main_fab_rotate_backward);
+
+        MainCloudFab = findViewById(R.id.cloudalbum_fab_btn);
+        DeleteAlbumFab = findViewById(R.id.cloudalbum_delete_fab_btn);
+        InviteAlbumFab = findViewById(R.id.cloudalbum_invite_fab_btn);
+        CreateSitFab = findViewById(R.id.cloudalbum_new_situation_fab_btn);
+
+        DeleteAlbumView = findViewById(R.id.cloudalbum_delete_textview);
+        InviteAlbumView = findViewById(R.id.cloudalbum_invite_txtview);
+        CreateSitView = findViewById(R.id.cloudalbum_new_situation_textview);
+
+        MainCloudFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
+                if(sharedPreferences.getBoolean("UsingCommunity::", false)) {
+                    if((TestCommunityID).contentEquals(getIntent().getExtras().getString("GlobalID::")))
+                    {
+                        AnimateFab();
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(),"Album Expired.",Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(),"Album Expired.",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+        DeleteAlbumFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(IsConnectedToNet())
+                {
+                    DeleteCurrentAlbum();
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(),"Umable to connec to Internet.",Toast.LENGTH_SHORT).show();
+                }
+
+                AnimateFab();
+            }
+        });
+
+        InviteAlbumFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                QRCodeDialog.show();
+                AnimateFab();
+            }
+        });
+
+        CreateSitFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(IsConnectedToNet())
+                {
+                    createNewSituation.show();
+                    int countdef = SituationIDList.size() + 1;
+                    SitEditName.setText(String.format("New Situation %s", String.valueOf(countdef)));
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(),"Unable to connect to Internet.",Toast.LENGTH_SHORT).show();
+
+                }
+                AnimateFab();
+
+            }
+        });
+
+    }
+
+    private void AnimateFab() {
+
+        if (IsFabOpen) {
+
+            DimBackground.setVisibility(View.GONE);
+            DeleteAlbumFab.clearAnimation();
+            DeleteAlbumFab.setAnimation(FabClose);
+            DeleteAlbumFab.getAnimation().start();
+
+            InviteAlbumFab.clearAnimation();
+            InviteAlbumFab.setAnimation(FabClose);
+            InviteAlbumFab.getAnimation().start();
+
+            CreateSitFab.clearAnimation();
+            CreateSitFab.setAnimation(FabClose);
+            CreateSitFab.getAnimation().start();
+
+            DeleteAlbumView.clearAnimation();
+            DeleteAlbumView.setAnimation(FabClose);
+            DeleteAlbumView.getAnimation().start();
+
+            InviteAlbumView.clearAnimation();
+            InviteAlbumView.setAnimation(FabClose);
+            InviteAlbumView.getAnimation().start();
+
+            CreateSitView.clearAnimation();
+            CreateSitView.setAnimation(FabClose);
+            CreateSitView.getAnimation().start();
+
+            DeleteAlbumFab.setVisibility(View.INVISIBLE);
+            InviteAlbumFab.setVisibility(View.INVISIBLE);
+            CreateSitFab.setVisibility(View.INVISIBLE);
+            DeleteAlbumView.setVisibility(View.INVISIBLE);
+            InviteAlbumView.setVisibility(View.INVISIBLE);
+            CreateSitView.setVisibility(View.INVISIBLE);
+
+            MainCloudFab.clearAnimation();
+            MainCloudFab.setAnimation(FabRotateBackward);
+            MainCloudFab.getAnimation().start();
+
+            IsFabOpen = false;
+        } else {
+
+            DeleteAlbumFab.clearAnimation();
+            DeleteAlbumFab.setAnimation(FabOpen);
+            DeleteAlbumFab.getAnimation().start();
+
+            InviteAlbumFab.clearAnimation();
+            InviteAlbumFab.setAnimation(FabOpen);
+            InviteAlbumFab.getAnimation().start();
+
+            CreateSitFab.clearAnimation();
+            CreateSitFab.setAnimation(FabOpen);
+            CreateSitFab.getAnimation().start();
+
+            DeleteAlbumView.clearAnimation();
+            DeleteAlbumView.setAnimation(FabOpen);
+            DeleteAlbumView.getAnimation().start();
+
+            InviteAlbumView.clearAnimation();
+            InviteAlbumView.setAnimation(FabOpen);
+            InviteAlbumView.getAnimation().start();
+
+            CreateSitView.clearAnimation();
+            CreateSitView.setAnimation(FabOpen);
+            CreateSitView.getAnimation().start();
+
+            DeleteAlbumFab.setVisibility(View.VISIBLE);
+            InviteAlbumFab.setVisibility(View.VISIBLE);
+            CreateSitFab.setVisibility(View.VISIBLE);
+            DeleteAlbumView.setVisibility(View.VISIBLE);
+            InviteAlbumView.setVisibility(View.VISIBLE);
+            CreateSitView.setVisibility(View.VISIBLE);
+
+            MainCloudFab.clearAnimation();
+            MainCloudFab.setAnimation(FabRotateForward);
+            MainCloudFab.getAnimation().start();
+            IsFabOpen = true;
+
+            DimBackground.setVisibility(View.VISIBLE);
+
+        }
+
+    }
+
+
     private void QRCodeInit() {
 
         QRCodeDialog = new Dialog(this,android.R.style.Theme_Light_NoTitleBar);
@@ -434,85 +615,6 @@ public class CloudAlbum extends AppCompatActivity {
 
         return ReturnName;
     }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        Boolean Default = false;
-        SharedPreferences sharedPreferences = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
-        SharedPreferences sharedPreferences1=getSharedPreferences("Owner.pref",MODE_PRIVATE);
-
-        if (sharedPreferences.getBoolean("UsingCommunity::", Default) == true) {
-        if((TestCommunityID).contentEquals(getIntent().getExtras().getString("GlobalID::"))){
-            menu.add(0, 0, 0, "Add Participant")
-                    .setIcon(R.drawable.ic_add_participant)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-
-        if(sharedPreferences1.getBoolean("ThisOwner::",false) ==true) {
-            menu.add(0, 1, 0, "Add Situation")
-                    .setIcon(R.drawable.ic_add)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        }
-            menu.add(0, 2, 0, "Delete Album")
-                    .setIcon(R.drawable.menu_icon)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-        }
-
-
-    }
-
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        if(item.getItemId() == R.id.home)
-        {
-            onBackPressed();
-        }
-
-
-
-        if(IsConnectedToNet()) {
-
-            if (item.getItemId() == 0) {
-                //startActivity(new Intent(CloudAlbum.this, QRCodeGenerator.class));
-                QRCodeDialog.show();
-            }
-            if (item.getItemId() == 1) {
-                createNewSituation.show();
-                int countdef = SituationIDList.size() + 1;
-                SitEditName.setText(String.format("New Situation %s", String.valueOf(countdef)));
-            }
-            if (item.getItemId() == 2) {
-                new BottomSheet.Builder(this).title("Cloud-Album Options").sheet(R.menu.cloud_album_menu).listener(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case R.id.delete_cloud_album:
-                                DeleteCurrentAlbum();
-                                break;
-                        }
-                    }
-                }).show();
-
-            }
-
-        }
-        else
-        {
-            Snackbar.make(RootForCloudAlbum,"Unable to connect to internet. Try again.",Snackbar.LENGTH_SHORT).show();
-
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
 
     private boolean IsConnectedToNet() {
 
