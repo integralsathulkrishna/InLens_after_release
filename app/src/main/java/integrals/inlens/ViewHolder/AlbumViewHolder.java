@@ -47,17 +47,15 @@ import integrals.inlens.R;
 
     private View view;
     public Dialog UserDialog;
-    public ImageButton StarAlbum,ParticipantsAlbum,AlbumCoverEditBtn,DetailsAlbumn,ShareAlbum;
+    public ImageButton ParticipantsAlbum,AlbumCoverEditBtn,DetailsAlbumn;
     public LinearLayout AlbumContainer;
 
     public AlbumViewHolder(View ItemView) {
         super(ItemView);
         view=ItemView;
         AlbumCoverEditBtn = view.findViewById(R.id.album_changecover_btn);
-        StarAlbum = view.findViewById(R.id.album_like_btn);
         ParticipantsAlbum = view.findViewById(R.id.album_participants_btn);
         DetailsAlbumn = view.findViewById(R.id.album_details_btn);
-        ShareAlbum = view.findViewById(R.id.album_share_btn);
         AlbumContainer = view.findViewById(R.id.album_card_button_container);
         }
 

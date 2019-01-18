@@ -1584,13 +1584,7 @@ public class MainActivity extends AppCompatActivity {
             holder.SetTitle(AlbumList.get(position).getAlbumTitle());
             holder.SetProfilePic(getApplicationContext(), AlbumList.get(position).getPostedByProfilePic());
             if (holder.AlbumContainer.isShown()) {
-                holder.StarAlbum.clearAnimation();
-                holder.StarAlbum.setAnimation(AlbumCardClose);
-                holder.StarAlbum.getAnimation().start();
 
-                holder.ShareAlbum.clearAnimation();
-                holder.ShareAlbum.setAnimation(AlbumCardClose);
-                holder.ShareAlbum.getAnimation().start();
 
                 holder.DetailsAlbumn.clearAnimation();
                 holder.DetailsAlbumn.setAnimation(AlbumCardClose);
@@ -1604,20 +1598,12 @@ public class MainActivity extends AppCompatActivity {
                 holder.ParticipantsAlbum.setAnimation(AlbumCardClose);
                 holder.ParticipantsAlbum.getAnimation().start();
 
-                holder.StarAlbum.setVisibility(View.INVISIBLE);
                 holder.DetailsAlbumn.setVisibility(View.INVISIBLE);
-                holder.ShareAlbum.setVisibility(View.INVISIBLE);
                 holder.AlbumCoverEditBtn.setVisibility(View.INVISIBLE);
                 holder.ParticipantsAlbum.setVisibility(View.INVISIBLE);
 
             } else {
-                holder.StarAlbum.clearAnimation();
-                holder.StarAlbum.setAnimation(AlbumCardOpen);
-                holder.StarAlbum.getAnimation().start();
 
-                holder.ShareAlbum.clearAnimation();
-                holder.ShareAlbum.setAnimation(AlbumCardOpen);
-                holder.ShareAlbum.getAnimation().start();
 
                 holder.DetailsAlbumn.clearAnimation();
                 holder.DetailsAlbumn.setAnimation(AlbumCardOpen);
@@ -1631,9 +1617,7 @@ public class MainActivity extends AppCompatActivity {
                 holder.ParticipantsAlbum.setAnimation(AlbumCardOpen);
                 holder.ParticipantsAlbum.getAnimation().start();
 
-                holder.StarAlbum.setVisibility(View.VISIBLE);
                 holder.DetailsAlbumn.setVisibility(View.VISIBLE);
-                holder.ShareAlbum.setVisibility(View.VISIBLE);
                 holder.AlbumCoverEditBtn.setVisibility(View.VISIBLE);
                 holder.ParticipantsAlbum.setVisibility(View.VISIBLE);
 
@@ -1748,42 +1732,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            holder.StarAlbum.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
 
-                    Toast.makeText(context, "Coming Soon : ID : " + AlbumKeyIDs.get(position), Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
-            holder.ShareAlbum.setOnClickListener(new View.OnClickListener() {
-                final String PostKeyS = AlbumKeyIDs.get(position);
-
-                @Override
-                public void onClick(View v) {
-
-                    if (holder.ShareAlbum.isShown()) {
-                        final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
-                        SharingIntent.setType("text/plain");
-                        InDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                CommunityPostKey = dataSnapshot.child(PostKeyS).child("CommunityID").getValue().toString().trim();
-                                SharingIntent.putExtra(Intent.EXTRA_TEXT, "https://inlens.in/watch/" + CommunityPostKey);
-                                startActivity(SharingIntent);
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-                    }
-
-                }
-            });
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

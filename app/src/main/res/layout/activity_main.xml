@@ -41,12 +41,12 @@
         android:id="@+id/main_fab_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:fabSize="normal"
-        android:src="@drawable/ic_fab_add"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginEnd="10dp"/>
+        android:src="@drawable/ic_fab_add"
+        app:fabSize="normal" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/main_create_album_fab_btn"
@@ -75,32 +75,32 @@
         android:id="@+id/main_scan_qr_fab_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/main_scan_qr_fab_btn"
         android:layout_alignTop="@id/main_scan_qr_fab_btn"
-        android:text="Scan QR code"
+        android:layout_marginTop="15dp"
+        android:layout_toStartOf="@id/main_scan_qr_fab_btn"
         android:background="@drawable/curved_corners"
         android:backgroundTint="#ffffff"
-        android:textSize="12sp"
-        android:padding="3dp"
-        android:layout_marginTop="15dp"
-        android:visibility="invisible"
+        android:padding="5dp"
         android:paddingStart="2dp"
-        android:paddingEnd="2dp"/>
+        android:paddingEnd="2dp"
+        android:text="Scan QR code"
+        android:textSize="15sp"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/main_create_album_fab_txtview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/main_create_album_fab_btn"
         android:layout_alignTop="@id/main_create_album_fab_btn"
-        android:text="Create album"
+        android:layout_marginTop="15dp"
+        android:layout_toStartOf="@id/main_create_album_fab_btn"
         android:background="@drawable/curved_corners"
         android:backgroundTint="#ffffff"
-        android:textSize="12sp"
-        android:padding="3dp"
-        android:layout_marginTop="15dp"
-        android:visibility="invisible"
-        android:paddingStart="2dp"
-        android:paddingEnd="2dp"/>
+        android:padding="5dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="2dp"
+        android:text="Create album"
+        android:textSize="15sp"
+        android:visibility="invisible" />
 
 </RelativeLayout>
