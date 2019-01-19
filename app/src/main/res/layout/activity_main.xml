@@ -52,39 +52,41 @@
         android:id="@+id/main_create_album_fab_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_fab_create_album"
-        android:layout_alignParentEnd="true"
         android:layout_above="@id/main_fab_btn"
-        android:layout_marginBottom="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
-        android:visibility="invisible"
-        />
+        android:layout_marginBottom="10dp"
+        android:src="@drawable/ic_fab_create_album"
+        android:visibility="invisible" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/main_scan_qr_fab_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_fab_scan_qr"
-        android:layout_alignParentEnd="true"
         android:layout_above="@id/main_create_album_fab_btn"
-        android:layout_marginBottom="8dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
-        android:visibility="invisible"/>
+        android:layout_marginBottom="10dp"
+        android:src="@drawable/ic_read_qr"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/main_scan_qr_fab_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/main_scan_qr_fab_btn"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:layout_toStartOf="@id/main_scan_qr_fab_btn"
         android:background="@drawable/curved_corners"
         android:backgroundTint="#ffffff"
-        android:padding="5dp"
-        android:paddingStart="2dp"
-        android:paddingEnd="2dp"
+        android:padding="7dp"
         android:text="Scan QR code"
-        android:textSize="15sp"
+        android:textColor="@android:color/black"
+        android:textSize="17sp"
         android:visibility="invisible" />
 
     <TextView
@@ -92,15 +94,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/main_create_album_fab_btn"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:layout_toStartOf="@id/main_create_album_fab_btn"
         android:background="@drawable/curved_corners"
         android:backgroundTint="#ffffff"
-        android:padding="5dp"
-        android:paddingStart="4dp"
-        android:paddingEnd="2dp"
+        android:padding="7dp"
         android:text="Create album"
-        android:textSize="15sp"
+        android:textColor="@android:color/black"
+        android:textSize="17sp"
         android:visibility="invisible" />
 
 </RelativeLayout>
