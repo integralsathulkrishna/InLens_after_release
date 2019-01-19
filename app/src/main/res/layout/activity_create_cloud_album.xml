@@ -7,117 +7,162 @@
     android:background="@android:color/white"
     tools:context=".Activities.CreateCloudAlbum">
 
-    <ProgressBar
-        android:id="@+id/UploadProgress"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="43dp"
-        android:layout_height="43dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="30dp"
-        android:layout_marginEnd="30dp"
-        android:visibility="invisible" />
 
-    <ImageView
-        android:id="@+id/CoverPhoto"
-        android:layout_width="match_parent"
-        android:layout_height="230dp"
+    <android.support.v7.widget.CardView
+        android:id="@+id/CoverPhotoCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:background="@android:color/white" />
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/AlbumTitleLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/CoverPhoto"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/white"
-        android:hint="Album Title">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/AlbumTitleEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            />
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/AlbumDescriptionLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/AlbumTitleLayout"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/white"
-        android:hint="Album Description">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/AlbumDescriptionEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/AlbumDescriptionLayout"
-            android:layout_centerHorizontal="true"
-            android:inputType="text"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <TextView
-        android:id="@+id/TimeEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/AlbumDescriptionLayout"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginTop="20dp"
-        android:hint="Click to pick completion date."
-        android:textSize="16sp"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"/>
-    <TextView
-        android:id="@+id/EventTypeText"
-        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="2dp">
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/CoverPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:background="@android:color/white" />
+
+                <ImageButton
+                    android:id="@+id/DisplayImage"
+                    android:layout_width="50dp"
+                    android:layout_height="45dp"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/ic_camera" />
+
+
+            </RelativeLayout>
+        </android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/TimeEditText"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp"
-        android:hint="Click to pick event type."
-        android:textSize="16sp"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"/>
-    <Button
+        android:layout_below="@id/CoverPhotoCard"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="4dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/AlbumTitleLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_margin="5dp"
+                android:background="@android:color/white"
+                android:hint="Album Title">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/AlbumTitleEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/AlbumDescriptionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/AlbumTitleLayout"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/white"
+                android:hint="Album Description">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/AlbumDescriptionEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/AlbumDescriptionLayout"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:inputType="text" />
+            </android.support.design.widget.TextInputLayout>
+
+            <TextView
+                android:id="@+id/TimeEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/AlbumDescriptionLayout"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:hint="Click to pick completion date."
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/EventTypeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/TimeEditText"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:hint="Click to pick event type."
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+     <android.support.v7.widget.CardView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignParentEnd="true"
+         android:layout_alignParentBottom="true"
+         android:layout_marginStart="2dp"
+         android:layout_marginTop="15dp"
+         android:layout_marginEnd="10dp"
+         android:layout_marginBottom="10dp"
+         android:elevation="5dp"
+         app:cardCornerRadius="31.5dp"
+         >
+
+         <ProgressBar
+             android:id="@+id/UploadProgress"
+             style="?android:attr/progressBarStyle"
+             android:layout_width="63dp"
+             android:layout_height="63dp"
+             android:visibility="invisible" />
+
+         <Button
         android:id="@+id/DoneButton"
         android:layout_width="63dp"
         android:layout_height="63dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="20dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="1dp"
         android:background="@drawable/ic_tick" />
-
-    <ImageButton
-        android:id="@+id/DisplayImage"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:background="@drawable/ic_camera" />
+     </android.support.v7.widget.CardView>
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/CoverPhoto"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
         android:layout_marginEnd="5dp"
         android:text="Tap to add album cover"
         android:textSize="10sp" />

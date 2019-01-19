@@ -64,8 +64,7 @@
             android:screenOrientation="portrait"/>
 
         <service
-            android:name=".Services.RecentImageService"
-            android:enabled="true" />
+            android:name=".Services.RecentImageService" />
 
         <receiver
             android:name=".Broadcast_Receivers.RestartRecentImageService"
