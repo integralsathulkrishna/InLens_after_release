@@ -227,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
             AlbumEndTime, AlbumPostCount, AlbumMemberCount;
     private int PostCount , MemberCount;
 
+    private TextView NoAlbumTextView;
 
 
     public MainActivity() {
@@ -246,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
         ParticipantsBottomSheetDialogInit();
         DetailsDialogInit();
 
+        NoAlbumTextView = findViewById(R.id.nocloudalbumtextview);
         MainDimBackground = findViewById(R.id.main_dim_background);
         MainDimBackground.setVisibility(View.GONE);
 
@@ -1016,6 +1018,15 @@ public class MainActivity extends AppCompatActivity {
 
                 Collections.reverse(SearchedAlbums);
                 Collections.reverse(AlbumKeys);
+
+                if(AlbumKeys.size()==0)
+                {
+                    NoAlbumTextView.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    NoAlbumTextView.setVisibility(View.GONE);
+                }
 
 
                 MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums,AlbumKeys,FirebaseDatabase.getInstance().getReference().child("Communities"));
