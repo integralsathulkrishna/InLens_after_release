@@ -131,6 +131,7 @@ import id.zelory.compressor.Compressor;
 import integrals.inlens.Activities.CloudAlbum;
 import integrals.inlens.Activities.CreateCloudAlbum;
 import integrals.inlens.Activities.IntroActivity;
+import integrals.inlens.Activities.IssueActivity;
 import integrals.inlens.Activities.LoginActivity;
 import integrals.inlens.Activities.QRCodeReader;
 import integrals.inlens.Activities.SharedImageActivity;
@@ -972,6 +973,13 @@ public class MainActivity extends AppCompatActivity {
                                     startService(getApplicationContext(), new Intent(getApplicationContext(), RecentImageService.class));
                                 }
 
+                            }
+                            break;
+                            case R.id.create_issues:
+                            {
+                                startActivity(new Intent(MainActivity.this, IssueActivity.class));
+                                overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+                                finish();
                             }
                             break;
                         }
