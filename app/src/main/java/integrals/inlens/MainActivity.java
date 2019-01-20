@@ -1648,7 +1648,7 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 for(DataSnapshot PostSnapShot : dataSnapshot.child("CommunityPhotographer").getChildren())
                                 {
-                                    PostCount++;
+                                    MemberCount++;
                                 }
                             }
 
@@ -1656,7 +1656,7 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 for(DataSnapshot PostSnapShot : dataSnapshot.child("Situations").getChildren())
                                 {
-                                    MemberCount++;
+                                    PostCount++;
                                 }
                             }
 
@@ -1909,15 +1909,18 @@ public class MainActivity extends AppCompatActivity {
                 final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                 SharingIntent.setType("text/plain");
                 String CommunityPostKey = QRCommunityID;
-
-                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens Cloud-Album Invite Link \n\n" +
-                        "Copy and paste the link on InLens app https://inlens.in/joins/" + CommunityPostKey);
+                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n"+ GenarateDeepLinkForInvite(CommunityPostKey));
                 startActivity(SharingIntent);
 
             }
         });
     }
 
+
+    private static String GenarateDeepLinkForInvite(String CommunityID)
+    {
+        return "https://inlens.page.link/?link=https://integrals.inlens.in/comid="+CommunityID+"/&apn=integrals.inlens";
+    }
 
 }
 

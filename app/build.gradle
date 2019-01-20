@@ -61,7 +61,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-tasks:11.0.2'
 
 
-
-
 }
 apply plugin: 'com.google.gms.google-services'
