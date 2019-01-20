@@ -1260,7 +1260,7 @@ public class MainActivity extends AppCompatActivity {
                                     AddingAlbumToReference.child("User_ID").setValue(dataSnapshot.child("User_ID").getValue().toString());
                                     AddingAlbumToReference.child("PostedByProfilePic").setValue(dataSnapshot.child("PostedByProfilePic").getValue().toString());
                                     AddingAlbumToReference.child("UserName").setValue(dataSnapshot.child("UserName").getValue().toString());
-                                    AddingAlbumToReference.child("Time").setValue(dataSnapshot.child("Time").getValue().toString());
+                                    AddingAlbumToReference.child("CreatedTimestamp").setValue(dataSnapshot.child("CreatedTimestamp").getValue().toString());
                                     AddingAlbumToReference.child("CommunityID").setValue(CommunityID);
 
 

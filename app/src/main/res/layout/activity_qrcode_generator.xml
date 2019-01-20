@@ -18,7 +18,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:background="@drawable/circle"
-            android:backgroundTint="#cdcdcd"
+            android:backgroundTint="@android:color/black"
             android:padding="5dp"
             android:src="@drawable/ic_closedialog" />
 
@@ -39,9 +39,12 @@
             android:layout_below="@id/QR_dialog_closebtn"
             android:layout_alignParentStart="true"
             android:layout_centerHorizontal="true"
-            android:layout_margin="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
             android:maxWidth="250dp"
-            android:text="Scan QR code or send an invite."
+            android:text="Scan QR code or send an invite link to add particiapants to the album"
             android:textSize="15sp" />
 
         <Button
