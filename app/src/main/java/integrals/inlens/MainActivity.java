@@ -76,6 +76,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -218,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton MainFab, CreateAlbumFab, ScanQrFab;
     private Animation FabOpen, FabClose, FabRotateForward, FabRotateBackward, AlbumCardOpen, AlbumCardClose;
     private boolean isOpen = false;
-    private TextView MainCreateAlbumTxtview , MainScanQrTxtview;
+    private TextView MainCreateAlbumTxtview, MainScanQrTxtview;
     private RelativeLayout MainDimBackground;
 
     //for details Dialog
@@ -226,10 +229,11 @@ public class MainActivity extends AppCompatActivity {
             AlbumDesc, AlbumOwner,
             AlbumType, AlbumStartTime,
             AlbumEndTime, AlbumPostCount, AlbumMemberCount;
-    private int PostCount , MemberCount;
+    private int PostCount, MemberCount;
 
     private TextView NoAlbumTextView;
 
+    private SharedPreferences FirstRunMain;
 
     public MainActivity() {
     }
@@ -267,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
         // to handle album clicks
 
         AlbumClickDetails = getSharedPreferences("LastClickedAlbum", MODE_PRIVATE);
+        FirstRunMain = getSharedPreferences("MainActivityPref", MODE_PRIVATE);
         //Snackbar
         RootForMainActivity = findViewById(R.id.root_for_main_activity);
 
@@ -318,8 +323,88 @@ public class MainActivity extends AppCompatActivity {
 
 
         DecryptDeepLink();
+        if (FirstRunMain.getBoolean("FirstRun", true)) {
+            ShowAllTapTargets();
+            SharedPreferences.Editor FirstRunMainEditor = FirstRunMain.edit();
+            FirstRunMainEditor.putBoolean("FirstRun", false);
+            FirstRunMainEditor.apply();
+        }
+
     }
 
+    private void ShowAllTapTargets() {
+
+        TapTargetView.showFor(this,
+                TapTarget.forView(findViewById(R.id.main_fab_btn), "Adding New Albums", "Click here to create new album or join one.")
+                        .tintTarget(false)
+                        .outerCircleColor(R.color.colorPrimaryDark)
+                        .textColor(R.color.white),
+                new TapTargetView.Listener() {
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);
+                        AnimateFab();
+                        TapTargetView.showFor(MainActivity.this,
+                                TapTarget.forView(findViewById(R.id.main_create_album_fab_btn), "Create New Albums", "Click here to create new album.")
+                                        .tintTarget(false)
+                                        .outerCircleColor(R.color.colorPrimaryDark)
+                                        .textColor(R.color.white),
+                                new TapTargetView.Listener() {
+                                    @Override
+                                    public void onTargetClick(TapTargetView view) {
+                                        super.onTargetClick(view);
+
+                                        TapTargetView.showFor(MainActivity.this,
+                                                TapTarget.forView(findViewById(R.id.main_scan_qr_fab_btn), "Join Albums", "Click here to join a new album.")
+                                                        .tintTarget(false)
+                                                        .outerCircleColor(R.color.colorPrimaryDark)
+                                                        .textColor(R.color.white),
+                                                new TapTargetView.Listener() {
+                                                    @Override
+                                                    public void onTargetClick(TapTargetView view) {
+                                                        super.onTargetClick(view);
+                                                        AnimateFab();
+
+                                                        TapTargetView.showFor(MainActivity.this,
+                                                                TapTarget.forView(findViewById(0), "Search", "Click here perform a search on albums.")
+                                                                        .tintTarget(false)
+                                                                        .outerCircleColor(R.color.colorPrimaryDark)
+                                                                        .textColor(R.color.white)
+                                                                        .targetCircleColor(R.color.black),
+                                                                new TapTargetView.Listener() {
+                                                                    @Override
+                                                                    public void onTargetClick(TapTargetView view) {
+                                                                        super.onTargetClick(view);
+
+                                                                        TapTargetView.showFor(MainActivity.this,
+                                                                                TapTarget.forView(findViewById(1), "More Options", "Click here get more options.")
+                                                                                        .tintTarget(false)
+                                                                                        .targetCircleColor(R.color.black)
+                                                                                        .outerCircleColor(R.color.colorPrimaryDark)
+                                                                                        .textColor(R.color.white),
+                                                                                new TapTargetView.Listener() {
+                                                                                    @Override
+                                                                                    public void onTargetClick(TapTargetView view) {
+                                                                                        super.onTargetClick(view);
+
+
+
+                                                                                    }
+                                                                                });
+
+                                                                    }
+                                                                });
+                                                    }
+                                                });
+
+                                    }
+                                });
+
+                    }
+                });
+
+
+    }
 
 
     private void DecryptDeepLink() {
@@ -576,9 +661,7 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences sharedPreferences1 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                 if (sharedPreferences1.getBoolean("UsingCommunity::", false) == true) {
                     Toast.makeText(getApplicationContext(), "Sorry,You can't scan a new Cloud-Album before you quit the current one.", Toast.LENGTH_LONG).show();
-                } else
-
-                {
+                } else {
                     startActivity(new Intent(MainActivity.this, QRCodeReader.class));
 
                 }
@@ -599,6 +682,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void CloseFabs()
+    {
+        if(MainDimBackground.isShown()){
+
+            MainDimBackground.setVisibility(View.GONE);
+            ScanQrFab.clearAnimation();
+            ScanQrFab.setAnimation(FabClose);
+            ScanQrFab.getAnimation().start();
+
+            CreateAlbumFab.clearAnimation();
+            CreateAlbumFab.setAnimation(FabClose);
+            CreateAlbumFab.getAnimation().start();
+
+            MainScanQrTxtview.clearAnimation();
+            MainScanQrTxtview.setAnimation(FabClose);
+            MainScanQrTxtview.getAnimation().start();
+
+            MainCreateAlbumTxtview.clearAnimation();
+            MainCreateAlbumTxtview.setAnimation(FabClose);
+            MainCreateAlbumTxtview.getAnimation().start();
+
+            CreateAlbumFab.setVisibility(View.INVISIBLE);
+            ScanQrFab.setVisibility(View.INVISIBLE);
+            MainCreateAlbumTxtview.setVisibility(View.INVISIBLE);
+            MainScanQrTxtview.setVisibility(View.INVISIBLE);
+
+            MainFab.clearAnimation();
+            MainFab.setAnimation(FabRotateBackward);
+            MainFab.getAnimation().start();
+        }
+        isOpen = false;
     }
 
     private void AnimateFab() {
@@ -886,9 +1002,7 @@ public class MainActivity extends AppCompatActivity {
                                             String dbname = dataSnapshot.child("Name").getValue().toString();
                                             ProfileuserName.setText(dbname);
 
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             ProfileuserName.setText("-NA-");
                                         }
                                         if (dataSnapshot.hasChild("Profile_picture")) {
@@ -916,27 +1030,20 @@ public class MainActivity extends AppCompatActivity {
                                                         })
                                                         .into(UserImage);
 
-                                            }
-                                            else if(image.equals("default")) {
+                                            } else if (image.equals("default")) {
 
                                                 Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
-                                            }
-                                            else
-                                            {
+                                            } else {
                                                 Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
                                             }
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             Glide.with(MainActivity.this).load(R.drawable.ic_account_200dp).into(UserImage);
                                         }
                                         if (dataSnapshot.hasChild("Email")) {
 
                                             String dbemail = dataSnapshot.child("Email").getValue().toString();
                                             ProfileUserEmail.setText(String.format("Email : %s", dbemail));
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             ProfileUserEmail.setText("Email : -NA-");
                                         }
 
@@ -975,10 +1082,9 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                             break;
-                            case R.id.create_issues:
-                            {
+                            case R.id.create_issues: {
                                 startActivity(new Intent(MainActivity.this, IssueActivity.class));
-                                overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+                                overridePendingTransition(R.anim.activity_fade_in, R.anim.activity_fade_out);
                                 finish();
                             }
                             break;
@@ -1027,17 +1133,14 @@ public class MainActivity extends AppCompatActivity {
                 Collections.reverse(SearchedAlbums);
                 Collections.reverse(AlbumKeys);
 
-                if(AlbumKeys.size()==0)
-                {
+                if (AlbumKeys.size() == 0) {
                     NoAlbumTextView.setVisibility(View.VISIBLE);
-                }
-                else
-                {
+                } else {
                     NoAlbumTextView.setVisibility(View.GONE);
                 }
 
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums,AlbumKeys,FirebaseDatabase.getInstance().getReference().child("Communities"));
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums, AlbumKeys, FirebaseDatabase.getInstance().getReference().child("Communities"));
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
                 MemoryRecyclerView.scrollToPosition(AlbumClickDetails.getInt("last_clicked_position", 0));
                 MainLoadingProgressBar.setVisibility(View.GONE);
@@ -1087,7 +1190,7 @@ public class MainActivity extends AppCompatActivity {
                 Collections.reverse(SearchedAlbums);
                 Collections.reverse(AlbumKeys);
 
-                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums, AlbumKeys,FirebaseDatabase.getInstance().getReference().child("Communities"));
+                MainAdapterForSearch = new MainSearchAdapter(getApplicationContext(), SearchedAlbums, AlbumKeys, FirebaseDatabase.getInstance().getReference().child("Communities"));
                 MemoryRecyclerView.setAdapter(MainAdapterForSearch);
                 MainLoadingProgressBar.setVisibility(View.GONE);
                 MemoryRecyclerView.setVisibility(View.VISIBLE);
@@ -1643,17 +1746,15 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-
-
             holder.DetailsAlbumn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
+                    CloseFabs();
 
                     AlbumTitle.setText(String.format("Album Title : %s", AlbumList.get(position).getAlbumTitle()));
                     AlbumDesc.setText(String.format("Album About : %s", AlbumList.get(position).getAlbumDescription()));
-                    AlbumOwner.setText("Created By : "+AlbumList.get(position).getUserName());
-
+                    AlbumOwner.setText("Created By : " + AlbumList.get(position).getUserName());
 
 
                     CommunityRef.child(AlbumKeyIDs.get(position)).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -1661,20 +1762,16 @@ public class MainActivity extends AppCompatActivity {
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
                             PostCount = 0;
-                            MemberCount=0;
+                            MemberCount = 0;
 
-                            if(dataSnapshot.hasChild("CommunityPhotographer"))
-                            {
-                                for(DataSnapshot PostSnapShot : dataSnapshot.child("CommunityPhotographer").getChildren())
-                                {
+                            if (dataSnapshot.hasChild("CommunityPhotographer")) {
+                                for (DataSnapshot PostSnapShot : dataSnapshot.child("CommunityPhotographer").getChildren()) {
                                     MemberCount++;
                                 }
                             }
 
-                            if(dataSnapshot.hasChild("Situations"))
-                            {
-                                for(DataSnapshot PostSnapShot : dataSnapshot.child("Situations").getChildren())
-                                {
+                            if (dataSnapshot.hasChild("Situations")) {
+                                for (DataSnapshot PostSnapShot : dataSnapshot.child("Situations").getChildren()) {
                                     PostCount++;
                                 }
                             }
@@ -1706,8 +1803,7 @@ public class MainActivity extends AppCompatActivity {
                             }
 
 
-                            if(dataSnapshot.hasChild("CreatedTimestamp"))
-                            {
+                            if (dataSnapshot.hasChild("CreatedTimestamp")) {
                                 String timestamp = dataSnapshot.child("CreatedTimestamp").getValue().toString();
                                 long time = Long.parseLong(timestamp);
                                 CharSequence Time = DateUtils.getRelativeDateTimeString(getApplicationContext(), time, DateUtils.SECOND_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
@@ -1716,27 +1812,20 @@ public class MainActivity extends AppCompatActivity {
                                 String dateformat = DateFormat.format("dd-MM-yyyy", date).toString();
                                 String DateandTime = "Event started on : " + dateformat + " @ " + timesubstring;
                                 AlbumStartTime.setText(DateandTime);
-                            }
-                            else if(dataSnapshot.hasChild("Time"))
-                            {
+                            } else if (dataSnapshot.hasChild("Time")) {
                                 String DateandTime = dataSnapshot.child("Time").getValue().toString();
                                 AlbumStartTime.setText(DateandTime);
-                            }
-                            else
-                            {
+                            } else {
                                 String DateEnd = "Data not available";
                                 AlbumEndTime.setText(String.format("Album Start Time : %s", DateEnd));
                             }
 
-                            if(dataSnapshot.hasChild("AlbumType"))
-                            {
+                            if (dataSnapshot.hasChild("AlbumType")) {
                                 String EventType = dataSnapshot.child("AlbumType").getValue().toString();
-                                AlbumType.setText("Event Type : "+EventType);
-                            }
-                            else
-                            {
+                                AlbumType.setText("Event Type : " + EventType);
+                            } else {
                                 String EventType = "Data not available";
-                                AlbumType.setText("Event Type : "+EventType);
+                                AlbumType.setText("Event Type : " + EventType);
                             }
                         }
 
@@ -1756,6 +1845,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
+                    CloseFabs();
                     getSupportActionBar().setDisplayShowCustomEnabled(false);
 
                     final String PostKey = AlbumKeyIDs.get(position);
@@ -1785,6 +1875,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
 
+                    CloseFabs();
                     AlbumCoverEditprogressBar.setVisibility(View.VISIBLE);
                     AlbumCoverEditProfileuserName.setText(AlbumList.get(position).getAlbumTitle());
                     AlbumCoverEditProfileUserEmail.setTextSize(13);
@@ -1841,6 +1932,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
 
+                    CloseFabs();
                     ParticpantsBottomSheetDialogProgressbar.setVisibility(View.VISIBLE);
                     PostKeyForEdit = AlbumKeyIDs.get(position);
                     DisplayAllParticipantsAsBottomSheet(PostKeyForEdit, FirebaseDatabase.getInstance().getReference());
@@ -1928,7 +2020,7 @@ public class MainActivity extends AppCompatActivity {
                 final Intent SharingIntent = new Intent(Intent.ACTION_SEND);
                 SharingIntent.setType("text/plain");
                 String CommunityPostKey = QRCommunityID;
-                SharingIntent.putExtra(Intent.EXTRA_TEXT,"InLens Cloud-Album Invite Link \n\n"+ GenarateDeepLinkForInvite(CommunityPostKey));
+                SharingIntent.putExtra(Intent.EXTRA_TEXT, "InLens Cloud-Album Invite Link \n\n" + GenarateDeepLinkForInvite(CommunityPostKey));
                 startActivity(SharingIntent);
 
             }
@@ -1936,9 +2028,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private static String GenarateDeepLinkForInvite(String CommunityID)
-    {
-        return "https://inlens.page.link/?link=https://integrals.inlens.in/comid="+CommunityID+"/&apn=integrals.inlens";
+    private static String GenarateDeepLinkForInvite(String CommunityID) {
+        return "https://inlens.page.link/?link=https://integrals.inlens.in/comid=" + CommunityID + "/&apn=integrals.inlens";
     }
 
 }
