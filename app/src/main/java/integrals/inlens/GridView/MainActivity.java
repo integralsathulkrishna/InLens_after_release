@@ -390,11 +390,16 @@ public class MainActivity extends AppCompatActivity
         RecentImageDatabase recentImageDatabase = new RecentImageDatabase(MainActivity.this, "", null, 1);
         int Record = recentImageDatabase.GetNumberOfRows();
         for (int i = 1; i <= Record; i++) {
-            if(new File(recentImageDatabase.GetPhotoUri(i)).exists() && !ImageList.contains(recentImageDatabase.GetPhotoUri(i)))
-            {
-                ImageList.add(recentImageDatabase.GetPhotoUri(i));
-                TimeList.add(recentImageDatabase.GetTimeTaken(i));
+            try {
+                if(new File(recentImageDatabase.GetPhotoUri(i)).exists() && !ImageList.contains(recentImageDatabase.GetPhotoUri(i)))
+                {
+                    ImageList.add(recentImageDatabase.GetPhotoUri(i));
+                    TimeList.add(recentImageDatabase.GetTimeTaken(i));
+                }
+            }catch (NullPointerException e){
+                e.printStackTrace();
             }
+
         }
 
         for (int j = 0; j < ImageList.size(); j++) {
@@ -404,6 +409,9 @@ public class MainActivity extends AppCompatActivity
 
 
         }
+        recentImageDatabase.close();
+
+
     }
 
     public void AddingToDatabase(int Index) {
@@ -423,7 +431,7 @@ public class MainActivity extends AppCompatActivity
                 DatabaseCurrentTimeMilliSecond
 
         );
-
+        uploadDatabaseHelper.close();
 
     }
 

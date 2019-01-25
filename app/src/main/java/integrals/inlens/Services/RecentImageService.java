@@ -85,6 +85,7 @@ public class RecentImageService extends Service {
     private File OriginalImageFile;
     private File ImageFile, ThumbnailFile;
     private String OriginalImageName;
+    private String DeleteString;
     private Uri DownloadUri, ThumbImageUri, DownloadThumbUri;
     private Calendar calendar;
     String AlbumTime;
@@ -94,6 +95,7 @@ public class RecentImageService extends Service {
     private DatabaseReference
             InUserReference,
             PostDatabaseReference;
+    private String ImageURL;
     private StorageReference PostStorageReference;
     private FirebaseAuth InAuthentication;
     private FirebaseUser InUser;
@@ -413,7 +415,7 @@ public class RecentImageService extends Service {
         ImageFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
         OriginalImageFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
         ThumbnailFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
-
+        DeleteString=uploadDatabaseHelper.GetPhotoUri(uploadID);
         try {
             bitmap = new Compressor(getApplicationContext())
                     .setMaxHeight(130)
@@ -528,6 +530,8 @@ public class RecentImageService extends Service {
                                         pictureFile1.delete();
                                         CurrentDatabase currentDatabase = new CurrentDatabase(getApplicationContext(), "", null, 1);
                                         int Value = currentDatabase.GetUploadingTargetColumn();
+
+
                                         currentDatabase.ResetUploadTargetColumn((Value + 1));
                                         currentDatabase.close();
 
@@ -543,6 +547,11 @@ public class RecentImageService extends Service {
                                         int Value = currentDatabase.GetUploadingTargetColumn();
                                         currentDatabase.ResetUploadTargetColumn((Value));
                                         currentDatabase.close();
+                                        RecentImageDatabase recentImageDatabase=new RecentImageDatabase(getApplicationContext(),"",null,1);
+                                        recentImageDatabase.deleteUri(DeleteString);
+                                        recentImageDatabase.close();
+
+
                                     }
                                 });
 

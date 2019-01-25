@@ -72,6 +72,9 @@ public class OreoService extends Service {
     final File[] file1 = {null};
     final Bitmap[] bitmap1 = {null};
     private File pictureFile, pictureFile1;
+    private int COMPRESSION_WIDTH=400;
+    private int COMPRESSION_HEIGHT=400;
+    private int COMPRESSION_QUALITY=75;
     private Uri ImageUri;
     private RemoteViews remoteViews;
     private String CommunityID;
@@ -81,6 +84,7 @@ public class OreoService extends Service {
     private File OriginalImageFile;
     private File ImageFile, ThumbnailFile;
     private String OriginalImageName;
+    private String DeleteString;
     private Uri DownloadUri, ThumbImageUri, DownloadThumbUri;
     private Calendar calendar;
     String AlbumTime;
@@ -429,7 +433,7 @@ public class OreoService extends Service {
         ImageFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
         OriginalImageFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
         ThumbnailFile = new File(uploadDatabaseHelper.GetPhotoUri(uploadID));
-
+        DeleteString=uploadDatabaseHelper.GetPhotoUri(uploadID);
         try {
             bitmap = new Compressor(getApplicationContext())
                     .setMaxHeight(130)
@@ -442,8 +446,12 @@ public class OreoService extends Service {
         }
 
         try {
-            ThumbBitmap = new Compressor(this)
+            compressionDimensions(ThumbnailFile);
 
+            ThumbBitmap = new Compressor(this)
+                             .setMaxWidth(COMPRESSION_WIDTH)
+                             .setMaxHeight(COMPRESSION_HEIGHT)
+                             .setQuality(COMPRESSION_QUALITY)
                     .compressToBitmap(ThumbnailFile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -543,6 +551,10 @@ public class OreoService extends Service {
                                         int Value = currentDatabase.GetUploadingTargetColumn();
                                         currentDatabase.ResetUploadTargetColumn((Value + 1));
                                         currentDatabase.close();
+                                        RecentImageDatabase recentImageDatabase=new RecentImageDatabase(getApplicationContext(),"",null,1);
+                                        recentImageDatabase.deleteUri(DeleteString);
+                                        recentImageDatabase.close();
+
 
                                     }
 
@@ -736,6 +748,23 @@ public class OreoService extends Service {
     }
 
 
+    private void compressionDimensions(File file){
+
+        if(file.exists()) {
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+
+            if (bitmap.getHeight() > bitmap.getWidth()) {
+                COMPRESSION_HEIGHT = 640;
+                COMPRESSION_WIDTH = 480;
+                COMPRESSION_QUALITY = 90;
+            } else {
+                COMPRESSION_WIDTH = 640;
+                COMPRESSION_HEIGHT = 480;
+                COMPRESSION_QUALITY = 90;
+            }
+
+        }
+    }
 
 
 

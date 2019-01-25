@@ -64,8 +64,8 @@ public class RecentImageDatabase extends SQLiteOpenHelper {
         this.getWritableDatabase().execSQL("UPDATE RECENTTABLE" + " SET UPLOADSTATUS='" + NewUploadStatus + "' WHERE ID='" + InLensePostID + "'");
     }
 
-    public void DeleteInLensePost(int InLensePostID) {
-        this.getWritableDatabase().delete("RECENTTABLE", "ID='" + InLensePostID + "'", null);
+    public void deleteUri(String ImageUriDelete) {
+        this.getWritableDatabase().delete("RECENTTABLE", "IMAGEURI ='" +ImageUriDelete+"'" , null);
     }
     public int GetNumberOfRows() {
         int S=1;
