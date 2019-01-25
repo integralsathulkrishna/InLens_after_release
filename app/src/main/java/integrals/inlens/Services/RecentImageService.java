@@ -74,6 +74,9 @@ public class RecentImageService extends Service {
     final Bitmap[] bitmap1 = {null};
     private File pictureFile, pictureFile1;
     private Uri ImageUri;
+    private int COMPRESSION_WIDTH=400;
+    private int COMPRESSION_HEIGHT=400;
+    private int COMPRESSION_QUALITY=75;
     private RemoteViews remoteViews;
     private String CommunityID;
     private int UploadingIntegerID;
@@ -415,7 +418,7 @@ public class RecentImageService extends Service {
             bitmap = new Compressor(getApplicationContext())
                     .setMaxHeight(130)
                     .setMaxWidth(130)
-                    .setQuality(90)
+                    .setQuality(75)
                     .setCompressFormat(Bitmap.CompressFormat.JPEG)
                     .compressToBitmap(ImageFile);
         } catch (IOException e) {
@@ -423,9 +426,12 @@ public class RecentImageService extends Service {
         }
 
         try {
+            compressionDimensions(ThumbnailFile);
             ThumbBitmap = new Compressor(this)
-
-                    .compressToBitmap(ThumbnailFile);
+                          .setMaxHeight(COMPRESSION_HEIGHT)
+                          .setMaxWidth(COMPRESSION_WIDTH)
+                          .setQuality(COMPRESSION_QUALITY)
+                          .compressToBitmap(ThumbnailFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -583,6 +589,36 @@ public class RecentImageService extends Service {
 
         uploadDatabaseHelper.close();
     }
+
+
+
+    private void compressionDimensions(File file){
+
+        if(file.exists()) {
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+
+            if (bitmap.getHeight() > bitmap.getWidth()) {
+                COMPRESSION_HEIGHT = 640;
+                COMPRESSION_WIDTH = 480;
+                COMPRESSION_QUALITY = 90;
+            } else {
+                COMPRESSION_WIDTH = 640;
+                COMPRESSION_HEIGHT = 480;
+                COMPRESSION_QUALITY = 90;
+            }
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 
 
     private void storeImage(Bitmap image) {

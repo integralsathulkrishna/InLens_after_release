@@ -736,7 +736,7 @@ public class CloudAlbum extends AppCompatActivity {
 
 
 
-    private void DeleteCurrentAlbum(){
+    private void DeleteCurrentAlbum(){/*
                 deleteDatabaseReference.removeValue().addOnSuccessListener(
                         new OnSuccessListener<Void>() {
                             @Override
@@ -753,6 +753,9 @@ public class CloudAlbum extends AppCompatActivity {
 
                     }
                 });
+    */
+        Toast.makeText(getApplicationContext(),"This feature to be available soon",Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
