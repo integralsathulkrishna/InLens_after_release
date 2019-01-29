@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import integrals.inlens.Helper.CurrentDatabase;
+import integrals.inlens.Helper.JobSchedulerHelper;
 import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 import integrals.inlens.Services.OreoService;
@@ -107,6 +108,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
     private Dialog EventDialog,QRCodeDialog;
     private String EventType = "";
     private String CheckTimeTaken="";
+    private JobSchedulerHelper                 jobSchedulerHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +116,7 @@ public class CreateCloudAlbum extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         EventDialogInit();
-
+        jobSchedulerHelper=new JobSchedulerHelper(getApplicationContext());
         InAuthentication = FirebaseAuth.getInstance();
         InUser = InAuthentication.getCurrentUser();
         CommunityDatabaseReference = FirebaseDatabase.getInstance().getReference()
@@ -556,7 +558,8 @@ public class CreateCloudAlbum extends AppCompatActivity {
             }
         else
             {
-            context.startService(intent);
+                jobSchedulerHelper.startJobScheduler();
+                context.startService(intent);
             }
     }
 

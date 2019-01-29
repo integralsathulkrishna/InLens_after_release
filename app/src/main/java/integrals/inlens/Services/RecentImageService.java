@@ -55,6 +55,7 @@ import id.zelory.compressor.Compressor;
 
 import integrals.inlens.Broadcast_Receivers.RestartRecentImageService;
 import integrals.inlens.Helper.CurrentDatabase;
+import integrals.inlens.Helper.JobSchedulerHelper;
 import integrals.inlens.Helper.NotificationHelper;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
@@ -108,6 +109,7 @@ public class RecentImageService extends Service {
         super();
     }
 
+    private JobSchedulerHelper jobSchedulerHelper;
     public RecentImageService() {
 
     }
@@ -138,6 +140,8 @@ public class RecentImageService extends Service {
         uploadDatabaseHelper.close();
 
 
+
+        jobSchedulerHelper=new JobSchedulerHelper(getApplicationContext());
         Toast.makeText(getApplicationContext(), "InLens Service created.", Toast.LENGTH_SHORT).show();
 
 
@@ -268,6 +272,7 @@ public class RecentImageService extends Service {
 
     }
 
+
     private void QuitCloudAlbum(int XYZ) {
 
         if (XYZ == 1) {
@@ -295,6 +300,7 @@ public class RecentImageService extends Service {
                                 editorC.putBoolean("UsingCommunity::", false);
                                 editorC.commit();
                                 stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                                jobSchedulerHelper.stopJobScheduler();
                                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                 notificationManager.cancelAll();
                                 Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
@@ -317,6 +323,7 @@ public class RecentImageService extends Service {
                 editorC.putBoolean("UsingCommunity::", false);
                 editorC.commit();
                 stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                jobSchedulerHelper.stopJobScheduler();
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancelAll();
                 Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();

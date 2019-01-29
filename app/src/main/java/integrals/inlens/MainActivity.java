@@ -3,30 +3,23 @@ package integrals.inlens;
 import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
-import android.app.SearchManager;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -37,7 +30,6 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -53,16 +45,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
-import android.view.inputmethod.InputMethod;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -77,7 +64,6 @@ import com.bumptech.glide.request.target.Target;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -87,7 +73,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
@@ -100,7 +85,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.encoder.QRCode;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
@@ -111,11 +95,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidParameterSpecException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -123,11 +102,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
@@ -140,6 +114,7 @@ import integrals.inlens.Activities.QRCodeReader;
 import integrals.inlens.Activities.SharedImageActivity;
 import integrals.inlens.Helper.CurrentDatabase;
 
+import integrals.inlens.Helper.JobSchedulerHelper;
 import integrals.inlens.Helper.RecentImageDatabase;
 import integrals.inlens.Helper.UploadDatabaseHelper;
 import integrals.inlens.Models.AlbumModel;
@@ -230,11 +205,10 @@ public class MainActivity extends AppCompatActivity {
             AlbumType, AlbumStartTime,
             AlbumEndTime, AlbumPostCount, AlbumMemberCount;
     private int PostCount, MemberCount;
-
     private TextView NoAlbumTextView;
-
     private SharedPreferences FirstRunMain;
 
+    private JobSchedulerHelper jobSchedulerHelper;
     public MainActivity() {
     }
 
@@ -329,6 +303,8 @@ public class MainActivity extends AppCompatActivity {
             FirstRunMainEditor.putBoolean("FirstRun", false);
             FirstRunMainEditor.apply();
         }
+
+        jobSchedulerHelper=new JobSchedulerHelper(getApplicationContext());
 
     }
 
@@ -1251,10 +1227,10 @@ public class MainActivity extends AppCompatActivity {
                                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                                         stopService(new Intent(getApplicationContext(), OreoService.class));
                                     } else {
+                                        jobSchedulerHelper.stopJobScheduler();
                                         stopService(new Intent(getApplicationContext(), RecentImageService.class));
+
                                     }
-                                    JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-                                    jobScheduler.cancel(7907);
                                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                     notificationManager.cancelAll();
                                     Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
@@ -1281,6 +1257,7 @@ public class MainActivity extends AppCompatActivity {
                         stopService(new Intent(getApplicationContext(), OreoService.class));
                     } else {
                         stopService(new Intent(getApplicationContext(), RecentImageService.class));
+                        jobSchedulerHelper.stopJobScheduler();
                     }
                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     notificationManager.cancelAll();
@@ -1409,9 +1386,7 @@ public class MainActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor1 = sharedPreferences1.edit();
                             editor1.putBoolean("ThisOwner::", false);
                             editor1.commit();
-
                             startService(getApplicationContext(), new Intent(getApplicationContext(), RecentImageService.class));
-
 
                         }
 
@@ -1442,6 +1417,7 @@ public class MainActivity extends AppCompatActivity {
             serviceIntent.putExtra("inputExtra", "Ongoing InLens Recent-Image service.");
             ContextCompat.startForegroundService(context, serviceIntent);
         } else {
+            jobSchedulerHelper.startJobScheduler();
             context.startService(intent);
         }
     }

@@ -27,6 +27,7 @@ import java.util.List;
 import info.androidhive.barcode.BarcodeReader;
 import integrals.inlens.Helper.CurrentDatabase;
 
+import integrals.inlens.Helper.JobSchedulerHelper;
 import integrals.inlens.R;
 import integrals.inlens.Services.OreoService;
 import integrals.inlens.Services.RecentImageService;
@@ -45,7 +46,7 @@ public class QRCodeReader extends AppCompatActivity
     private DatabaseReference databaseReference;
     private DatabaseReference databaseReference2,databaseReference3,databaseReference4;
     private Activity activity;
-
+    private JobSchedulerHelper jobSchedulerHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,8 @@ public class QRCodeReader extends AppCompatActivity
         setContentView(R.layout.activity_qrcode_reader);
         getSupportActionBar().hide();
         activity=this;
+
+
         barcodeReader = (BarcodeReader) getSupportFragmentManager().findFragmentById(R.id.barcode_fragment);
         NewCommunityStatus = (TextView) findViewById(R.id.NewCommunityStatus);
         CommunityPhotographerAuthentication = FirebaseAuth.getInstance();
@@ -63,7 +66,10 @@ public class QRCodeReader extends AppCompatActivity
                         .getUid());
         UserID = CommunityPhotographerAuthentication.getCurrentUser().getUid();
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        }
+
+        jobSchedulerHelper=new JobSchedulerHelper(getApplicationContext());
+
+    }
 
 
 
@@ -250,6 +256,7 @@ public class QRCodeReader extends AppCompatActivity
         }
         else
         {
+            jobSchedulerHelper.startJobScheduler();
             context.startService(intent);
         }
     }

@@ -304,14 +304,11 @@ public class OreoService extends Service {
                                 SharedPreferences.Editor editorC = sharedPreferencesC.edit();
                                 editorC.putBoolean("UsingCommunity::", false);
                                 editorC.commit();
-                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
                                     stopService(new Intent(getApplicationContext(), OreoService.class));
-                                    }else{
-                                     stopService(new Intent(getApplicationContext(), RecentImageService.class));
-                                     }
-                                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                                notificationManager.cancelAll();
-                                Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
+                                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                    notificationManager.cancelAll();
+                                    Toast.makeText(getApplicationContext(), "Successfully left from the current Cloud-Album", Toast.LENGTH_SHORT).show();
 
                             }
                         }).addOnFailureListener(new OnFailureListener() {
