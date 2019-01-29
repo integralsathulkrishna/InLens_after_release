@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="integrals.inlens">
 
-    <uses-permission
-        android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -25,7 +24,8 @@
         android:roundIcon="@drawable/inlens_logo_m"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.IssueActivity"></activity>
+        <activity android:name=".Activities.WorkingIntroActivity"></activity>
+        <activity android:name=".Activities.IssueActivity" />
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
@@ -131,7 +131,7 @@
         <activity
             android:name=".Activities.SharedImageActivity"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/NoActionBarTheme"></activity>
+            android:theme="@style/NoActionBarTheme" />
     </application>
 
 </manifest>

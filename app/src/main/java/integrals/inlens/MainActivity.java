@@ -112,6 +112,7 @@ import integrals.inlens.Activities.IssueActivity;
 import integrals.inlens.Activities.LoginActivity;
 import integrals.inlens.Activities.QRCodeReader;
 import integrals.inlens.Activities.SharedImageActivity;
+import integrals.inlens.Activities.WorkingIntroActivity;
 import integrals.inlens.Helper.CurrentDatabase;
 
 import integrals.inlens.Helper.JobSchedulerHelper;
@@ -1033,6 +1034,13 @@ public class MainActivity extends AppCompatActivity {
                                 });
 
                                 break;
+                            case R.id.working_tour:
+                            {
+                                startActivity(new Intent(MainActivity.this, WorkingIntroActivity.class));
+                                overridePendingTransition(R.anim.activity_fade_in,R.anim.activity_fade_out);
+                                finish();
+                                break;
+                            }
                             case R.id.quit_cloud_album:
                                 SharedPreferences sharedPreferences3 = getSharedPreferences("InCommunity.pref", MODE_PRIVATE);
                                 if (sharedPreferences3.getBoolean("UsingCommunity::", false) == true) {

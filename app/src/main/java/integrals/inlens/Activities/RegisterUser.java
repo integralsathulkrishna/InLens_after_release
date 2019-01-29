@@ -32,7 +32,6 @@ import com.vistrav.ask.Ask;
 
 import java.util.HashMap;
 
-import integrals.inlens.MainActivity;
 import integrals.inlens.R;
 
 public class RegisterUser extends AppCompatActivity {
@@ -188,7 +187,7 @@ public class RegisterUser extends AppCompatActivity {
                 if(task.isSuccessful()) {
                     if (user.isEmailVerified()) {
                         DisplaySnackBar("Done.");
-                        startActivity(new Intent(RegisterUser.this, MainActivity.class));
+                        startActivity(new Intent(RegisterUser.this, WorkingIntroActivity.class));
                         overridePendingTransition(R.anim.activity_fade_in, R.anim.activity_fade_out);
                         finish();
                     } else {
